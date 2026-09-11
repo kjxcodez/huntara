@@ -20,6 +20,7 @@ import { Users, X, Mail, Phone, Briefcase, Linkedin } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
 import { ContactStatus } from '@leadforge/schema';
+import { useContactSelection } from '../hooks/useContactSelection';
 import { PageHeader } from '../components/common/PageHeader';
 import { Sheet, SheetContent } from '../components/ui/sheet';
 import { toast } from 'sonner';
@@ -113,7 +114,17 @@ export default function ContactsScreen() {
   const [titleFilter, setTitleFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   const [discoveryRunFilter, setDiscoveryRunFilter] = useState('');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const {
+    selectedIds,
+    selectedCount,
+    setSelectedIds,
+    isSelected,
+    toggleContact,
+    togglePageSelection,
+    getPageSelectionState,
+    clearSelection,
+    pruneStaleIds
+  } = useContactSelection();
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
 
   // Audience Modal State
@@ -154,7 +165,7 @@ export default function ContactsScreen() {
     onSuccess: () => {
       setEnrollOpen(false);
       setEnrollCampaignId('');
-      setSelectedIds([]);
+      clearSelection();
       toast.success('Successfully enrolled selected contact(s) into campaign!');
     },
     onError: (err: any) => {
@@ -275,8 +286,9 @@ export default function ContactsScreen() {
   // Selected Contacts for Static Audience creation
   const selectedContactsForAudience: PreloadedContact[] = React.useMemo(() => {
     if (selectedIds.length === 0) return [];
+    const idSet = new Set(selectedIds);
     return contacts
-      .filter((ct: any) => selectedIds.includes(ct.id))
+      .filter((ct: any) => idSet.has(ct.id))
       .map((ct: any) => ({
         id: ct.id,
         firstName: ct.firstName,
@@ -293,6 +305,33 @@ export default function ContactsScreen() {
   const adjustedPage = Math.min(Math.max(1, currentPage), totalPages || 1);
   const startIndex = (adjustedPage - 1) * itemsPerPage;
   const paginatedContacts = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  const currentPageIds = React.useMemo(
+    () => paginatedContacts.map((c: any) => c.id),
+    [paginatedContacts]
+  );
+
+  const headerCheckboxRef = React.useRef<HTMLInputElement>(null);
+
+  const headerState = React.useMemo(
+    () => getPageSelectionState(currentPageIds),
+    [getPageSelectionState, currentPageIds]
+  );
+
+  React.useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = headerState.indeterminate;
+    }
+  }, [headerState.indeterminate]);
+
+  // Prune any selected IDs that no longer exist in contacts (e.g. after sync / deletion)
+  React.useEffect(() => {
+    if (contactsQuery.isSuccess && contacts.length > 0 && selectedIds.length > 0) {
+      pruneStaleIds(contacts.map((c: any) => c.id));
+    } else if (contactsQuery.isSuccess && contacts.length === 0 && selectedIds.length > 0) {
+      clearSelection();
+    }
+  }, [contactsQuery.isSuccess, contacts, pruneStaleIds, clearSelection, selectedIds.length]);
 
   const handleCreate = async (data: any) => {
     await createMutation.mutateAsync(data);
@@ -313,17 +352,20 @@ export default function ContactsScreen() {
       if (selectedContact?.id === id) {
         setSelectedContact(null);
       }
+      setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
     }
   };
 
   const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
     if (confirm(`Are you sure you want to delete the ${selectedIds.length} selected contacts?`)) {
       await Promise.all(selectedIds.map((id) => deleteMutation.mutateAsync(id)));
-      setSelectedIds([]);
+      clearSelection();
     }
   };
 
   const handleBulkStatusChange = async (status: string) => {
+    if (selectedIds.length === 0) return;
     if (
       confirm(
         `Are you sure you want to update the status of ${selectedIds.length} contacts to "${status}"?`
@@ -332,21 +374,7 @@ export default function ContactsScreen() {
       await Promise.all(
         selectedIds.map((id) => updateMutation.mutateAsync({ id, data: { status } }))
       );
-      setSelectedIds([]);
-    }
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === paginatedContacts.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(paginatedContacts.map((c: any) => c.id));
+      clearSelection();
     }
   };
 
@@ -367,7 +395,7 @@ export default function ContactsScreen() {
 
     queryClient.invalidateQueries({ queryKey: ['audiences', 'list', workspaceId] });
     toast.success(`Saved audience segment "${audName.trim()}"!`);
-    setSelectedIds([]);
+    clearSelection();
   };
 
   return (
@@ -386,7 +414,7 @@ export default function ContactsScreen() {
           statusOptions={Object.values(ContactStatus)}
           createLabel="Add Contact"
           onCreateTrigger={() => setCreateOpen(true)}
-          selectedCount={selectedIds.length}
+          selectedCount={selectedCount}
           onBulkDelete={handleBulkDelete}
           onBulkStatusChange={handleBulkStatusChange}
           bulkStatusOptions={Object.values(ContactStatus)}
@@ -509,9 +537,10 @@ export default function ContactsScreen() {
                   <tr className="bg-surface-3 border-b border-border-subtle text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
                     <th className="px-4 py-3 w-10">
                       <input
+                        ref={headerCheckboxRef}
                         type="checkbox"
-                        checked={selectedIds.length === paginatedContacts.length && paginatedContacts.length > 0}
-                        onChange={toggleSelectAll}
+                        checked={headerState.checked}
+                        onChange={() => togglePageSelection(currentPageIds)}
                         className="rounded-none border-border-subtle text-primary focus:ring-ring"
                       />
                     </th>
@@ -531,7 +560,7 @@ export default function ContactsScreen() {
                   variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
                 >
                   {paginatedContacts.map((item: any) => {
-                    const isSelected = selectedIds.includes(item.id);
+                    const rowSelected = isSelected(item.id);
                     const isPanelSelected = selectedContact?.id === item.id;
 
                     return (
@@ -549,8 +578,8 @@ export default function ContactsScreen() {
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleSelect(item.id)}
+                            checked={rowSelected}
+                            onChange={() => toggleContact(item.id)}
                             className="rounded-none border-border-subtle text-primary focus:ring-ring"
                           />
                         </td>
@@ -1055,7 +1084,7 @@ export default function ContactsScreen() {
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['audiences', 'list', workspaceId] });
           toast.success('Audience saved successfully!');
-          setSelectedIds([]);
+          clearSelection();
           contactsQuery.refetch();
         }}
         initialMode={selectedIds.length > 0 ? 'static' : 'dynamic'}
