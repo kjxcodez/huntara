@@ -57,6 +57,14 @@ export interface IpcChannelMap {
     input: CreateCompanyDto;
     output: Company;
   };
+  'companies:bulk:create': {
+    input: { workspaceId: string; data: any[] };
+    output: any;
+  };
+  'contacts:bulk:create': {
+    input: { workspaceId: string; data: any[] };
+    output: any;
+  };
   'system:status': {
     input: void;
     output: Array<{ name: string; status: string }>;
@@ -92,6 +100,10 @@ export interface IpcChannelMap {
   'auth:google:login': {
     input: void;
     output: AuthResponse;
+  };
+  'auth:google:check-chrome': {
+    input: void;
+    output: { installed: boolean; path?: string };
   };
   'settings:getSync': {
     input: void;
@@ -433,45 +445,17 @@ export interface IpcChannelMap {
     input: any;
     output: any[];
   };
-  'discovery:list': {
-    input: any;
-    output: any[];
-  };
-  'discovery:create': {
-    input: { name: string; provider: string; query: string };
-    output: any;
-  };
-  'discovery:get': {
-    input: string;
-    output: any;
-  };
-  'discovery:results': {
-    input: string;
-    output: any[];
-  };
-  'discovery:import': {
-    input: string;
-    output: any;
-  };
-  'discovery:skip': {
-    input: string;
-    output: any;
-  };
   'email-accounts:list': {
     input: void;
     output: any[];
-  };
-  'email-accounts:create': {
-    input: any;
-    output: any;
   };
   'email-accounts:delete': {
     input: string;
     output: void;
   };
-  'email-accounts:test': {
+  'email-accounts:reset-health': {
     input: string;
-    output: { verified: boolean };
+    output: { success: boolean };
   };
   'email-accounts:gmail:connect': {
     input: void;
@@ -585,6 +569,10 @@ export interface IpcChannelMap {
       notes?: string | null;
     };
     output: any;
+  };
+  'email-deliveries:reindex-inbound': {
+    input: { workspaceId: string; limit?: number };
+    output: { processed: number; matched: number };
   };
   'campaigns:schedule': {
     input: string;
@@ -878,10 +866,6 @@ export interface IpcChannelMap {
       workersReady: boolean;
     };
   };
-  'onboarding:generate-sample-data': {
-    input: { workspaceId: string };
-    output: { success: boolean };
-  };
   'onboarding:save-setting': {
     input: { workspaceId: string; key: string; value: string };
     output: { success: boolean };
@@ -1054,6 +1038,95 @@ export interface IpcChannelMap {
   'agent:workflow:progress': {
     input: void;
     output: { executionId: string; step: number; status: string; message?: string };
+  };
+
+  // ── Native Electron & Settings ──────────────────────────────────────────
+  'electron:ready-to-show': {
+    input: void;
+    output: void;
+  };
+  'settings:get-all': {
+    input: void;
+    output: any;
+  };
+
+  // ── Dashboard ────────────────────────────────────────────────────────────
+  'dashboard:stats': {
+    input: { workspaceId: string };
+    output: any;
+  };
+  'dashboard:chart-data': {
+    input: { workspaceId: string; range?: string };
+    output: any;
+  };
+  'dashboard:activity-feed': {
+    input: { workspaceId: string; limit?: number };
+    output: any[];
+  };
+
+  // ── Google Drive & Storage ──────────────────────────────────────────────
+  'drive:about': {
+    input: { connectionId: string };
+    output: any;
+  };
+
+  // ── AI Agent Workflows ───────────────────────────────────────────────────
+  'agent:execute': {
+    input: {
+      workspaceId: string;
+      query: string;
+      traceId: string;
+      actorId: string;
+      aiConfig?: any;
+    };
+    output: any;
+  };
+  'agent:workflow:execute': {
+    input: {
+      workspaceId: string;
+      workflowId: string;
+      inputData?: any;
+    };
+    output: any;
+  };
+
+  // ── Suppressions ─────────────────────────────────────────────────────────
+  'suppressions:list': {
+    input: { workspaceId: string; type?: string; limit?: number };
+    output: any;
+  };
+  'suppressions:check': {
+    input: { workspaceId: string; email?: string; domain?: string; companyId?: string };
+    output: any;
+  };
+  'suppressions:suppress': {
+    input: { workspaceId: string; type: string; value: string; reason?: string };
+    output: any;
+  };
+  'suppressions:unsuppress': {
+    input: { workspaceId: string; id: string };
+    output: any;
+  };
+
+  // ── Browser Engine (Playwright) ──────────────────────────────────────────
+  'browser:status': {
+    input: void;
+    output: {
+      isInstalled: boolean;
+      isInstalling: boolean;
+      browsersPath: string;
+      executablePath?: string | undefined;
+      headlessPath?: string | undefined;
+      lastError?: string | undefined;
+    };
+  };
+  'browser:install': {
+    input: void;
+    output: boolean;
+  };
+  'browser:install-progress': {
+    input: void;
+    output: string;
   };
 }
 

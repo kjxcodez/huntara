@@ -90,7 +90,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
       try {
         // 1. Discovery runs
-        const runs = await window.ipc.invoke('discovery:list' as any, { workspaceId });
+        const runs = await window.ipc.invoke('discovery:run:list', { workspaceId });
         if (Array.isArray(runs)) {
           for (const r of runs.slice(0, 10)) {
             if (r.status === 'completed') {
