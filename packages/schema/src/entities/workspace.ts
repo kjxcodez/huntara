@@ -59,6 +59,83 @@ export function resolveSchedulerPolicy(raw?: unknown): SchedulerPolicy {
   };
 }
 
+export const OUTREACH_JOB_TYPES = Object.freeze([
+  'outreach:campaign',
+  'automation:workflow',
+  'outreach:imap-poll'
+] as const);
+
+export const DISCOVERY_JOB_TYPES = Object.freeze([
+  'scraper:maps',
+  'crawler:website',
+  'enrich:intelligence',
+  'enrich:website',
+  'enrich:linkedin'
+] as const);
+
+export type OutreachJobType = (typeof OUTREACH_JOB_TYPES)[number];
+export type DiscoveryJobType = (typeof DISCOVERY_JOB_TYPES)[number];
+export type JobResourceClass = 'outreach' | 'discovery' | 'other';
+
+export function isOutreachJobType(type: string): boolean {
+  return (OUTREACH_JOB_TYPES as readonly string[]).includes(type);
+}
+
+export function isDiscoveryJobType(type: string): boolean {
+  return (DISCOVERY_JOB_TYPES as readonly string[]).includes(type);
+}
+
+export function getJobResourceClass(type: string): JobResourceClass {
+  if (isOutreachJobType(type)) return 'outreach';
+  if (isDiscoveryJobType(type)) return 'discovery';
+  return 'other';
+}
+
+export interface SchedulerCapacityAllocation {
+  globalMaxConcurrency: number;
+  maxOutreachCapacity: number;
+  maxDiscoveryCapacity: number;
+  targetOutreachCapacity: number;
+  targetDiscoveryCapacity: number;
+}
+
+/**
+ * Derives fair capacity targets and limits for outreach and discovery classes
+ * strictly from the MongoDB-backed scheduler policy without introducing any hardcoded constants.
+ */
+export function resolveSchedulerCapacityAllocation(
+  policy: SchedulerPolicy | { globalMaxConcurrency: number; typeLimits: Record<string, number> }
+): SchedulerCapacityAllocation {
+  const globalMax = Math.max(1, policy.globalMaxConcurrency);
+
+  // Maximum concurrency outreach can reach based on configured type limits
+  const outreachLimits = OUTREACH_JOB_TYPES.map((t) => policy.typeLimits[t] ?? 2);
+  const sumOutreachLimits = outreachLimits.reduce((a, b) => a + b, 0);
+  const maxOutreachTypeLimit = Math.max(...outreachLimits);
+  const maxOutreachCapacity = Math.min(globalMax, sumOutreachLimits);
+
+  // Maximum concurrency discovery can reach based on configured type limits
+  const discoveryLimits = DISCOVERY_JOB_TYPES.map((t) => policy.typeLimits[t] ?? 2);
+  const sumDiscoveryLimits = discoveryLimits.reduce((a, b) => a + b, 0);
+  const maxDiscoveryTypeLimit = Math.max(...discoveryLimits);
+  const maxDiscoveryCapacity = Math.min(globalMax, sumDiscoveryLimits);
+
+  // Under contention: Outreach must have protected capacity up to its configured share,
+  // while discovery is guaranteed at least 1 slot if globalMax >= 2.
+  const targetOutreachCapacity =
+    globalMax >= 2 ? Math.min(maxOutreachTypeLimit, globalMax - 1) : 1;
+
+  const targetDiscoveryCapacity = Math.max(1, globalMax - targetOutreachCapacity);
+
+  return {
+    globalMaxConcurrency: globalMax,
+    maxOutreachCapacity,
+    maxDiscoveryCapacity,
+    targetOutreachCapacity,
+    targetDiscoveryCapacity
+  };
+}
+
 export const workspaceSettingsSchema = z.object({
   defaultTimezone: z.string().default('UTC'),
   outreachPolicy: z

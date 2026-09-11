@@ -3,7 +3,13 @@ import {
   DEFAULT_SCHEDULER_POLICY,
   schedulerPolicySchema,
   resolveSchedulerPolicy,
-  workspaceSettingsSchema
+  workspaceSettingsSchema,
+  OUTREACH_JOB_TYPES,
+  DISCOVERY_JOB_TYPES,
+  isOutreachJobType,
+  isDiscoveryJobType,
+  getJobResourceClass,
+  resolveSchedulerCapacityAllocation
 } from './workspace.js';
 import { updateSchedulerPolicyDtoSchema } from '../dto/workspace.js';
 
@@ -147,6 +153,121 @@ describe('Workspace Scheduler Concurrency Policy Schema', () => {
       expect(resolved.globalMaxConcurrency).toBe(6);
       expect(resolved.typeLimits['scraper:maps']).toBe(2);
       expect(resolved.typeLimits['outreach:campaign']).toBe(3);
+    });
+  });
+
+  describe('Scheduler Job Classification', () => {
+    it('accurately identifies outreach job types', () => {
+      expect(isOutreachJobType('outreach:campaign')).toBe(true);
+      expect(isOutreachJobType('automation:workflow')).toBe(true);
+      expect(isOutreachJobType('outreach:imap-poll')).toBe(true);
+      expect(isOutreachJobType('scraper:maps')).toBe(false);
+      expect(isOutreachJobType('crawler:website')).toBe(false);
+      expect(isOutreachJobType('enrich:intelligence')).toBe(false);
+    });
+
+    it('accurately identifies discovery job types', () => {
+      expect(isDiscoveryJobType('scraper:maps')).toBe(true);
+      expect(isDiscoveryJobType('crawler:website')).toBe(true);
+      expect(isDiscoveryJobType('enrich:intelligence')).toBe(true);
+      expect(isDiscoveryJobType('enrich:website')).toBe(true);
+      expect(isDiscoveryJobType('enrich:linkedin')).toBe(true);
+      expect(isDiscoveryJobType('outreach:campaign')).toBe(false);
+      expect(isDiscoveryJobType('automation:workflow')).toBe(false);
+    });
+
+    it('returns canonical resource class name', () => {
+      expect(getJobResourceClass('outreach:campaign')).toBe('outreach');
+      expect(getJobResourceClass('automation:workflow')).toBe('outreach');
+      expect(getJobResourceClass('scraper:maps')).toBe('discovery');
+      expect(getJobResourceClass('crawler:website')).toBe('discovery');
+      expect(getJobResourceClass('enrich:intelligence')).toBe('discovery');
+      expect(getJobResourceClass('mock:test')).toBe('other');
+      expect(getJobResourceClass('unknown:custom')).toBe('other');
+    });
+  });
+
+  describe('Capacity Allocation Calculation (Phase 3 Invariant)', () => {
+    it('derives canonical capacity targets from default policy (G=3 -> Outreach=2, Discovery=1)', () => {
+      const allocation = resolveSchedulerCapacityAllocation(DEFAULT_SCHEDULER_POLICY);
+      expect(allocation.globalMaxConcurrency).toBe(3);
+      expect(allocation.targetOutreachCapacity).toBe(2);
+      expect(allocation.targetDiscoveryCapacity).toBe(1);
+      expect(allocation.maxOutreachCapacity).toBe(3);
+      expect(allocation.maxDiscoveryCapacity).toBe(3);
+    });
+
+    it('derives proportional capacity when global limit is larger (G=5 -> Outreach=2, Discovery=3)', () => {
+      const customPolicy = {
+        globalMaxConcurrency: 5,
+        typeLimits: {
+          'scraper:maps': 1,
+          'crawler:website': 3,
+          'enrich:intelligence': 2,
+          'outreach:campaign': 2,
+          'automation:workflow': 2
+        }
+      };
+      const allocation = resolveSchedulerCapacityAllocation(customPolicy as any);
+      expect(allocation.globalMaxConcurrency).toBe(5);
+      expect(allocation.targetOutreachCapacity).toBe(2);
+      expect(allocation.targetDiscoveryCapacity).toBe(3);
+    });
+
+    it('derives equal share when G=4 and outreach=2 (Outreach=2, Discovery=2)', () => {
+      const customPolicy = {
+        globalMaxConcurrency: 4,
+        typeLimits: {
+          'scraper:maps': 1,
+          'crawler:website': 2,
+          'enrich:intelligence': 2,
+          'outreach:campaign': 2,
+          'automation:workflow': 2
+        }
+      };
+      const allocation = resolveSchedulerCapacityAllocation(customPolicy as any);
+      expect(allocation.globalMaxConcurrency).toBe(4);
+      expect(allocation.targetOutreachCapacity).toBe(2);
+      expect(allocation.targetDiscoveryCapacity).toBe(2);
+    });
+
+    it('handles minimal concurrency G=1 deterministically', () => {
+      const minimal = {
+        globalMaxConcurrency: 1,
+        typeLimits: { ...DEFAULT_SCHEDULER_POLICY.typeLimits }
+      };
+      const allocation = resolveSchedulerCapacityAllocation(minimal);
+      expect(allocation.globalMaxConcurrency).toBe(1);
+      expect(allocation.targetOutreachCapacity).toBe(1);
+      expect(allocation.targetDiscoveryCapacity).toBe(1);
+    });
+
+    it('handles G=2 deterministically (Outreach=1, Discovery=1)', () => {
+      const small = {
+        globalMaxConcurrency: 2,
+        typeLimits: { ...DEFAULT_SCHEDULER_POLICY.typeLimits }
+      };
+      const allocation = resolveSchedulerCapacityAllocation(small);
+      expect(allocation.globalMaxConcurrency).toBe(2);
+      expect(allocation.targetOutreachCapacity).toBe(1);
+      expect(allocation.targetDiscoveryCapacity).toBe(1);
+    });
+
+    it('handles zero-limit job types without crashing', () => {
+      const disabledOutreach = {
+        globalMaxConcurrency: 3,
+        typeLimits: {
+          'scraper:maps': 1,
+          'crawler:website': 2,
+          'enrich:intelligence': 2,
+          'outreach:campaign': 0,
+          'automation:workflow': 0,
+          'outreach:imap-poll': 0
+        }
+      };
+      const allocation = resolveSchedulerCapacityAllocation(disabledOutreach as any);
+      expect(allocation.targetOutreachCapacity).toBe(0);
+      expect(allocation.targetDiscoveryCapacity).toBe(3);
     });
   });
 });
