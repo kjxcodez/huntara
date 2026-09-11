@@ -123,9 +123,20 @@ export class WorkspaceRuntime {
     // 2. Recover interrupted background jobs and waiting sequences before scheduler starts
     await this.recoverInterruptedJobs();
 
-    // 3. Start Concurrency Scheduler
+    // 3. Start Concurrency Scheduler with MongoDB-backed policy
     sendBootProgress('scheduler:start', '✓ Starting scheduler');
     const schedStart = Date.now();
+    try {
+      const policy = await this.sdk.workspaces.getSchedulerPolicy(this.workspaceId);
+      if (policy) {
+        this.scheduler.setPolicy(policy);
+      }
+    } catch (err: any) {
+      console.warn(
+        `[WorkspaceRuntime] Could not load scheduler policy from MongoDB for ${this.workspaceId}, using canonical default:`,
+        err?.message || err
+      );
+    }
     await this.scheduler.start();
     this.schedulerDuration = Date.now() - schedStart;
 

@@ -188,6 +188,46 @@ workspacesRouter.patch('/:id/policy', async (c) => {
 });
 
 // ---------------------------------------------------------------------------
+// 4c. Get Workspace Scheduler Concurrency Policy
+// ---------------------------------------------------------------------------
+workspacesRouter.get('/:id/scheduler-policy', async (c) => {
+  const id = c.req.param('id');
+  const wsId = (c as any).get('workspaceId');
+  if (wsId && wsId !== id) {
+    throw new ForbiddenError('Cross-workspace access prohibited.');
+  }
+  const policy = await workspaceService.getSchedulerPolicy(id);
+  return c.json(successResponse(policy));
+});
+
+// ---------------------------------------------------------------------------
+// 4d. Update Workspace Scheduler Concurrency Policy (OWNER / ADMIN only)
+// ---------------------------------------------------------------------------
+workspacesRouter.put('/:id/scheduler-policy', async (c) => {
+  const id = c.req.param('id');
+  const wsId = (c as any).get('workspaceId');
+  if (wsId && wsId !== id) {
+    throw new ForbiddenError('Cross-workspace access prohibited.');
+  }
+  const body = await c.req.json();
+  const userId = getUserId(c);
+  const updatedPolicy = await workspaceService.updateSchedulerPolicy(id, body, userId);
+  return c.json(successResponse(updatedPolicy));
+});
+
+workspacesRouter.patch('/:id/scheduler-policy', async (c) => {
+  const id = c.req.param('id');
+  const wsId = (c as any).get('workspaceId');
+  if (wsId && wsId !== id) {
+    throw new ForbiddenError('Cross-workspace access prohibited.');
+  }
+  const body = await c.req.json();
+  const userId = getUserId(c);
+  const updatedPolicy = await workspaceService.updateSchedulerPolicy(id, body, userId);
+  return c.json(successResponse(updatedPolicy));
+});
+
+// ---------------------------------------------------------------------------
 // 5. Delete Workspace (Soft Delete)
 // ---------------------------------------------------------------------------
 const deleteWorkspaceRoute = createRoute({

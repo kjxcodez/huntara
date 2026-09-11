@@ -3,7 +3,12 @@ import { join } from 'path';
 import { randomUUID } from 'crypto';
 import { app } from 'electron';
 import type { SdkClient } from '@leadforge/sdk';
-import type { Job } from '@leadforge/schema';
+import {
+  type Job,
+  DEFAULT_SCHEDULER_POLICY,
+  resolveSchedulerPolicy,
+  type SchedulerPolicy
+} from '@leadforge/schema';
 
 const isDev =
   process.env.NODE_ENV === 'development' ||
@@ -72,8 +77,11 @@ export class JobScheduler {
   private readonly heartbeatIntervalMs = 10_000;
   /** ms after the last pong at which the worker is considered stalled and killed. */
   private readonly heartbeatTimeoutMs = 30_000;
-  /** Total maximum active workers across all job types. */
-  private readonly defaultMaxConcurrency = 3;
+  /** Active concurrency limits configured for this workspace runtime. */
+  private policy: SchedulerConfig = {
+    globalMaxConcurrency: DEFAULT_SCHEDULER_POLICY.globalMaxConcurrency,
+    typeLimits: { ...DEFAULT_SCHEDULER_POLICY.typeLimits }
+  };
   /** Tracks the number of currently active workers for each job type. */
   private typeActiveCount = new Map<string, number>();
   /** Tracks terminal jobs to guard against duplicate completion callbacks or late crash events. */
@@ -91,6 +99,27 @@ export class JobScheduler {
     private sdk: SdkClient,
     private eventBus: LocalEventBus
   ) {}
+
+  /**
+   * Sets active scheduler policy for this workspace runtime.
+   */
+  public setPolicy(policy: SchedulerConfig | SchedulerPolicy): void {
+    const resolved = resolveSchedulerPolicy(policy);
+    this.policy = {
+      globalMaxConcurrency: resolved.globalMaxConcurrency,
+      typeLimits: { ...resolved.typeLimits }
+    };
+  }
+
+  /**
+   * Returns a copy of the current active scheduler concurrency policy.
+   */
+  public getPolicy(): SchedulerConfig {
+    return {
+      globalMaxConcurrency: this.policy.globalMaxConcurrency,
+      typeLimits: { ...this.policy.typeLimits }
+    };
+  }
 
   public get isActive(): boolean {
     return this.state !== 'STOPPED' && this.state !== 'PAUSED_OFFLINE';
@@ -118,8 +147,12 @@ export class JobScheduler {
 
   /**
    * Starts periodic polling loop and triggers startup recovery of stale leases.
+   * Optionally accepts a runtime-loaded concurrency policy.
    */
-  public async start(): Promise<void> {
+  public async start(policy?: SchedulerConfig | SchedulerPolicy): Promise<void> {
+    if (policy) {
+      this.setPolicy(policy);
+    }
     if (this.state !== 'STOPPED') return;
     this.state = 'ACTIVE';
     this.consecutiveEmptyClaims = 0;
@@ -698,19 +731,10 @@ export class JobScheduler {
   }
 
   /**
-   * Reads concurrency configuration with default fallbacks.
+   * Reads active concurrency configuration for this workspace runtime.
    */
   private loadSchedulerConfig(): SchedulerConfig {
-    return {
-      globalMaxConcurrency: this.defaultMaxConcurrency,
-      typeLimits: {
-        'scraper:maps': 1,
-        'crawler:website': 2,
-        'enrich:intelligence': 2,
-        'outreach:campaign': 2,
-        'automation:workflow': 2
-      }
-    };
+    return this.policy;
   }
 
   /**

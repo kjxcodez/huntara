@@ -1,5 +1,5 @@
 import { getDatabase } from '../connection';
-import type { Workspace } from '@leadforge/schema';
+import { type Workspace, workspaceSettingsSchema } from '@leadforge/schema';
 
 /**
  * LocalWorkspaceRepository handles local SQLite caching of workspace records.
@@ -28,7 +28,7 @@ export const LocalWorkspaceRepository = {
       slug: row.slug,
       ownerId: row.ownerId,
       plan: row.plan || 'free',
-      settings: parsedSettings,
+      settings: workspaceSettingsSchema.parse(parsedSettings),
       members: [],
       createdAt: new Date(row.createdAt),
       updatedAt: new Date(row.updatedAt)
@@ -58,7 +58,7 @@ export const LocalWorkspaceRepository = {
         slug: row.slug,
         ownerId: row.ownerId,
         plan: row.plan || 'free',
-        settings: parsedSettings,
+        settings: workspaceSettingsSchema.parse(parsedSettings),
         members: [],
         createdAt: new Date(row.createdAt),
         updatedAt: new Date(row.updatedAt)
