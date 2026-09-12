@@ -3,6 +3,7 @@ import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { ProjectionService } from '../services/projection-service';
+import { ConnectivityService } from '../services/connectivity-service';
 
 export function resolveAudienceLocally(
   workspaceId: string,
@@ -170,6 +171,16 @@ export function registerAudiencesIpc() {
     if (!workspaceId) return [];
     const runtime = await WorkspaceManager.getOrAwaitActiveRuntime(workspaceId);
     if (!runtime) return [];
+
+    const connState = ConnectivityService.getState();
+    if (connState.status === 'ONLINE') {
+      try {
+        await ProjectionService.reconcileEntity(workspaceId, 'audiences', runtime.sdk, false);
+      } catch (err) {
+        // Fallback to SQLite cache if network/API is temporarily unavailable
+      }
+    }
+
     const audiences = await LocalCRMRepository.findMany('audiences', workspaceId);
 
     return audiences.map((audience) => {
@@ -265,6 +276,7 @@ export function registerAudiencesIpc() {
     const sdk = WorkspaceManager.getSdk();
     const updated = await sdk.audiences.update(id, dto);
     await LocalCRMRepository.saveFromServer('audiences', updated);
+    ProjectionService.broadcastProjectionUpdated('audiences', dto.workspaceId);
     return updated;
   });
 
@@ -274,6 +286,7 @@ export function registerAudiencesIpc() {
     const sdk = WorkspaceManager.getSdk();
     await sdk.audiences.delete(id);
     await LocalCRMRepository.softDeleteFromServer('audiences', workspaceId, id);
+    ProjectionService.broadcastProjectionUpdated('audiences', workspaceId);
     return { success: true };
   });
 

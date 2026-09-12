@@ -11,12 +11,14 @@ import {
   Send,
   Users,
   Sparkles,
-  Filter
+  Filter,
+  RefreshCw
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { CreateAudienceModal } from '../components/crm/CreateAudienceModal';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -43,6 +45,7 @@ export default function AudiencesScreen() {
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<any | null>(null);
+  const { refresh, isRefreshing } = useProjectionRefresh('audiences');
 
   const audiencesQuery = useQuery({
     queryKey: ['audiences', 'list', workspaceId],
@@ -50,8 +53,7 @@ export default function AudiencesScreen() {
       if (!workspaceId) return [];
       return window.ipc.invoke('audiences:list', { workspaceId });
     },
-    enabled: !!workspaceId,
-    refetchInterval: 3000
+    enabled: !!workspaceId
   });
 
   const deleteAudienceMutation = useMutation({
@@ -85,15 +87,29 @@ export default function AudiencesScreen() {
         title="Audiences"
         description="Reusable static and dynamic recipient segment definitions over your CRM records."
         actions={
-          <Button
-            type="button"
-            onClick={() => setCreateModalOpen(true)}
-            size="sm"
-            className="h-8 font-semibold gap-1.5 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 rounded-none"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            New Audience
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={refresh}
+              disabled={isRefreshing}
+              className="h-8 text-xs font-semibold gap-1.5 rounded-none border-border-subtle bg-card text-foreground hover:bg-surface-3"
+              title="Refresh audiences from server"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setCreateModalOpen(true)}
+              size="sm"
+              className="h-8 font-semibold gap-1.5 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 rounded-none"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Audience
+            </Button>
+          </div>
         }
       />
 

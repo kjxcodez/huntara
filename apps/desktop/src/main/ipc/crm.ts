@@ -2,6 +2,7 @@ import { safeRegister } from './helper';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
+import { ProjectionService } from '../services/projection-service';
 import { loadSession } from '../lib/session';
 import type { CanonicalContactQuery, BulkContactSelection } from '@leadforge/schema';
 
@@ -87,6 +88,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const created = await sdk.companies.create(record);
     await LocalCRMRepository.saveFromServer('companies', created);
+    ProjectionService.broadcastProjectionUpdated('companies', record.workspaceId);
     return created;
   });
 
@@ -96,6 +98,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const updated = await sdk.companies.update(id, dto);
     await LocalCRMRepository.saveFromServer('companies', updated);
+    ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
     return updated;
   });
 
@@ -105,6 +108,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     await sdk.companies.delete(id);
     await LocalCRMRepository.softDeleteFromServer('companies', workspaceId, id);
+    ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
     return { success: true };
   });
 
@@ -238,6 +242,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const created = await sdk.contacts.create(record);
     await LocalCRMRepository.saveFromServer('contacts', created);
+    ProjectionService.broadcastProjectionUpdated('contacts', record.workspaceId);
     return created;
   });
 
@@ -247,6 +252,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const updated = await sdk.contacts.update(id, dto);
     await LocalCRMRepository.saveFromServer('contacts', updated);
+    ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
     return updated;
   });
 
@@ -256,6 +262,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     await sdk.contacts.delete(id);
     await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, id);
+    ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
     return { success: true };
   });
 
@@ -302,6 +309,10 @@ export function registerCrmIpc() {
       );
     }
 
+    if (deletedCount > 0) {
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
+
     return { success: true, count: deletedCount };
   });
 
@@ -337,10 +348,10 @@ export function registerCrmIpc() {
               await LocalCRMRepository.saveFromServer('contacts', updated);
             } else {
               db.prepare('UPDATE contacts SET status = ?, updatedAt = ? WHERE id = ? AND workspaceId = ?').run(
-                status,
-                new Date().toISOString(),
-                id,
-                workspaceId
+                 status,
+                 new Date().toISOString(),
+                 id,
+                 workspaceId
               );
             }
             updatedCount++;
@@ -349,6 +360,10 @@ export function registerCrmIpc() {
           }
         })
       );
+    }
+
+    if (updatedCount > 0) {
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
     }
 
     return { success: true, count: updatedCount };
@@ -466,6 +481,7 @@ export function registerCrmIpc() {
     if (result && Array.isArray(result.data)) {
       await LocalCRMRepository.saveManyFromServer('companies', result.data);
     }
+    ProjectionService.broadcastProjectionUpdated('companies', dto.workspaceId);
     return result;
   });
 
@@ -476,6 +492,7 @@ export function registerCrmIpc() {
     if (result && Array.isArray(result.data)) {
       await LocalCRMRepository.saveManyFromServer('contacts', result.data);
     }
+    ProjectionService.broadcastProjectionUpdated('contacts', dto.workspaceId);
     return result;
   });
 
@@ -495,6 +512,7 @@ export function registerCrmIpc() {
     };
     const created = await sdk.campaigns.create(payload);
     await LocalCRMRepository.saveFromServer('campaigns', created);
+    ProjectionService.broadcastProjectionUpdated('campaigns', record.workspaceId);
     return created;
   });
 
@@ -513,6 +531,7 @@ export function registerCrmIpc() {
     };
     const updated = await sdk.campaigns.update(id, payload);
     await LocalCRMRepository.saveFromServer('campaigns', updated);
+    ProjectionService.broadcastProjectionUpdated('campaigns', workspaceId);
     return updated;
   });
 
@@ -522,6 +541,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     await sdk.campaigns.delete(id);
     await LocalCRMRepository.softDeleteFromServer('campaigns', workspaceId, id);
+    ProjectionService.broadcastProjectionUpdated('campaigns', workspaceId);
     return { success: true };
   });
 

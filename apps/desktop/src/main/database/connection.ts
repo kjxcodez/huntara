@@ -98,18 +98,143 @@ export function getDatabase(workspaceId?: string): Database.Database {
           return t;
         };
 
-        const standardColumns = [
-          'id', 'workspaceId', 'name', 'domain', 'website', 'phone', 'location', 'rating',
-          'status', 'query', 'country', 'state', 'city', 'provider', 'resultCount', 'progress',
-          'companyId', 'discoveryRunId', 'requiresReview', 'tags', 'notes', 'steps', 'variables',
-          'firstName', 'lastName', 'email', 'source', 'type', 'key', 'value', 'updatedAt',
-          'createdAt', 'deletedAt', 'finishedAt', 'startedAt', 'payload', 'error',
-          'campaignId', 'contactId', 'sequenceId', 'toAddress', 'sentAt', 'currentStepIndex'
-        ].map((name) => ({ name }));
+        const TABLE_COLUMNS: Record<string, string[]> = {
+          workspaces: ['id', 'name', 'slug', 'ownerId', 'plan', 'settings', 'createdAt', 'updatedAt', 'deletedAt'],
+          companies: [
+            'id', 'workspaceId', 'name', 'domain', 'industry', 'status', 'website', 'address', 'phone', 'email',
+            'employeeCount', 'size', 'revenue', 'city', 'state', 'country', 'location', 'linkedin', 'linkedinUrl',
+            'notes', 'opportunityScore', 'tags', 'customFields', 'metrics', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          contacts: [
+            'id', 'workspaceId', 'companyId', 'firstName', 'lastName', 'email', 'phone', 'title', 'linkedin',
+            'linkedinUrl', 'source', 'priority', 'status', 'emailStatus', 'emailMeta', 'emailQuality',
+            'additionalEmails', 'notes', 'tags', 'lastContactedAt', 'customFields', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          campaigns: [
+            'id', 'workspaceId', 'sequenceId', 'sendingAccountId', 'name', 'description', 'dailyLimit',
+            'timezone', 'status', 'trackingEnabled', 'settings', 'stats', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          sequences: [
+            'id', 'workspaceId', 'name', 'description', 'steps', 'status', 'variables', 'stats',
+            'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          sequence_executions: [
+            'id', 'workspaceId', 'campaignId', 'sequenceId', 'contactId', 'status', 'currentStepIndex',
+            'stepIndex', 'startedAt', 'completedAt', 'failedAt', 'error', 'logs', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          templates: [
+            'id', 'workspaceId', 'name', 'subject', 'bodyHtml', 'bodyText', 'variables', 'category',
+            'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          email_accounts: [
+            'id', 'workspaceId', 'name', 'email', 'provider', 'status', 'dailyLimit', 'usedToday',
+            'settings', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          email_deliveries: [
+            'id', 'workspaceId', 'campaignId', 'sequenceId', 'contactId', 'toAddress', 'sentAt',
+            'status', 'stepIndex', 'currentStepIndex', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          operations_cache: ['id', 'workspaceId', 'type', 'payload', 'isStale', 'createdAt', 'updatedAt'],
+          suppressions: ['id', 'workspaceId', 'type', 'value', 'domain', 'reason', 'source', 'createdAt', 'updatedAt', 'deletedAt'],
+          email_quality: ['id', 'workspaceId', 'email', 'score', 'status', 'details', 'createdAt', 'updatedAt'],
+          audiences: [
+            'id', 'workspaceId', 'name', 'description', 'entityType', 'type', 'mode', 'isDynamic',
+            'filterRules', 'filterDefinition', 'memberCount', 'staticMemberIds', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          discovery_runs: [
+            'id', 'workspaceId', 'name', 'query', 'country', 'state', 'city', 'provider', 'status',
+            'resultCount', 'contactsFound', 'progress', 'startedAt', 'completedAt', 'failedAt', 'error',
+            'parameters', 'logs', 'createdAt', 'updatedAt', 'deletedAt'
+          ],
+          company_discovery_runs: ['id', 'workspaceId', 'discoveryRunId', 'companyId', 'discoveredAt', 'requiresReview', 'createdAt', 'deletedAt'],
+          cache_metadata: ['key', 'value', 'updatedAt']
+        };
+
+        const standardColumns = Array.from(
+          new Set(Object.values(TABLE_COLUMNS).flat())
+        ).map((name) => ({ name }));
+
+        function matchesWhere(row: any, whereClause: string, params: any[]): boolean {
+          if (!whereClause) return true;
+          if (/deletedAt\s+IS\s+NULL/i.test(whereClause)) {
+            if (row.deletedAt !== null && row.deletedAt !== undefined) return false;
+          }
+          if (/deletedAt\s+IS\s+NOT\s+NULL/i.test(whereClause)) {
+            if (row.deletedAt === null || row.deletedAt === undefined) return false;
+          }
+
+          const conditions = whereClause.split(/\s+AND\s+/i);
+          let paramIdx = 0;
+
+          for (const cond of conditions) {
+            const trimmedCond = cond.trim();
+            if (/deletedAt\s+IS\s+NULL/i.test(trimmedCond) || /deletedAt\s+IS\s+NOT\s+NULL/i.test(trimmedCond)) {
+              continue;
+            }
+
+            if (/\bid\s+IN\s+\(/i.test(trimmedCond)) {
+              const qCount = (trimmedCond.match(/\?/g) || []).length;
+              const inIds = params.slice(paramIdx, paramIdx + qCount).map(String);
+              paramIdx += qCount;
+              if (!inIds.includes(String(row.id))) return false;
+              continue;
+            }
+
+            if (/\bcompanyId\s+IN\s+\(/i.test(trimmedCond)) {
+              const qCount = (trimmedCond.match(/\?/g) || []).length;
+              const inIds = params.slice(paramIdx, paramIdx + qCount).map(String);
+              paramIdx += qCount;
+              if (!inIds.includes(String(row.companyId))) return false;
+              continue;
+            }
+
+            if (/industry\s+LIKE\s+\?/i.test(trimmedCond)) {
+              const ind = String(params[paramIdx++] || '').replace(/%/g, '').toLowerCase();
+              if (!row.industry?.toLowerCase().includes(ind)) return false;
+              continue;
+            }
+
+            if (/(?:city\s+LIKE|location\s+LIKE)\s+\?/i.test(trimmedCond)) {
+              const geo = String(params[paramIdx++] || '').replace(/%/g, '').toLowerCase();
+              if (!row.city?.toLowerCase().includes(geo) && !row.location?.toLowerCase().includes(geo)) return false;
+              continue;
+            }
+
+            const eqMatch = trimmedCond.match(/^([a-zA-Z0-9_]+)\s*=\s*\?$/);
+            if (eqMatch && eqMatch[1]) {
+              const col = eqMatch[1];
+              const val = params[paramIdx++];
+              if (val !== undefined && row[col] !== val) return false;
+              continue;
+            }
+
+            const neMatch = trimmedCond.match(/^([a-zA-Z0-9_]+)\s*!=\s*\?$/);
+            if (neMatch && neMatch[1]) {
+              const col = neMatch[1];
+              const val = params[paramIdx++];
+              if (val !== undefined && row[col] === val) return false;
+              continue;
+            }
+          }
+
+          return true;
+        }
 
         const stubDb: any = {
           _tables: tables,
-          pragma: () => standardColumns,
+          pragma: (sql?: string) => {
+            if (typeof sql === 'string') {
+              const infoMatch = sql.match(/table_info\(([^)]+)\)/i);
+              if (infoMatch && infoMatch[1]) {
+                const tbl = infoMatch[1].trim().toLowerCase();
+                const cols = TABLE_COLUMNS[tbl];
+                if (cols) {
+                  return cols.map((name) => ({ name }));
+                }
+              }
+            }
+            return standardColumns;
+          },
           exec: (sql: string) => {
             const match = sql.match(/DELETE\s+FROM\s+([a-zA-Z0-9_]+)/i);
             if (match && match[1]) getTable(match[1]).clear();
@@ -134,25 +259,47 @@ export function getDatabase(workspaceId?: string): Database.Database {
               };
             }
 
-            if (/^SELECT/i.test(trimmed)) {
+            const updateMatch = trimmed.match(/^UPDATE\s+([a-zA-Z0-9_]+)\s+SET\s+([\s\S]+?)\s+WHERE\s+([\s\S]+)$/i);
+            if (updateMatch && updateMatch[1] && updateMatch[2] && updateMatch[3]) {
+              const tableName = updateMatch[1];
+              const setClause = updateMatch[2];
+              const whereClause = updateMatch[3];
               return {
-                get: (...params: any[]) => {
-                  const fromMatch = trimmed.match(/FROM\s+([a-zA-Z0-9_]+)/i);
-                  if (!fromMatch || !fromMatch[1]) return null;
-                  const table = getTable(fromMatch[1]);
-                  const rows = Array.from(table.values());
-                  if (params.length >= 2) {
-                    const [wsId, id] = params;
-                    return rows.find((r) => r.id === id && (!r.workspaceId || r.workspaceId === wsId)) || null;
+                run: (...params: any[]) => {
+                  const table = getTable(tableName);
+                  let pIdx = 0;
+                  const setAssignments: Record<string, any> = {};
+                  const setParts = setClause.split(',').map((s) => s.trim());
+                  for (const part of setParts) {
+                    const colName = part.split('=')[0]?.trim();
+                    if (colName) setAssignments[colName] = params[pIdx++];
                   }
-                  if (params.length === 1) {
-                    const [idOrWs] = params;
-                    return rows.find((r) => r.id === idOrWs || r.workspaceId === idOrWs) || null;
+                  const whereParams = params.slice(pIdx);
+                  let changes = 0;
+                  for (const row of table.values()) {
+                    if (matchesWhere(row, whereClause, whereParams)) {
+                      Object.assign(row, setAssignments);
+                      changes++;
+                    }
                   }
-                  return rows[0] || null;
-                },
-                all: (...params: any[]) => {
-                  if (/company_discovery_runs/i.test(trimmed) && /companies/i.test(trimmed)) {
+                  return { changes, lastInsertRowid: 1 };
+                }
+              };
+            }
+
+            if (/^SELECT/i.test(trimmed)) {
+              // Sequence executions aggregate stats query
+              if (/COUNT\(id\)/i.test(trimmed) && /sequence_executions/i.test(trimmed)) {
+                return {
+                  get: () => ({ total: 0, running: 0, waiting: 0, replied: 0, failed: 0, paused: 0, completed: 0 }),
+                  all: () => []
+                };
+              }
+
+              // Special junction/join queries
+              if (/company_discovery_runs/i.test(trimmed) && /companies/i.test(trimmed)) {
+                return {
+                  all: (...params: any[]) => {
                     const cdrTable = getTable('company_discovery_runs');
                     const compTable = getTable('companies');
                     const wsId = params[0];
@@ -164,8 +311,12 @@ export function getDatabase(workspaceId?: string): Database.Database {
                     const uniqueCompanyIds = new Set(matchedLinks.map((l) => l.companyId));
                     return Array.from(uniqueCompanyIds).map((id) => compTable.get(id)).filter(Boolean);
                   }
+                };
+              }
 
-                  if (/contacts/i.test(trimmed) && /companies/i.test(trimmed)) {
+              if (/contacts/i.test(trimmed) && /companies/i.test(trimmed)) {
+                return {
+                  all: (...params: any[]) => {
                     const contTable = getTable('contacts');
                     const compTable = getTable('companies');
                     const wsId = params[0];
@@ -185,52 +336,31 @@ export function getDatabase(workspaceId?: string): Database.Database {
                       })
                       .filter((c) => !filterCity || c.companyCity === filterCity || c.companyLocation?.includes(filterCity));
                   }
+                };
+              }
 
+              return {
+                get: (...params: any[]) => {
+                  const fromMatch = trimmed.match(/FROM\s+([a-zA-Z0-9_]+)/i);
+                  if (!fromMatch || !fromMatch[1]) return null;
+                  const table = getTable(fromMatch[1]);
+                  let rows = Array.from(table.values());
+
+                  const whereMatch = trimmed.match(/WHERE\s+([\s\S]+?)(?:\s+ORDER\s+BY|\s+LIMIT|\s+GROUP\s+BY|$)/i);
+                  if (whereMatch && whereMatch[1]) {
+                    rows = rows.filter((r) => matchesWhere(r, whereMatch[1]!, params));
+                  }
+                  return rows[0] || null;
+                },
+                all: (...params: any[]) => {
                   const fromMatch = trimmed.match(/FROM\s+([a-zA-Z0-9_]+)/i);
                   if (!fromMatch || !fromMatch[1]) return [];
                   const table = getTable(fromMatch[1]);
-                  const rows = Array.from(table.values());
-                  if (params.length === 2 && /discoveryRunId/i.test(trimmed)) {
-                    const [wsId, runId] = params;
-                    return rows.filter((r) => (!wsId || r.workspaceId === wsId) && (!runId || r.discoveryRunId === runId));
-                  }
-                  if (params.length > 0) {
-                    const wsId =
-                      params.find(
-                        (p) =>
-                          typeof p === 'string' &&
-                          (p.startsWith('ws_') || p.startsWith('workspace_') || p === 'test_ws' || p === 'global')
-                      ) || params[0];
-                    let filtered = rows.filter((r) => !wsId || r.workspaceId === wsId);
-                    if (/\bid\s+IN\s+\(/i.test(trimmed)) {
-                      const idList = params.filter((p) => p !== wsId).map(String);
-                      filtered = filtered.filter((r) => idList.includes(r.id));
-                    }
-                    if (/\bcompanyId\s+IN\s+\(/i.test(trimmed)) {
-                      const compIdList = params.filter((p) => p !== wsId).map(String);
-                      filtered = filtered.filter((r) => compIdList.includes(r.companyId));
-                    }
-                    if (/industry\s+LIKE/i.test(trimmed)) {
-                      const ind = String(params.find((p) => typeof p === 'string' && p.startsWith('%')) || '')
-                        .replace(/%/g, '')
-                        .toLowerCase();
-                      if (ind) filtered = filtered.filter((r) => r.industry?.toLowerCase().includes(ind));
-                    }
-                    if (/(?:city\s+LIKE|location\s+LIKE)/i.test(trimmed)) {
-                      const geo = String(params.find((p) => typeof p === 'string' && p.startsWith('%')) || '')
-                        .replace(/%/g, '')
-                        .toLowerCase();
-                      if (geo) {
-                        filtered = filtered.filter(
-                          (r) => r.city?.toLowerCase().includes(geo) || r.location?.toLowerCase().includes(geo)
-                        );
-                      }
-                    }
-                    if (/status\s*=\s*\?/i.test(trimmed)) {
-                      const st = params.find((p) => typeof p === 'string' && !p.startsWith('%') && p !== wsId);
-                      if (st) filtered = filtered.filter((r) => r.status === st);
-                    }
-                    return filtered;
+                  let rows = Array.from(table.values());
+
+                  const whereMatch = trimmed.match(/WHERE\s+([\s\S]+?)(?:\s+ORDER\s+BY|\s+LIMIT|\s+GROUP\s+BY|$)/i);
+                  if (whereMatch && whereMatch[1]) {
+                    rows = rows.filter((r) => matchesWhere(r, whereMatch[1]!, params));
                   }
                   return rows;
                 },
@@ -238,25 +368,25 @@ export function getDatabase(workspaceId?: string): Database.Database {
               };
             }
 
-            const delMatch = trimmed.match(/DELETE\s+FROM\s+([a-zA-Z0-9_]+)/i);
+            const delMatch = trimmed.match(/DELETE\s+FROM\s+([a-zA-Z0-9_]+)(?:\s+WHERE\s+([\s\S]+))?/i);
             if (delMatch && delMatch[1]) {
               const targetTable = delMatch[1];
+              const whereClause = delMatch[2];
               return {
                 run: (...params: any[]) => {
                   const table = getTable(targetTable);
-                  if (params.length === 0) {
+                  if (!whereClause || params.length === 0) {
                     table.clear();
-                  } else {
-                    const [wsId, id] = params;
-                    if (id) {
-                      table.delete(id);
-                    } else if (wsId) {
-                      for (const [k, v] of table.entries()) {
-                        if (v.workspaceId === wsId) table.delete(k);
-                      }
+                    return { changes: 1, lastInsertRowid: 1 };
+                  }
+                  let changes = 0;
+                  for (const [key, row] of Array.from(table.entries())) {
+                    if (matchesWhere(row, whereClause, params)) {
+                      table.delete(key);
+                      changes++;
                     }
                   }
-                  return { changes: 1, lastInsertRowid: 1 };
+                  return { changes, lastInsertRowid: 1 };
                 }
               };
             }

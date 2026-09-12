@@ -35,6 +35,7 @@ import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
 import { CompanyStatus, ContactStatus } from '@leadforge/schema';
 import { useWorkspace } from '../hooks/useWorkspace';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { motion } from 'framer-motion';
 
 /**
@@ -45,6 +46,7 @@ export default function CompaniesScreen() {
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id || '';
   const queryClient = useQueryClient();
+  const { refresh, isRefreshing } = useProjectionRefresh('companies');
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -292,6 +294,8 @@ export default function CompaniesScreen() {
           statusOptions={Object.values(CompanyStatus)}
           createLabel="Add Company"
           onCreateTrigger={() => setCreateOpen(true)}
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
           selectedCount={selectedIds.length}
           onBulkDelete={handleBulkDelete}
           onBulkCreateAudience={() => setAudienceModalOpen(true)}

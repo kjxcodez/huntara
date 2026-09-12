@@ -366,6 +366,17 @@ export interface IpcChannelMap {
     input: { workspaceId: string };
     output: { success: boolean; stats: any };
   };
+  'sync:reconcile': {
+    input: {
+      workspaceId: string;
+      scope?: 'all' | 'audiences' | 'companies' | 'contacts' | 'campaigns' | 'discovery_runs';
+    };
+    output: {
+      success: boolean;
+      scope: string;
+      recordsReconciled: Record<string, number>;
+    };
+  };
 
   'discovery:run:create': {
     input: {

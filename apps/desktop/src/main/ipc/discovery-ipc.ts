@@ -31,6 +31,7 @@ export function registerDiscoveryIpc() {
 
     // Save discovery run record directly into SQLite cache
     await LocalCRMRepository.saveFromServer('discovery_runs', created);
+    ProjectionService.broadcastProjectionUpdated('discovery_runs', workspaceId);
 
     // Submit scraper job to scheduler via MongoDB SDK
     const jobId = globalThis.crypto?.randomUUID
@@ -67,10 +68,7 @@ export function registerDiscoveryIpc() {
     if (connState.status === 'ONLINE') {
       try {
         const sdk = WorkspaceManager.getSdk();
-        const serverRuns = await sdk.discovery.listRuns().catch(() => []);
-        if (Array.isArray(serverRuns) && serverRuns.length > 0) {
-          await ProjectionService.projectEntities('discovery_runs', serverRuns, workspaceId);
-        }
+        await ProjectionService.reconcileEntity(workspaceId, 'discovery_runs', sdk, false);
       } catch {
         // Fallback to existing SQLite cache if network/API is temporarily unavailable
       }

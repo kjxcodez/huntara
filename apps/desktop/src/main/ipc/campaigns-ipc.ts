@@ -2,6 +2,7 @@ import { safeRegister } from './helper';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
+import { ProjectionService } from '../services/projection-service';
 import { resolveMatchingContactIds } from './crm';
 import { randomUUID } from 'crypto';
 
@@ -144,6 +145,10 @@ export function registerCampaignsIpc(): void {
       WorkspaceManager.wakeScheduler();
     }
 
+    if (enrolledIds.length > 0) {
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+    }
+
     console.log(`[IPC] Enrolled ${enrolledIds.length} contact(s) into campaign: ${campaignId}`);
     return { success: true, enrolledCount: enrolledIds.length };
   });
@@ -233,6 +238,8 @@ export function registerCampaignsIpc(): void {
         console.warn('[IPC] Error cancelling jobs via SDK:', err);
       }
 
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
       return { success: true };
     }
   );
@@ -307,6 +314,8 @@ export function registerCampaignsIpc(): void {
         }
       }
 
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
       return { success: true };
     }
   );
@@ -351,6 +360,8 @@ export function registerCampaignsIpc(): void {
       } catch (err) {
         console.warn('[IPC] Error cancelling jobs via SDK:', err);
       }
+
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
 
       return { success: true, count: enrollmentIds.length };
     }
@@ -446,6 +457,8 @@ export function registerCampaignsIpc(): void {
 
     WorkspaceManager.wakeScheduler();
 
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
     console.log(`[IPC] Campaign "${campaignId}" scheduled successfully.`);
     return { success: true, campaignId };
   });
@@ -498,6 +511,8 @@ export function registerCampaignsIpc(): void {
     } catch (err) {
       console.warn('[IPC] Error cancelling paused jobs via SDK:', err);
     }
+
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
 
     return { success: true, campaignId, status: 'PAUSED' };
   });
@@ -579,6 +594,8 @@ export function registerCampaignsIpc(): void {
       WorkspaceManager.wakeScheduler();
     }
 
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
     console.log(`[IPC] Resumed campaign ${campaignId}. Enqueued ${enqueuedCount} immediate job(s).`);
     return { success: true, campaignId, status: 'ACTIVE', enqueuedCount };
   });
@@ -628,6 +645,8 @@ export function registerCampaignsIpc(): void {
     } catch (err) {
       console.warn('[IPC] Error cancelling stopped jobs via SDK:', err);
     }
+
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
 
     return { success: true, campaignId, status: 'STOPPED' };
   });

@@ -29,6 +29,7 @@ import {
 import { PageHeader } from '../components/common/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import {
   COUNTRIES,
   getStatesForCountry,
@@ -73,6 +74,7 @@ export default function DiscoveryScreen() {
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id || '';
   const queryClient = useQueryClient();
+  const { refresh, isRefreshing } = useProjectionRefresh('discovery_runs');
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -361,15 +363,29 @@ export default function DiscoveryScreen() {
         title="Discovery Platform"
         description="Scrape Google Maps leads, enrich contacts, and import directly into your CRM."
         actions={
-          <Button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            size="sm"
-            className="h-8 font-semibold gap-1.5 shrink-0 rounded-none"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            New Discovery Run
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={refresh}
+              disabled={isRefreshing}
+              className="h-8 text-xs font-semibold gap-1.5 rounded-none border-border-subtle bg-card text-foreground hover:bg-surface-3"
+              title="Refresh discovery runs from server"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              size="sm"
+              className="h-8 font-semibold gap-1.5 shrink-0 rounded-none"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Discovery Run
+            </Button>
+          </div>
         }
       />
 

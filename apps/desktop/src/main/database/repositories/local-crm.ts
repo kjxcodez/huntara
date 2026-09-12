@@ -277,6 +277,103 @@ export const LocalCRMRepository = {
   },
 
   /**
+   * Authoritatively reconciles a local SQLite table against a set of server documents.
+   * 1. Upserts all incoming authoritative records into SQLite.
+   * 2. Soft-deletes (or hard-deletes if no deletedAt) any active records in SQLite for this workspace
+   *    that are absent from authoritativeRecords.
+   * 3. Fully idempotent and workspace-scoped.
+   * Returns the count of upserted and tombstoned records.
+   */
+  async reconcileTableFromServer(
+    tableName: string,
+    workspaceId: string,
+    authoritativeRecords: any[]
+  ): Promise<{ upserted: number; tombstoned: number }> {
+    if (!workspaceId) throw new Error('workspaceId is required for reconciliation');
+    if (!/^[a-zA-Z0-9_]+$/.test(tableName)) throw new Error(`Invalid table: ${tableName}`);
+
+    const db = getDatabase(workspaceId);
+    const tableInfo = db.pragma(`table_info(${tableName})`) as Array<{ name: string }>;
+    const validColumns = new Set(tableInfo.map((col) => col.name));
+    const hasWorkspaceId = validColumns.has('workspaceId');
+    const hasDeletedAt = validColumns.has('deletedAt');
+
+    const authoritativeList = Array.isArray(authoritativeRecords) ? authoritativeRecords : [];
+
+    // Ensure all incoming records carry workspaceId
+    const scopedAuthoritative = authoritativeList.map((r) => {
+      const doc = typeof r?.toObject === 'function' ? r.toObject() : { ...r };
+      if (!doc.workspaceId && hasWorkspaceId) {
+        doc.workspaceId = workspaceId;
+      }
+      return doc;
+    });
+
+    // 1. Upsert live records
+    if (scopedAuthoritative.length > 0) {
+      await this.saveManyFromServer(tableName, scopedAuthoritative);
+    }
+
+    // 2. Identify active records in SQLite for this workspace
+    let activeQuery = `SELECT id FROM ${tableName}`;
+    const whereClauses: string[] = [];
+    const whereParams: any[] = [];
+
+    if (hasWorkspaceId) {
+      whereClauses.push('workspaceId = ?');
+      whereParams.push(workspaceId);
+    }
+    if (hasDeletedAt) {
+      whereClauses.push('deletedAt IS NULL');
+    }
+    if (whereClauses.length > 0) {
+      activeQuery += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    const localRows = db.prepare(activeQuery).all(...whereParams) as Array<{ id: string }>;
+
+    // Collect IDs from authoritative list (handling doc._id and doc.id)
+    const serverIdSet = new Set<string>();
+    for (const r of authoritativeList) {
+      const id = r?.id ?? (r?._id ? (typeof r._id === 'object' ? r._id.toString() : String(r._id)) : null);
+      if (id) {
+        serverIdSet.add(String(id));
+      }
+    }
+
+    // Determine IDs in SQLite that no longer exist on server
+    const idsToTombstone = localRows
+      .map((row) => String(row.id))
+      .filter((id) => !serverIdSet.has(id));
+
+    let tombstonedCount = 0;
+    if (idsToTombstone.length > 0) {
+      const now = new Date().toISOString();
+      const chunkSize = 500; // Well below SQLite parameter limits
+
+      const tombstoneTx = db.transaction((ids: string[]) => {
+        for (let i = 0; i < ids.length; i += chunkSize) {
+          const chunk = ids.slice(i, i + chunkSize);
+          const placeholders = chunk.map(() => '?').join(', ');
+          if (hasDeletedAt) {
+            db.prepare(`UPDATE ${tableName} SET deletedAt = ? WHERE id IN (${placeholders})`).run(now, ...chunk);
+          } else {
+            db.prepare(`DELETE FROM ${tableName} WHERE id IN (${placeholders})`).run(...chunk);
+          }
+          tombstonedCount += chunk.length;
+        }
+      });
+
+      tombstoneTx(idsToTombstone);
+    }
+
+    return {
+      upserted: scopedAuthoritative.length,
+      tombstoned: tombstonedCount
+    };
+  },
+
+  /**
    * Clears all cached rows in a specific table for a workspace.
    */
   async clearTable(tableName: string, workspaceId: string): Promise<void> {

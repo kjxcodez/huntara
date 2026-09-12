@@ -21,6 +21,7 @@ import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
 import { ContactStatus } from '@leadforge/schema';
 import { useContactSelection } from '../hooks/useContactSelection';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { areQueriesEqual, type CanonicalContactQuery, type BulkContactSelection } from '../utils/contact-selection';
 import { PageHeader } from '../components/common/PageHeader';
 import { Sheet, SheetContent } from '../components/ui/sheet';
@@ -133,6 +134,7 @@ export default function ContactsScreen() {
     pruneStaleIds,
     getBulkSelectionPayload
   } = useContactSelection();
+  const { refresh, isRefreshing } = useProjectionRefresh('contacts');
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
 
   // Audience Modal State
@@ -474,6 +476,8 @@ export default function ContactsScreen() {
           statusOptions={Object.values(ContactStatus)}
           createLabel="Add Contact"
           onCreateTrigger={() => setCreateOpen(true)}
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
           selectedCount={selectedCount}
           onBulkDelete={handleBulkDelete}
           onBulkStatusChange={handleBulkStatusChange}

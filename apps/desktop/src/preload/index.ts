@@ -116,6 +116,7 @@ contextBridge.exposeInMainWorld('ipc', {
       'scheduler:dead-letters:requeue',
       'scheduler:workers:health',
       'projection:rebuild',
+      'sync:reconcile',
       'discovery:run:create',
       'discovery:run:list',
       'discovery:run:get',
