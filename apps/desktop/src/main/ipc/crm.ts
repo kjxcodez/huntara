@@ -3,6 +3,11 @@ import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { loadSession } from '../lib/session';
+import type { CanonicalContactQuery, BulkContactSelection } from '@leadforge/schema';
+
+import { resolveMatchingContactIds } from './query-resolver';
+export { resolveMatchingContactIds };
+
 
 /**
  * Registers CRM entities (companies, contacts, campaigns, activities) IPC channels
@@ -253,6 +258,104 @@ export function registerCrmIpc() {
     await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, id);
     return { success: true };
   });
+
+  safeRegister('contacts:query:resolve', async (_event, { workspaceId, query, excludedIds }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    const db = getDatabase(workspaceId);
+    const contactIds = resolveMatchingContactIds(db, workspaceId, query || {}, excludedIds || []);
+    return { contactIds, total: contactIds.length };
+  });
+
+  safeRegister('contacts:bulk:delete', async (_event, { workspaceId, selection }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    if (!selection) throw new Error('selection is required.');
+    const db = getDatabase(workspaceId);
+    const sdk = WorkspaceManager.getSdk();
+
+    let targetIds: string[] = [];
+    if (selection.mode === 'explicit') {
+      targetIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+    } else if (selection.mode === 'all-matching') {
+      targetIds = resolveMatchingContactIds(db, workspaceId, selection.query || {}, selection.excludedIds || []);
+    } else {
+      throw new Error(`Unsupported selection mode: ${(selection as any).mode}`);
+    }
+
+    if (targetIds.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const BATCH_SIZE = 100;
+    let deletedCount = 0;
+    for (let i = 0; i < targetIds.length; i += BATCH_SIZE) {
+      const batch = targetIds.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (id) => {
+          try {
+            await sdk.contacts.delete(id).catch(() => null);
+            await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, id);
+            deletedCount++;
+          } catch (err) {
+            console.warn(`[BulkDelete] Failed to delete contact ${id}:`, err);
+          }
+        })
+      );
+    }
+
+    return { success: true, count: deletedCount };
+  });
+
+  safeRegister('contacts:bulk:update-status', async (_event, { workspaceId, selection, status }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    if (!selection) throw new Error('selection is required.');
+    if (!status) throw new Error('status is required.');
+    const db = getDatabase(workspaceId);
+    const sdk = WorkspaceManager.getSdk();
+
+    let targetIds: string[] = [];
+    if (selection.mode === 'explicit') {
+      targetIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+    } else if (selection.mode === 'all-matching') {
+      targetIds = resolveMatchingContactIds(db, workspaceId, selection.query || {}, selection.excludedIds || []);
+    } else {
+      throw new Error(`Unsupported selection mode: ${(selection as any).mode}`);
+    }
+
+    if (targetIds.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const BATCH_SIZE = 100;
+    let updatedCount = 0;
+    for (let i = 0; i < targetIds.length; i += BATCH_SIZE) {
+      const batch = targetIds.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (id) => {
+          try {
+            const updated = await sdk.contacts.update(id, { status } as any).catch(() => null);
+            if (updated) {
+              await LocalCRMRepository.saveFromServer('contacts', updated);
+            } else {
+              db.prepare('UPDATE contacts SET status = ?, updatedAt = ? WHERE id = ? AND workspaceId = ?').run(
+                status,
+                new Date().toISOString(),
+                id,
+                workspaceId
+              );
+            }
+            updatedCount++;
+          } catch (err) {
+            console.warn(`[BulkUpdateStatus] Failed to update contact ${id}:`, err);
+          }
+        })
+      );
+    }
+
+    return { success: true, count: updatedCount };
+  });
+
+  // Helper function exported for use in campaigns-ipc and test runner
+  // (Defined within module scope)
 
 
   // Campaigns

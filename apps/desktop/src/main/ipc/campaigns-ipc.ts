@@ -2,6 +2,7 @@ import { safeRegister } from './helper';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
+import { resolveMatchingContactIds } from './crm';
 import { randomUUID } from 'crypto';
 
 /**
@@ -10,17 +11,29 @@ import { randomUUID } from 'crypto';
  */
 export function registerCampaignsIpc(): void {
   // 1. Batch enroll contacts into a campaign
-  safeRegister('campaigns:enroll', async (_event, { campaignId, contactIds }) => {
+  safeRegister('campaigns:enroll', async (_event, { campaignId, contactIds, selection }) => {
     if (!campaignId) throw new Error('campaignId is required.');
-    if (!Array.isArray(contactIds) || contactIds.length === 0) {
-      throw new Error('contactIds must be a non-empty array.');
-    }
 
     const runtime = WorkspaceManager.getActiveRuntime();
     if (!runtime) throw new Error('No active workspace runtime');
 
     const db = getDatabase(runtime.workspaceId);
     const sdk = WorkspaceManager.getSdk();
+
+    let targetContactIds: string[] = [];
+    if (selection) {
+      if (selection.mode === 'explicit') {
+        targetContactIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+      } else if (selection.mode === 'all-matching') {
+        targetContactIds = resolveMatchingContactIds(db, runtime.workspaceId, selection.query || {}, selection.excludedIds || []);
+      }
+    } else if (Array.isArray(contactIds)) {
+      targetContactIds = contactIds;
+    }
+
+    if (targetContactIds.length === 0) {
+      throw new Error('contactIds must be a non-empty array or resolved selection.');
+    }
 
     // Load target campaign to get sequenceId and status
     let campaign = db
@@ -62,7 +75,7 @@ export function registerCampaignsIpc(): void {
     const now = new Date().toISOString();
     const enrolledIds: string[] = [];
 
-    for (const contactId of contactIds) {
+    for (const contactId of targetContactIds) {
       // Phase 15 (ENROLL-08): Contact cross-campaign exclusivity check.
       // A contact cannot have more than one active execution across the entire workspace concurrently.
       const activeExec = db

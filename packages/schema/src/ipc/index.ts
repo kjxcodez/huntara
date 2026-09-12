@@ -28,6 +28,30 @@ export interface RuntimeConnectivityState {
   activeWorkspaceId: string | null;
 }
 
+export interface CanonicalContactQuery {
+  search?: string | undefined;
+  status?: string | undefined;
+  companyId?: string | undefined;
+  title?: string | undefined;
+  source?: string | undefined;
+  discoveryRunId?: string | undefined;
+  location?: string | undefined;
+  city?: string | undefined;
+  state?: string | undefined;
+  country?: string | undefined;
+}
+
+export type BulkContactSelection =
+  | {
+      mode: 'explicit';
+      selectedIds: string[];
+    }
+  | {
+      mode: 'all-matching';
+      query: CanonicalContactQuery;
+      excludedIds: string[];
+    };
+
 export interface IpcChannelMap {
   'diagnostics:get-system-info': {
     input: { workspaceId?: string };
@@ -232,7 +256,7 @@ export interface IpcChannelMap {
     output: void;
   };
   'campaigns:enroll': {
-    input: { campaignId: string; contactIds: string[] };
+    input: { campaignId: string; contactIds?: string[]; selection?: BulkContactSelection };
     output: { success: boolean; enrolledCount: number };
   };
   'campaigns:enrollments:list': {
@@ -414,6 +438,29 @@ export interface IpcChannelMap {
       discoveryRunId?: string;
     };
     output: any[];
+  };
+  'contacts:query:resolve': {
+    input: {
+      workspaceId: string;
+      query: CanonicalContactQuery;
+      excludedIds?: string[];
+    };
+    output: { contactIds: string[]; total: number };
+  };
+  'contacts:bulk:delete': {
+    input: {
+      workspaceId: string;
+      selection: BulkContactSelection;
+    };
+    output: { success: boolean; count: number };
+  };
+  'contacts:bulk:update-status': {
+    input: {
+      workspaceId: string;
+      selection: BulkContactSelection;
+      status: string;
+    };
+    output: { success: boolean; count: number };
   };
   'companies:distinct-values': {
     input: { workspaceId: string };

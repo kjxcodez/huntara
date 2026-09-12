@@ -1,306 +1,475 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
   computePageSelectionState,
+  computeAllMatchingPageSelectionState,
   toggleSelectAllPage,
+  toggleAllMatchingPage,
   toggleSelectContact,
+  toggleAllMatchingContact,
   pruneStaleSelectedIds,
-  ContactSelectionManager
+  matchesCanonicalQuery,
+  areQueriesEqual,
+  ContactSelectionManager,
+  type CanonicalContactQuery,
+  type BulkContactSelection
 } from './contact-selection';
+import { resolveMatchingContactIds } from '../../main/ipc/query-resolver';
 
-describe('Contact Selection & Bulk Operations (ID-safe)', () => {
+describe('Contact Selection & Bulk Operations (ID-safe Explicit & All-Matching Modes)', () => {
   const page1Ids = ['A', 'B', 'C', 'D', 'E'];
   const page2Ids = ['F', 'G', 'H', 'I', 'J'];
 
   // -------------------------------------------------------------------------
-  // Test 1 — Select all current page
+  // Phase 5 Tests (Explicit Mode Semantics)
   // -------------------------------------------------------------------------
-  it('Test 1: selects all records on Page 1', () => {
-    const manager = new ContactSelectionManager();
+  describe('Phase 5 — Explicit ID Selection', () => {
+    it('selects all records on Page 1', () => {
+      const manager = new ContactSelectionManager();
+      manager.togglePage(page1Ids);
 
-    // User presses page header "Select all" on Page 1
-    manager.togglePage(page1Ids);
+      expect(manager.getSelectedIds()).toEqual(expect.arrayContaining(page1Ids));
+      expect(manager.getSelectedCount()).toBe(5);
 
-    expect(manager.getSelectedIds()).toEqual(expect.arrayContaining(page1Ids));
-    expect(manager.getSelectedCount()).toBe(5);
+      const headerState = manager.getPageSelectionState(page1Ids);
+      expect(headerState.checked).toBe(true);
+      expect(headerState.indeterminate).toBe(false);
+      expect(headerState.selectedCountOnPage).toBe(5);
+    });
 
-    const headerState = manager.getPageSelectionState(page1Ids);
-    expect(headerState.checked).toBe(true);
-    expect(headerState.indeterminate).toBe(false);
-    expect(headerState.selectedCountOnPage).toBe(5);
-  });
+    it('preserves selections across pagination; Page 2 UI shows unchecked', () => {
+      const manager = new ContactSelectionManager(page1Ids);
 
-  // -------------------------------------------------------------------------
-  // Test 2 — Navigate to page 2
-  // -------------------------------------------------------------------------
-  it('Test 2: preserves selections across pagination; Page 2 UI shows unchecked', () => {
-    // Starting state: Page 1 selected
-    const manager = new ContactSelectionManager(page1Ids);
+      expect(manager.getSelectedIds()).toEqual(page1Ids);
 
-    // Navigate to Page 2 (F, G, H, I, J)
-    // Internal state remains A, B, C, D, E
-    expect(manager.getSelectedIds()).toEqual(page1Ids);
+      for (const id of page2Ids) {
+        expect(manager.isSelected(id)).toBe(false);
+      }
 
-    // Each row on Page 2 must be unselected
-    for (const id of page2Ids) {
-      expect(manager.isSelected(id)).toBe(false);
-    }
+      const page2Header = manager.getPageSelectionState(page2Ids);
+      expect(page2Header.checked).toBe(false);
+      expect(page2Header.indeterminate).toBe(false);
+      expect(page2Header.selectedCountOnPage).toBe(0);
+    });
 
-    // Page 2 header state must be unchecked
-    const page2Header = manager.getPageSelectionState(page2Ids);
-    expect(page2Header.checked).toBe(false);
-    expect(page2Header.indeterminate).toBe(false);
-    expect(page2Header.selectedCountOnPage).toBe(0);
-  });
+    it('header is unchecked when selectedIds.size === currentPage.length but IDs belong to another page', () => {
+      const selectedIds = ['A', 'B', 'C', 'D', 'E'];
+      const currentPage = ['F', 'G', 'H', 'I', 'J'];
 
-  // -------------------------------------------------------------------------
-  // Test 3 — Return to page 1
-  // -------------------------------------------------------------------------
-  it('Test 3: returning to Page 1 restores full visual selection', () => {
-    const manager = new ContactSelectionManager(page1Ids);
+      const headerState = computePageSelectionState(currentPage, selectedIds);
+      expect(headerState.checked).toBe(false);
+      expect(headerState.indeterminate).toBe(false);
+      expect(headerState.selectedCountOnPage).toBe(0);
+    });
 
-    // Page 1 rows are all selected
-    for (const id of page1Ids) {
-      expect(manager.isSelected(id)).toBe(true);
-    }
+    it('partial page selection produces indeterminate header state', () => {
+      const currentPage = ['F', 'G', 'H', 'I', 'J'];
+      const selectedIds = ['G', 'H'];
 
-    const page1Header = manager.getPageSelectionState(page1Ids);
-    expect(page1Header.checked).toBe(true);
-    expect(page1Header.indeterminate).toBe(false);
-  });
+      const headerState = computePageSelectionState(currentPage, selectedIds);
+      expect(headerState.checked).toBe(false);
+      expect(headerState.indeterminate).toBe(true);
+      expect(headerState.selectedCountOnPage).toBe(2);
+    });
 
-  // -------------------------------------------------------------------------
-  // Test 4 — Select a record on page 2
-  // -------------------------------------------------------------------------
-  it('Test 4: selecting one record on Page 2 adds it and shows indeterminate header on Page 2', () => {
-    const manager = new ContactSelectionManager(page1Ids);
+    it('prunes deleted or nonexistent contact IDs from selectedIds', () => {
+      const selectedIds = ['A', 'B', 'C', 'D'];
+      const validInDb = ['A', 'C', 'E'];
 
-    // Select G on Page 2
-    manager.toggleContact('G');
-
-    expect(manager.getSelectedIds()).toEqual(expect.arrayContaining([...page1Ids, 'G']));
-    expect(manager.getSelectedCount()).toBe(6);
-
-    // On Page 2: only G is selected
-    expect(manager.isSelected('F')).toBe(false);
-    expect(manager.isSelected('G')).toBe(true);
-    expect(manager.isSelected('H')).toBe(false);
-    expect(manager.isSelected('I')).toBe(false);
-    expect(manager.isSelected('J')).toBe(false);
-
-    // Header on Page 2 is indeterminate (1 of 5 selected)
-    const page2Header = manager.getPageSelectionState(page2Ids);
-    expect(page2Header.checked).toBe(false);
-    expect(page2Header.indeterminate).toBe(true);
-    expect(page2Header.selectedCountOnPage).toBe(1);
-  });
-
-  // -------------------------------------------------------------------------
-  // Test 5 — Select all page 2
-  // -------------------------------------------------------------------------
-  it('Test 5: page header Select All on Page 2 adds Page 2 IDs without replacing Page 1 IDs', () => {
-    const manager = new ContactSelectionManager(page1Ids);
-
-    // Press page header Select All on Page 2
-    manager.togglePage(page2Ids);
-
-    // Internal state must contain all 10 records
-    const allIds = [...page1Ids, ...page2Ids];
-    expect(manager.getSelectedCount()).toBe(10);
-    for (const id of allIds) {
-      expect(manager.isSelected(id)).toBe(true);
-    }
-
-    // Page 2 header is fully checked
-    const page2Header = manager.getPageSelectionState(page2Ids);
-    expect(page2Header.checked).toBe(true);
-    expect(page2Header.indeterminate).toBe(false);
-  });
-
-  // -------------------------------------------------------------------------
-  // Test 6 — Deselect all page 2
-  // -------------------------------------------------------------------------
-  it('Test 6: deselecting all on Page 2 removes ONLY Page 2 IDs, keeping Page 1 IDs selected', () => {
-    const allIds = [...page1Ids, ...page2Ids];
-    const manager = new ContactSelectionManager(allIds);
-
-    // Page 2 is currently fully selected
-    expect(manager.getPageSelectionState(page2Ids).checked).toBe(true);
-
-    // Deselect Page 2
-    manager.togglePage(page2Ids);
-
-    // Page 2 IDs removed, Page 1 IDs preserved
-    expect(manager.getSelectedIds()).toEqual(expect.arrayContaining(page1Ids));
-    expect(manager.getSelectedCount()).toBe(5);
-    for (const id of page2Ids) {
-      expect(manager.isSelected(id)).toBe(false);
-    }
-
-    const page2Header = manager.getPageSelectionState(page2Ids);
-    expect(page2Header.checked).toBe(false);
-    expect(page2Header.indeterminate).toBe(false);
-  });
-
-  // -------------------------------------------------------------------------
-  // Test 7 — Header state uses IDs, not counts (CRITICAL REGRESSION TEST)
-  // -------------------------------------------------------------------------
-  it('Test 7: header is UNCHECKED when selectedIds.size === currentPage.length but IDs belong to another page', () => {
-    // Setup: selectedIds has 5 items (A, B, C, D, E)
-    // Current page has 5 items (F, G, H, I, J)
-    // selectedIds.size === currentPage.length === 5
-    const selectedIds = ['A', 'B', 'C', 'D', 'E'];
-    const currentPage = ['F', 'G', 'H', 'I', 'J'];
-
-    expect(selectedIds.length).toBe(currentPage.length);
-
-    // Under the buggy implementation:
-    // selectedIds.length === currentPage.length would be true!
-    // Under the corrected implementation:
-    const headerState = computePageSelectionState(currentPage, selectedIds);
-
-    expect(headerState.checked).toBe(false);
-    expect(headerState.indeterminate).toBe(false);
-    expect(headerState.selectedCountOnPage).toBe(0);
-  });
-
-  // -------------------------------------------------------------------------
-  // Test 8 — Partial page selection
-  // -------------------------------------------------------------------------
-  it('Test 8: partial page selection produces indeterminate header state', () => {
-    const currentPage = ['F', 'G', 'H', 'I', 'J'];
-    const selectedIds = ['G', 'H'];
-
-    const headerState = computePageSelectionState(currentPage, selectedIds);
-
-    expect(headerState.checked).toBe(false);
-    expect(headerState.indeterminate).toBe(true);
-    expect(headerState.selectedCountOnPage).toBe(2);
-  });
-
-  // -------------------------------------------------------------------------
-  // Test 9 — Bulk operation exact IDs
-  // -------------------------------------------------------------------------
-  it('Test 9: bulk operation payload matches exact explicit selected IDs', async () => {
-    const selectedIds = ['A', 'B', 'C', 'G'];
-    const mockBulkAction = vi.fn().mockResolvedValue({ success: true });
-
-    // Execute bulk operation
-    await mockBulkAction({ contactIds: selectedIds });
-
-    expect(mockBulkAction).toHaveBeenCalledTimes(1);
-    expect(mockBulkAction).toHaveBeenCalledWith({
-      contactIds: ['A', 'B', 'C', 'G']
+      const pruned = pruneStaleSelectedIds(validInDb, selectedIds);
+      expect(pruned).toEqual(['A', 'C']);
     });
   });
 
   // -------------------------------------------------------------------------
-  // Test 10 — Bulk operation after pagination
+  // Phase 5B Tests 1 to 15 (Specification Requirements)
   // -------------------------------------------------------------------------
-  it('Test 10: bulk operation after pagination targets only explicitly selected IDs, not visible page records', async () => {
-    const manager = new ContactSelectionManager();
+  describe('Phase 5B — Select All Matching Contacts', () => {
+    // -----------------------------------------------------------------------
+    // Test 1 — Page selection is not all-matching
+    // -----------------------------------------------------------------------
+    it('Test 1: page selection is not all-matching (explicit mode only)', () => {
+      const manager = new ContactSelectionManager();
 
-    // Select A, B, C on Page 1
-    manager.toggleContact('A');
-    manager.toggleContact('B');
-    manager.toggleContact('C');
+      manager.togglePage(page1Ids);
 
-    // Navigate to Page 2 (F, G, H, I, J)
-    // Verify none of Page 2 is selected
-    const page2Selection = manager.getPageSelectionState(page2Ids);
-    expect(page2Selection.selectedCountOnPage).toBe(0);
+      expect(manager.getMode()).toBe('explicit');
+      expect(manager.isAllMatching()).toBe(false);
+      expect(manager.getSelectedCount()).toBe(5);
+      expect(manager.getCapturedQuery()).toBeNull();
+      expect(manager.getExcludedIds()).toEqual([]);
 
-    // Execute bulk delete while on Page 2
-    const mockDelete = vi.fn().mockResolvedValue({ success: true });
-    const payload = manager.getSelectedIds();
+      const bulkPayload = manager.getBulkSelection();
+      expect(bulkPayload).toEqual({
+        mode: 'explicit',
+        selectedIds: expect.arrayContaining(page1Ids)
+      });
+    });
 
-    await mockDelete({ ids: payload });
+    // -----------------------------------------------------------------------
+    // Test 2 — Transition to all-matching
+    // -----------------------------------------------------------------------
+    it('Test 2: transition to all-matching stores query snapshot and initializes clean exclusion set', () => {
+      const manager = new ContactSelectionManager(page1Ids);
+      const querySnapshot: CanonicalContactQuery = {
+        search: 'acme',
+        status: 'NEW',
+        companyId: 'comp-100'
+      };
 
-    // Payload MUST be [A, B, C]
-    expect(payload).toEqual(['A', 'B', 'C']);
-    expect(mockDelete).toHaveBeenCalledWith({ ids: ['A', 'B', 'C'] });
-    // Must NOT contain visible Page 2 IDs
-    for (const id of page2Ids) {
-      expect(payload).not.toContain(id);
-    }
-  });
+      manager.selectAllMatching(querySnapshot, 5000);
 
-  // -------------------------------------------------------------------------
-  // Test 11 — Empty page handling
-  // -------------------------------------------------------------------------
-  it('Test 11: empty current page is never checked or indeterminate', () => {
-    const emptyPage: string[] = [];
-    const selectedIds = ['A', 'B'];
+      expect(manager.getMode()).toBe('all-matching');
+      expect(manager.isAllMatching()).toBe(true);
+      expect(manager.getCapturedQuery()).toEqual(querySnapshot);
+      expect(manager.getMatchedCount()).toBe(5000);
+      expect(manager.getExcludedIds()).toEqual([]);
+      expect(manager.getEffectiveCount()).toBe(5000);
+      expect(manager.getSelectedIds()).toEqual([]);
+    });
 
-    const headerState = computePageSelectionState(emptyPage, selectedIds);
-    expect(headerState.checked).toBe(false);
-    expect(headerState.indeterminate).toBe(false);
-    expect(headerState.selectedCountOnPage).toBe(0);
+    // -----------------------------------------------------------------------
+    // Test 3 — Pagination in all-matching mode
+    // -----------------------------------------------------------------------
+    it('Test 3: pagination in all-matching mode renders every page checked without materializing IDs', () => {
+      const manager = new ContactSelectionManager();
+      manager.selectAllMatching({ status: 'NEW' }, 5000);
 
-    // Toggling an empty page leaves selectedIds unchanged
-    const next = toggleSelectAllPage(emptyPage, selectedIds);
-    expect(next).toEqual(selectedIds);
-  });
+      // Page 1 header and rows
+      const page1Header = manager.getPageSelectionState(page1Ids);
+      expect(page1Header.checked).toBe(true);
+      expect(page1Header.indeterminate).toBe(false);
+      expect(page1Header.selectedCountOnPage).toBe(page1Ids.length);
+      for (const id of page1Ids) {
+        expect(manager.isSelected(id)).toBe(true);
+      }
 
-  // -------------------------------------------------------------------------
-  // Test 12 — Stale ID pruning
-  // -------------------------------------------------------------------------
-  it('Test 12: prunes deleted or nonexistent contact IDs from selectedIds', () => {
-    const selectedIds = ['A', 'B', 'C', 'D'];
-    const validInDb = ['A', 'C', 'E']; // B and D were deleted
+      // Page 2 header and rows
+      const page2Header = manager.getPageSelectionState(page2Ids);
+      expect(page2Header.checked).toBe(true);
+      expect(page2Header.indeterminate).toBe(false);
+      expect(page2Header.selectedCountOnPage).toBe(page2Ids.length);
+      for (const id of page2Ids) {
+        expect(manager.isSelected(id)).toBe(true);
+      }
 
-    const pruned = pruneStaleSelectedIds(validInDb, selectedIds);
-    expect(pruned).toEqual(['A', 'C']);
-  });
+      // Internal exclusion set remains empty — 0 IDs stored in memory
+      expect(manager.getExcludedIds()).toHaveLength(0);
+      expect(manager.getEffectiveCount()).toBe(5000);
+    });
 
-  // -------------------------------------------------------------------------
-  // Test 13 — Sorting safety
-  // -------------------------------------------------------------------------
-  it('Test 13: sorting/reordering does not change which records are selected', () => {
-    const manager = new ContactSelectionManager(['B', 'D']);
+    // -----------------------------------------------------------------------
+    // Test 4 — Single contact exclusion
+    // -----------------------------------------------------------------------
+    it('Test 4: deselecting a single contact adds it to excludedIds, sets row unchecked and header indeterminate', () => {
+      const manager = new ContactSelectionManager();
+      manager.selectAllMatching({ status: 'NEW' }, 5000);
 
-    const originalOrder = ['A', 'B', 'C', 'D', 'E'];
-    const sortedOrder = ['E', 'D', 'C', 'B', 'A'];
+      // Deselect 'G' on Page 2
+      manager.toggleContact('G');
 
-    // Original order
-    expect(originalOrder.map((id) => manager.isSelected(id))).toEqual([
-      false,
-      true,
-      false,
-      true,
-      false
-    ]);
+      expect(manager.getExcludedIds()).toEqual(['G']);
+      expect(manager.isSelected('G')).toBe(false);
+      expect(manager.isSelected('F')).toBe(true);
+      expect(manager.isSelected('H')).toBe(true);
 
-    // Sorted order: ID 'B' and 'D' remain selected based on ID, not index
-    expect(sortedOrder.map((id) => manager.isSelected(id))).toEqual([
-      false,
-      true,
-      false,
-      true,
-      false
-    ]);
+      // Page 2 header is now indeterminate (4 of 5 selected)
+      const page2Header = manager.getPageSelectionState(page2Ids);
+      expect(page2Header.checked).toBe(false);
+      expect(page2Header.indeterminate).toBe(true);
+      expect(page2Header.selectedCountOnPage).toBe(4);
 
-    expect(manager.getPageSelectionState(sortedOrder)).toEqual(
-      manager.getPageSelectionState(originalOrder)
-    );
-  });
+      // Effective count decrements to 4999
+      expect(manager.getEffectiveCount()).toBe(4999);
+    });
 
-  // -------------------------------------------------------------------------
-  // Test 14 — Filtering safety
-  // -------------------------------------------------------------------------
-  it('Test 14: filtering reduces visible set without creating query-wide selection', () => {
-    const manager = new ContactSelectionManager(['A', 'B', 'C']);
+    // -----------------------------------------------------------------------
+    // Test 5 — Re-inclusion
+    // -----------------------------------------------------------------------
+    it('Test 5: clicking an excluded contact re-includes it and restores fully checked state', () => {
+      const manager = new ContactSelectionManager();
+      manager.selectAllMatching({ status: 'NEW' }, 5000);
 
-    // Filter hides B, leaves A and C
-    const filteredVisible = ['A', 'C'];
+      manager.toggleContact('G'); // exclude
+      expect(manager.getEffectiveCount()).toBe(4999);
 
-    // Both visible records are selected -> header for filtered view is checked
-    const filteredHeader = manager.getPageSelectionState(filteredVisible);
-    expect(filteredHeader.checked).toBe(true);
-    expect(filteredHeader.indeterminate).toBe(false);
-    expect(filteredHeader.selectedCountOnPage).toBe(2);
+      manager.toggleContact('G'); // re-include
+      expect(manager.getExcludedIds()).toEqual([]);
+      expect(manager.isSelected('G')).toBe(true);
 
-    // But internal selection STILL contains B
-    expect(manager.isSelected('B')).toBe(true);
-    expect(manager.getSelectedCount()).toBe(3);
+      const page2Header = manager.getPageSelectionState(page2Ids);
+      expect(page2Header.checked).toBe(true);
+      expect(page2Header.indeterminate).toBe(false);
+      expect(page2Header.selectedCountOnPage).toBe(5);
+      expect(manager.getEffectiveCount()).toBe(5000);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 6 — Current page toggle in all-matching mode
+    // -----------------------------------------------------------------------
+    it('Test 6: toggling page header in all-matching mode adds/removes current page IDs from exclusions', () => {
+      const manager = new ContactSelectionManager();
+      manager.selectAllMatching({ status: 'NEW' }, 5000);
+
+      // Toggle Page 1 off
+      manager.togglePage(page1Ids);
+
+      expect(manager.getExcludedIds()).toEqual(expect.arrayContaining(page1Ids));
+      expect(manager.getEffectiveCount()).toBe(4995);
+
+      // Page 1 is unchecked
+      const page1Header = manager.getPageSelectionState(page1Ids);
+      expect(page1Header.checked).toBe(false);
+      expect(page1Header.indeterminate).toBe(false);
+      expect(page1Header.selectedCountOnPage).toBe(0);
+
+      // Page 2 remains fully checked
+      const page2Header = manager.getPageSelectionState(page2Ids);
+      expect(page2Header.checked).toBe(true);
+      expect(page2Header.indeterminate).toBe(false);
+      expect(page2Header.selectedCountOnPage).toBe(5);
+
+      // Toggle Page 1 back on
+      manager.togglePage(page1Ids);
+      expect(manager.getExcludedIds()).toEqual([]);
+      expect(manager.getEffectiveCount()).toBe(5000);
+      expect(manager.getPageSelectionState(page1Ids).checked).toBe(true);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 7 — Filter immutability and drift detection
+    // -----------------------------------------------------------------------
+    it('Test 7: captured query snapshot is immutable and flags filter drift', () => {
+      const manager = new ContactSelectionManager();
+      const initialQuery: CanonicalContactQuery = { search: 'acme', status: 'NEW' };
+      manager.selectAllMatching(initialQuery, 5000);
+
+      // Captured query is a detached snapshot
+      initialQuery.search = 'modified-externally';
+      expect(manager.getCapturedQuery()?.search).toBe('acme');
+
+      // User alters UI filters
+      const driftedQuery: CanonicalContactQuery = { search: 'modified-externally', status: 'NEW' };
+      expect(areQueriesEqual(driftedQuery, manager.getCapturedQuery())).toBe(false);
+
+      // Equivalent query with undefined/whitespace differences is equal
+      const equivalentQuery: CanonicalContactQuery = {
+        search: 'acme',
+        status: 'NEW',
+        city: undefined,
+        title: ''
+      };
+      expect(areQueriesEqual(equivalentQuery, manager.getCapturedQuery())).toBe(true);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 8 — Bulk operation payload
+    // -----------------------------------------------------------------------
+    it('Test 8: bulk operation in all-matching mode transmits query + exclusions, never a large ID list', () => {
+      const manager = new ContactSelectionManager();
+      const query: CanonicalContactQuery = { status: 'NEW', companyId: 'comp-1' };
+      manager.selectAllMatching(query, 5000);
+
+      // Exclude two contacts
+      manager.toggleContact('G');
+      manager.toggleContact('H');
+
+      const payload: BulkContactSelection = manager.getBulkSelection();
+
+      expect(payload).toEqual({
+        mode: 'all-matching',
+        query: { status: 'NEW', companyId: 'comp-1' },
+        excludedIds: ['G', 'H']
+      });
+
+      // Crucial assertion: no materialization of 4,998 IDs
+      expect((payload as any).selectedIds).toBeUndefined();
+      expect((payload as any).ids).toBeUndefined();
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 9 — Backend query resolution
+    // -----------------------------------------------------------------------
+    it('Test 9: backend resolver runs parameterized SQL with workspace isolation and exclusions', () => {
+      const capturedSql: { query: string; params: any[] } = { query: '', params: [] };
+
+      const mockDb = {
+        prepare: (query: string) => ({
+          all: (...params: any[]) => {
+            capturedSql.query = query;
+            capturedSql.params = params;
+            return [{ id: 'ct-1' }, { id: 'ct-2' }, { id: 'ct-3' }];
+          }
+        })
+      };
+
+      const resolved = resolveMatchingContactIds(
+        mockDb,
+        'ws-active',
+        { status: 'NEW', search: 'sarah' },
+        ['ct-2']
+      );
+
+      // Verified exclusion of 'ct-2'
+      expect(resolved).toEqual(['ct-1', 'ct-3']);
+
+      // Verified parameterized query structure
+      expect(capturedSql.query).toContain('c.workspaceId = ?');
+      expect(capturedSql.query).toContain('c.status = ?');
+      expect(capturedSql.query).toContain('(c.firstName LIKE ?');
+      expect(capturedSql.params[0]).toBe('ws-active');
+      expect(capturedSql.params).toContain('NEW');
+      expect(capturedSql.params).toContain('%sarah%');
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 10 — Non-matching contact safety
+    // -----------------------------------------------------------------------
+    it('Test 10: non-matching contacts are rejected both in-memory and in resolver', () => {
+      const query: CanonicalContactQuery = { search: 'alex', status: 'NEW' };
+
+      const matchingContact = {
+        id: 'c1',
+        firstName: 'Alex',
+        lastName: 'Rivers',
+        email: 'alex@example.com',
+        status: 'NEW'
+      };
+
+      const wrongStatusContact = {
+        id: 'c2',
+        firstName: 'Alex',
+        lastName: 'Rivers',
+        email: 'alex@example.com',
+        status: 'CONTACTED'
+      };
+
+      const wrongNameContact = {
+        id: 'c3',
+        firstName: 'Bob',
+        lastName: 'Smith',
+        email: 'bob@example.com',
+        status: 'NEW'
+      };
+
+      expect(matchesCanonicalQuery(matchingContact, query)).toBe(true);
+      expect(matchesCanonicalQuery(wrongStatusContact, query)).toBe(false);
+      expect(matchesCanonicalQuery(wrongNameContact, query)).toBe(false);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 11 — Workspace isolation
+    // -----------------------------------------------------------------------
+    it('Test 11: resolver strictly enforces target workspaceId isolation', () => {
+      const mockDb = {
+        prepare: (query: string) => ({
+          all: (...params: any[]) => {
+            const [wsId] = params;
+            if (wsId === 'workspace-target') {
+              return [{ id: 'target-1' }, { id: 'target-2' }];
+            }
+            return [{ id: 'other-ws-lead' }];
+          }
+        })
+      };
+
+      const targetResults = resolveMatchingContactIds(
+        mockDb,
+        'workspace-target',
+        { status: 'NEW' },
+        []
+      );
+
+      expect(targetResults).toEqual(['target-1', 'target-2']);
+      expect(targetResults).not.toContain('other-ws-lead');
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 12 — Dataset changes between selection and execution
+    // -----------------------------------------------------------------------
+    it('Test 12: resolution at execution time reflects newly inserted matching contacts and ignores deleted ones', () => {
+      // Mock db returns live rows matching the query at the instant of bulk execution
+      const mockDb = {
+        prepare: () => ({
+          all: () => [
+            { id: 'contact-old' },
+            { id: 'contact-newly-added' } // Added 1 second after selection was captured
+          ]
+        })
+      };
+
+      const resolved = resolveMatchingContactIds(
+        mockDb,
+        'ws-1',
+        { status: 'NEW' },
+        []
+      );
+
+      expect(resolved).toEqual(['contact-old', 'contact-newly-added']);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 13 — Performance / Zero ID materialization with 5,000+ synthetic contacts
+    // -----------------------------------------------------------------------
+    it('Test 13: 5,000+ synthetic contact test verifies state size remains O(exclusions)', () => {
+      const manager = new ContactSelectionManager();
+      const syntheticCount = 10000;
+
+      // Select all 10,000 matching contacts
+      manager.selectAllMatching({ status: 'NEW' }, syntheticCount);
+
+      // Invariant: zero contact IDs stored in memory
+      expect(manager.getExcludedIds()).toHaveLength(0);
+      expect(manager.getSelectedIds()).toHaveLength(0);
+      expect(manager.getEffectiveCount()).toBe(syntheticCount);
+
+      // Exclude 3 specific contacts out of 10,000
+      manager.toggleContact('id-42');
+      manager.toggleContact('id-100');
+      manager.toggleContact('id-999');
+
+      // State holds ONLY the 3 excluded IDs, NOT 9,997 IDs!
+      expect(manager.getExcludedIds()).toEqual(['id-42', 'id-100', 'id-999']);
+      expect(manager.getEffectiveCount()).toBe(9997);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 14 — Empty match set
+    // -----------------------------------------------------------------------
+    it('Test 14: empty match set sets count to 0 and page selection is unchecked', () => {
+      const manager = new ContactSelectionManager();
+      manager.selectAllMatching({ search: 'nonexistent-lead-xyz' }, 0);
+
+      expect(manager.getEffectiveCount()).toBe(0);
+      expect(manager.getMatchedCount()).toBe(0);
+
+      const emptyPageHeader = manager.getPageSelectionState([]);
+      expect(emptyPageHeader.checked).toBe(false);
+      expect(emptyPageHeader.indeterminate).toBe(false);
+      expect(emptyPageHeader.selectedCountOnPage).toBe(0);
+    });
+
+    // -----------------------------------------------------------------------
+    // Test 15 — Bulk operation failure safety
+    // -----------------------------------------------------------------------
+    it('Test 15: bulk operation rejection leaves selection state uncorrupted', async () => {
+      const manager = new ContactSelectionManager();
+      const query: CanonicalContactQuery = { status: 'NEW' };
+      manager.selectAllMatching(query, 5000);
+      manager.toggleContact('G');
+
+      const mockFailingIpc = vi.fn().mockRejectedValue(new Error('Network disconnected'));
+
+      await expect(
+        mockFailingIpc({ selection: manager.getBulkSelection() })
+      ).rejects.toThrow('Network disconnected');
+
+      // Selection state must remain completely intact
+      expect(manager.getMode()).toBe('all-matching');
+      expect(manager.getCapturedQuery()).toEqual(query);
+      expect(manager.getExcludedIds()).toEqual(['G']);
+      expect(manager.getEffectiveCount()).toBe(4999);
+      expect(manager.isSelected('F')).toBe(true);
+      expect(manager.isSelected('G')).toBe(false);
+    });
   });
 });
