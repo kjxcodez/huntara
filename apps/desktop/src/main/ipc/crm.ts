@@ -102,14 +102,43 @@ export function registerCrmIpc() {
     return updated;
   });
 
-  safeRegister('companies:delete', async (_event, { workspaceId, id }) => {
+  safeRegister('companies:delete', async (_event, payload) => {
+    const { workspaceId, id, mode } = payload || {};
     if (!workspaceId) throw new Error('workspaceId is required.');
     if (!id) throw new Error('id is required.');
-    const sdk = WorkspaceManager.getSdk();
-    await sdk.companies.delete(id);
+
+    const sdk = WorkspaceManager.getSdk(workspaceId);
+    const result = await sdk.companies.delete(id, { mode });
+
+    // 1. Soft-delete company in SQLite cache
     await LocalCRMRepository.softDeleteFromServer('companies', workspaceId, id);
+
+    // 2. Remove company_discovery_runs and company-owned metadata from SQLite
+    try {
+      const db = getDatabase(workspaceId);
+      db.prepare('DELETE FROM company_discovery_runs WHERE workspaceId = ? AND companyId = ?').run(
+        workspaceId,
+        id
+      );
+      db.prepare('DELETE FROM company_intelligence WHERE workspaceId = ? AND companyId = ?').run(workspaceId, id);
+      db.prepare('DELETE FROM website_intelligence WHERE workspaceId = ? AND companyId = ?').run(workspaceId, id);
+      db.prepare('DELETE FROM opportunity_scores WHERE workspaceId = ? AND companyId = ?').run(workspaceId, id);
+    } catch (err) {
+      console.warn('[CRM-IPC] Note cleaning SQLite company-owned cache:', err);
+    }
+
+    // 3. If eligible contacts were deleted authoritatively, soft-delete them in SQLite cache
+    if (result.deletedContactIds && result.deletedContactIds.length > 0) {
+      for (const contactId of result.deletedContactIds) {
+        await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, contactId);
+      }
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
+
+    // 4. Broadcast projection update for companies
     ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
-    return { success: true };
+
+    return result;
   });
 
   // Contacts

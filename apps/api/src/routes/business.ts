@@ -556,9 +556,34 @@ companiesRouter.patch('/:id', async (c) => {
 companiesRouter.delete('/:id', async (c) => {
   const wsId = getWorkspaceId(c);
   const id = c.req.param('id');
+  const userId = getUserId(c);
+
+  let mode: any = c.req.query('mode');
+  if (!mode) {
+    try {
+      const body = await c.req.json();
+      mode = body?.mode;
+    } catch {}
+  }
+
   const service = new CompanyService(wsId);
-  await service.deleteCompany(id);
-  return c.json(successResponse({ success: true }));
+  try {
+    const result = await service.deleteCompany(id, { mode, deletedBy: userId });
+    return c.json(successResponse(result));
+  } catch (err: any) {
+    if (err instanceof NotFoundError || err?.name === 'NotFoundError') {
+      return c.json(
+        successResponse({
+          success: true,
+          alreadyDeleted: true,
+          companyDeleted: false,
+          contactsDeletedCount: 0,
+          contactsPreservedCount: 0
+        })
+      );
+    }
+    throw err;
+  }
 });
 
 // ── Contacts Router ───────────────────────────────────────────────────────

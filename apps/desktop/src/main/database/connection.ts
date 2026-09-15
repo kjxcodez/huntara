@@ -119,8 +119,9 @@ export function getDatabase(workspaceId?: string): Database.Database {
             'createdAt', 'updatedAt', 'deletedAt'
           ],
           sequence_executions: [
-            'id', 'workspaceId', 'campaignId', 'sequenceId', 'contactId', 'status', 'currentStepIndex',
-            'stepIndex', 'startedAt', 'completedAt', 'failedAt', 'error', 'logs', 'createdAt', 'updatedAt', 'deletedAt'
+            'id', 'workspaceId', 'campaignId', 'sequenceId', 'contactId', 'companyId', 'status', 'currentStepIndex',
+            'currentStep', 'stepIndex', 'startedAt', 'completedAt', 'failedAt', 'pausedAt', 'nextExecutionAt',
+            'error', 'logs', 'metrics', 'emailsSent', 'replies', 'failures', 'createdAt', 'updatedAt', 'deletedAt'
           ],
           templates: [
             'id', 'workspaceId', 'name', 'subject', 'bodyHtml', 'bodyText', 'variables', 'category',
@@ -131,9 +132,17 @@ export function getDatabase(workspaceId?: string): Database.Database {
             'settings', 'createdAt', 'updatedAt', 'deletedAt'
           ],
           email_deliveries: [
-            'id', 'workspaceId', 'campaignId', 'sequenceId', 'contactId', 'toAddress', 'sentAt',
-            'status', 'stepIndex', 'currentStepIndex', 'createdAt', 'updatedAt', 'deletedAt'
+            'id', 'workspaceId', 'campaignId', 'sequenceId', 'executionId', 'stepIndex', 'contactId', 'companyId',
+            'accountId', 'senderEmail', 'recipientEmail', 'toAddress', 'subject', 'sentAt', 'status',
+            'hasReply', 'replyCount', 'lastRepliedAt', 'openCount', 'clickCount', 'lastOpenedAt', 'lastClickedAt',
+            'direction', 'retryable', 'ambiguous', 'error', 'safeHumanMessage', 'technicalMessage',
+            'processingStatus', 'matchConfidence', 'reconciliationAttempts', 'reconciliationNotes', 'reconciledAt',
+            'attempt', 'idempotencyKey', 'createdAt', 'updatedAt', 'deletedAt'
           ],
+          company_intelligence: ['companyId', 'workspaceId', 'summary', 'openingLine', 'techStack', 'painPoints', 'useCases', 'createdAt', 'updatedAt'],
+          website_intelligence: ['companyId', 'workspaceId', 'headline', 'description', 'services', 'techStack', 'scrapedAt', 'createdAt', 'updatedAt'],
+          contact_intelligence: ['contactId', 'workspaceId', 'companyId', 'summary', 'openingLine', 'linkedinData', 'createdAt', 'updatedAt'],
+          opportunity_scores: ['companyId', 'workspaceId', 'overallScore', 'fitScore', 'sizeScore', 'intentScore', 'urgencyScore', 'explanation', 'scoredAt', 'createdAt', 'updatedAt'],
           operations_cache: ['id', 'workspaceId', 'type', 'payload', 'isStale', 'createdAt', 'updatedAt'],
           suppressions: ['id', 'workspaceId', 'type', 'value', 'domain', 'reason', 'source', 'createdAt', 'updatedAt', 'deletedAt'],
           email_quality: ['id', 'workspaceId', 'email', 'score', 'status', 'details', 'createdAt', 'updatedAt'],
@@ -252,7 +261,12 @@ export function getDatabase(workspaceId?: string): Database.Database {
                     if (col) row[col] = params[idx];
                   });
                   const table = getTable(tableName);
-                  const key = row.id || `${row.discoveryRunId}_${row.companyId}` || Math.random().toString();
+                  const key =
+                    row.id ||
+                    (row.companyId && !row.discoveryRunId ? row.companyId : null) ||
+                    row.contactId ||
+                    (row.discoveryRunId && row.companyId ? `${row.discoveryRunId}_${row.companyId}` : null) ||
+                    Math.random().toString();
                   table.set(key, row);
                   return { changes: 1, lastInsertRowid: 1 };
                 }
@@ -271,8 +285,20 @@ export function getDatabase(workspaceId?: string): Database.Database {
                   const setAssignments: Record<string, any> = {};
                   const setParts = setClause.split(',').map((s) => s.trim());
                   for (const part of setParts) {
-                    const colName = part.split('=')[0]?.trim();
-                    if (colName) setAssignments[colName] = params[pIdx++];
+                    const eqIndex = part.indexOf('=');
+                    if (eqIndex !== -1) {
+                      const colName = part.substring(0, eqIndex).trim();
+                      const valExpr = part.substring(eqIndex + 1).trim();
+                      if (valExpr === '?') {
+                        setAssignments[colName] = params[pIdx++];
+                      } else if (/^\d+$/.test(valExpr)) {
+                        setAssignments[colName] = Number(valExpr);
+                      } else if (/^'.*'$/.test(valExpr)) {
+                        setAssignments[colName] = valExpr.slice(1, -1);
+                      } else {
+                        setAssignments[colName] = params[pIdx++];
+                      }
+                    }
                   }
                   const whereParams = params.slice(pIdx);
                   let changes = 0;

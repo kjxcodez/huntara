@@ -21,7 +21,10 @@ class WorkspaceManagerClass {
     this.sdk = sdk;
   }
 
-  public getSdk(): SdkClient {
+  public getSdk(workspaceId?: string): SdkClient {
+    if (workspaceId && this.activeRuntime && this.activeRuntime.workspaceId === workspaceId && this.activeRuntime.sdk) {
+      return this.activeRuntime.sdk;
+    }
     if (!this.sdk) throw new Error('SDK client has not been set in WorkspaceManager.');
     return this.sdk;
   }

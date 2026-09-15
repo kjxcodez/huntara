@@ -19,4 +19,14 @@ export class CompanyDiscoveryRunRepository extends BaseRepository<CompanyDiscove
     const result = await this.model.deleteMany(filter).session(session || null);
     return result.deletedCount || 0;
   }
+
+  /**
+   * Hard-deletes all provenance junction records linking a specific company.
+   * Strictly isolated to the active workspaceId.
+   */
+  public async deleteForCompany(companyId: string, session?: ClientSession): Promise<number> {
+    const filter = this.applyScope({ companyId });
+    const result = await this.model.deleteMany(filter).session(session || null);
+    return result.deletedCount || 0;
+  }
 }

@@ -138,13 +138,13 @@ class BaseSyncRepository<T> implements ISyncRepository<T> {
     return updatedRecord as T;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, options?: { mode?: string }): Promise<any> {
     const workspaceId = await window.ipc.invoke('electron:getActiveWorkspace', undefined);
     if (!workspaceId) throw new Error('Active workspace context is required.');
 
     const channels = DOMAIN_CHANNELS[this.tableName];
     if (channels) {
-      return window.ipc.invoke(channels.delete as any, { workspaceId, id });
+      return window.ipc.invoke(channels.delete as any, { workspaceId, id, ...(options || {}) });
     }
 
     // Fallback path

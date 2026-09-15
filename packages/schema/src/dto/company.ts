@@ -45,3 +45,28 @@ export const companyListResponseSchema = z.object({
   total: z.number()
 });
 export type CompanyListResponse = z.infer<typeof companyListResponseSchema>;
+
+export const deleteCompanyModeSchema = z.enum(['company-only', 'company-and-eligible-contacts']);
+export type DeleteCompanyMode = z.infer<typeof deleteCompanyModeSchema>;
+
+export const deleteCompanyDtoSchema = z.object({
+  workspaceId: entityIdField.optional(),
+  mode: deleteCompanyModeSchema.default('company-only')
+});
+export type DeleteCompanyDto = z.infer<typeof deleteCompanyDtoSchema>;
+
+export const deleteCompanyResultSchema = z.object({
+  success: z.boolean(),
+  alreadyDeleted: z.boolean().optional(),
+  companyDeleted: z.boolean(),
+  contactsDeletedCount: z.number(),
+  contactsPreservedCount: z.number(),
+  deletedContactIds: z.array(z.string()).optional(),
+  preservedReasons: z
+    .object({
+      activeWork: z.number().optional(),
+      historicalLineage: z.number().optional()
+    })
+    .optional()
+});
+export type DeleteCompanyResult = z.infer<typeof deleteCompanyResultSchema>;

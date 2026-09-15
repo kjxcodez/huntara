@@ -6,7 +6,9 @@ import type {
   UpdateCompanyDto,
   CompanyFilters,
   BulkCompanyDto,
-  BulkOperationResult
+  BulkOperationResult,
+  DeleteCompanyMode,
+  DeleteCompanyResult
 } from '@leadforge/schema';
 
 export class CompaniesModule {
@@ -33,7 +35,11 @@ export class CompaniesModule {
     return this.client.patch<Company>(`/companies/${id}`, dto);
   }
 
-  public async delete(id: string): Promise<void> {
-    return this.client.delete<void>(`/companies/${id}`);
+  public async delete(
+    id: string,
+    options?: { mode?: DeleteCompanyMode }
+  ): Promise<DeleteCompanyResult> {
+    const query = options?.mode ? `?mode=${encodeURIComponent(options.mode)}` : '';
+    return this.client.delete<DeleteCompanyResult>(`/companies/${id}${query}`);
   }
 }

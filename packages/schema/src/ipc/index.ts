@@ -1,4 +1,4 @@
-import type { CreateCompanyDto, CompanyFilters } from '../dto/company.js';
+import type { CreateCompanyDto, CompanyFilters, DeleteCompanyMode, DeleteCompanyResult } from '../dto/company.js';
 import type { Company } from '../entities/company.js';
 import type { LoginDto, RegisterDto, AuthResponse } from '../dto/auth.js';
 import type { CreateWorkspaceDto, UpdateWorkspaceDto, InviteMemberDto } from '../dto/workspace.js';
@@ -212,8 +212,8 @@ export interface IpcChannelMap {
     output: any;
   };
   'companies:delete': {
-    input: { workspaceId: string; id: string };
-    output: void;
+    input: { workspaceId: string; id: string; mode?: DeleteCompanyMode };
+    output: DeleteCompanyResult;
   };
   'contacts:get': {
     input: string;
