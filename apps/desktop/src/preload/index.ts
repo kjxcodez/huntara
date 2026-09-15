@@ -121,6 +121,7 @@ contextBridge.exposeInMainWorld('ipc', {
       'discovery:run:list',
       'discovery:run:get',
       'discovery:run:companies',
+      'discovery:run:delete',
       'email-accounts:list',
       'email-accounts:delete',
       'email-accounts:gmail:connect',

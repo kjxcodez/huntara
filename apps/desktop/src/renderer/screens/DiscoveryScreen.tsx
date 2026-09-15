@@ -24,7 +24,9 @@ import {
   BarChart3,
   Activity,
   Linkedin,
-  UserCheck
+  UserCheck,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -212,6 +214,26 @@ export default function DiscoveryScreen() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scheduler_jobs', 'list', workspaceId] });
+    }
+  });
+
+  const [runToDelete, setRunToDelete] = useState<any | null>(null);
+
+  const deleteRunMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return window.ipc.invoke('discovery:run:delete', { workspaceId, id });
+    },
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: ['discovery_runs', 'list', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['scheduler_jobs', 'list', workspaceId] });
+      if (selectedJobId === deletedId) {
+        setSelectedJobId(null);
+      }
+      setRunToDelete(null);
+      toast.success('Discovery run deleted.');
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || 'Failed to delete discovery run');
     }
   });
 
@@ -825,20 +847,36 @@ export default function DiscoveryScreen() {
                                     Cancel
                                   </Button>
                                 ) : (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className={`h-6 text-[10px] gap-1 rounded-none ${isSelected ? 'text-primary' : ''}`}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setSelectedJobId(isSelected ? null : run.id);
-                                    }}
-                                  >
-                                    {isSelected ? <CheckCircle className="w-3 h-3 text-primary" /> : null}
-                                    {isSelected ? 'Showing' : 'View Results'}
-                                  </Button>
+                                  <div className="inline-flex items-center gap-1">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className={`h-6 text-[10px] gap-1 rounded-none ${isSelected ? 'text-primary' : ''}`}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setSelectedJobId(isSelected ? null : run.id);
+                                      }}
+                                    >
+                                      {isSelected ? <CheckCircle className="w-3 h-3 text-primary" /> : null}
+                                      {isSelected ? 'Showing' : 'View Results'}
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-[10px] text-muted-foreground hover:text-danger hover:bg-danger/10 rounded-none px-2"
+                                      title="Delete discovery run"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setRunToDelete(run);
+                                      }}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                 )}
                               </td>
                             </motion.tr>
@@ -1069,6 +1107,60 @@ export default function DiscoveryScreen() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Discovery Run Confirmation Dialog */}
+      <Dialog open={!!runToDelete} onOpenChange={(open) => !open && setRunToDelete(null)}>
+        <DialogContent className="max-w-md rounded-none bg-background border border-border-subtle shadow-elevation-2">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-danger">
+              <AlertTriangle className="w-5 h-5 text-danger" />
+              Delete Discovery Run
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-sm text-foreground/80">
+            <p>
+              Are you sure you want to delete discovery run{' '}
+              <strong className="text-foreground">{runToDelete?.name}</strong>?
+            </p>
+            <div className="p-3 bg-muted/40 border border-border-subtle text-xs space-y-1.5">
+              <p className="font-semibold text-foreground">What will happen:</p>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>The discovery run history will be removed.</li>
+                <li>Associated run-specific jobs and provenance links will be cleaned up.</li>
+                <li>
+                  <strong className="text-foreground">Canonical companies and contacts will NOT be deleted</strong> and remain safe in your CRM.
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t border-border-subtle">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-none"
+              onClick={() => setRunToDelete(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="rounded-none gap-1.5"
+              disabled={deleteRunMutation.isPending}
+              onClick={() => {
+                if (runToDelete) {
+                  deleteRunMutation.mutate(runToDelete.id);
+                }
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {deleteRunMutation.isPending ? 'Deleting...' : 'Delete Run'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -403,6 +403,10 @@ export interface IpcChannelMap {
     input: { workspaceId: string; runId: string; forceSync?: boolean };
     output: any[];
   };
+  'discovery:run:delete': {
+    input: { workspaceId: string; id: string };
+    output: { success: boolean; alreadyDeleted?: boolean };
+  };
   'audiences:list': {
     input: { workspaceId: string };
     output: any[];
