@@ -38,6 +38,7 @@ export interface EmailDeliveryDocument
   textBody?: string | null;
   attachments?: EmailAttachmentDoc[];
   provider?: string;
+  messageId?: string | null;
   providerMessageId?: string | null;
   providerThreadId?: string | null;
   status: EmailDeliveryStatus;
@@ -124,6 +125,7 @@ const emailDeliverySchema = new Schema<EmailDeliveryDocument>(
       }
     ],
     provider: { type: String, default: 'gmail' },
+    messageId: { type: String, default: null, index: true },
     providerMessageId: { type: String, default: null, index: true },
     providerThreadId: { type: String, default: null, index: true },
     status: {

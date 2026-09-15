@@ -362,6 +362,9 @@ export function initCacheSchema(db: Database.Database): void {
         senderEmail TEXT,
         recipientEmail TEXT,
         subject TEXT,
+        messageId TEXT,
+        inReplyTo TEXT,
+        referencesList TEXT,
         providerMessageId TEXT,
         htmlBody TEXT,
         textBody TEXT,
@@ -422,7 +425,10 @@ export function initCacheSchema(db: Database.Database): void {
       'replyCount INTEGER DEFAULT 0',
       'lastOpenedAt DATETIME',
       'lastClickedAt DATETIME',
-      'lastRepliedAt DATETIME'
+      'lastRepliedAt DATETIME',
+      'messageId TEXT',
+      'inReplyTo TEXT',
+      'referencesList TEXT'
     ];
     for (const col of extraDeliveryCols) {
       try {

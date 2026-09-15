@@ -2,7 +2,7 @@ import { EmailAccountModel } from '../../db/models/email-account.model.js';
 import { UserTestRecipientModel } from '../../db/models/user-test-recipient.model.js';
 import { CampaignModel } from '../../db/models/campaign.model.js';
 import { ContactModel } from '../../db/models/contact.model.js';
-import { EmailDeliveryModel } from '../../db/models/email-delivery.model.js';
+import { EmailDeliveryModel, type EmailDeliveryDocument } from '../../db/models/email-delivery.model.js';
 import { EmailDeliveryRepository } from '../../repositories/email-delivery/email-delivery.repository.js';
 import { EmailAccountRepository } from '../../repositories/email-account/email-account.repository.js';
 import {
@@ -28,7 +28,8 @@ import {
   injectOpenTrackingPixel,
   rewriteLinksForClickTracking,
   validateTrackingBaseUrl,
-  isCircuitBreakerRejectionCategory
+  isCircuitBreakerRejectionCategory,
+  generateEntityId
 } from '@leadforge/schema';
 import {
   EmailDomainError,
@@ -257,6 +258,42 @@ export function classifyEmailFailure(err: any): {
 }
 
 /**
+ * Generates an RFC 2822 compliant Message-ID.
+ * Format: `<leadforge.${entityId}.${timestamp}@${domain}>`
+ */
+export function generateRfcMessageId(senderEmail?: string): string {
+  const entityId = generateEntityId();
+  const timestamp = Date.now();
+  let domain = 'leadforge.internal';
+  if (senderEmail && senderEmail.includes('@')) {
+    const parts = senderEmail.split('@');
+    if (parts[1] && parts[1].trim()) {
+      domain = parts[1].toLowerCase().trim();
+    }
+  }
+  return `<leadforge.${entityId}.${timestamp}@${domain}>`;
+}
+
+/**
+ * Validates whether a given string adheres to RFC Message-ID syntax `<id-left@id-right>`.
+ * Rejects arbitrary database IDs, Gmail REST API IDs (e.g. '18e5a7b123456789'), or undefined.
+ */
+export function isValidRfcMessageId(id: string | null | undefined): boolean {
+  if (!id || typeof id !== 'string') return false;
+  const trimmed = id.trim();
+  return /^<?[^<>\s@]+@[^<>\s@]+>?$/.test(trimmed);
+}
+
+/**
+ * Enforces enclosing angle brackets on an RFC Message-ID.
+ */
+export function formatRfcMessageId(id: string): string {
+  const trimmed = id.trim();
+  if (!trimmed) return '';
+  return trimmed.startsWith('<') && trimmed.endsWith('>') ? trimmed : `<${trimmed}>`;
+}
+
+/**
  * EmailService owns email operations (send / sendTest / verify) on top of the
  * GmailProvider abstraction and authoritative EmailDelivery ledger in MongoDB.
  */
@@ -282,6 +319,50 @@ export class EmailService {
       firstUsedAt: d.firstUsedAt,
       lastUsedAt: d.lastUsedAt
     }));
+  }
+
+  /**
+   * Resolves the authoritative predecessor outbound delivery for follow-up sequence steps.
+   * Strictly workspace-scoped, matches the exact execution and contact, and requires terminal SENT status.
+   */
+  public async resolvePredecessorDelivery(input: SendEmailInput): Promise<EmailDeliveryDocument | null> {
+    // If explicit inReplyTo was provided by caller, no auto-resolution required
+    if (input.inReplyTo) {
+      return null;
+    }
+
+    // Follow-ups require executionId and stepIndex > 0 (or explicit sequence step lineage)
+    if (input.executionId && typeof input.stepIndex === 'number' && input.stepIndex > 0) {
+      const query: any = {
+        workspaceId: this.workspaceId,
+        executionId: input.executionId,
+        direction: 'OUTBOUND',
+        status: 'SENT'
+      };
+
+      if (input.contactId && input.contactId !== 'direct-contact') {
+        query.contactId = input.contactId;
+      }
+
+      const predecessor = await EmailDeliveryModel.findOne(query).sort({ stepIndex: -1, sentAt: -1 });
+      if (predecessor) {
+        return predecessor;
+      }
+    }
+
+    // Fallback for campaign-scoped steps where executionId might not match but campaignId + contactId + stepIndex > 0 exists
+    if (input.campaignId && input.contactId && typeof input.stepIndex === 'number' && input.stepIndex > 0) {
+      const query: any = {
+        workspaceId: this.workspaceId,
+        campaignId: input.campaignId,
+        contactId: input.contactId,
+        direction: 'OUTBOUND',
+        status: 'SENT'
+      };
+      return await EmailDeliveryModel.findOne(query).sort({ stepIndex: -1, sentAt: -1 });
+    }
+
+    return null;
   }
 
   /**
@@ -566,6 +647,34 @@ export class EmailService {
       templateVersion: input.templateVersion || null
     });
 
+    // 2b. Resolve predecessor delivery and RFC threading headers for follow-ups
+    const predecessor = await this.resolvePredecessorDelivery(input);
+
+    let inReplyTo: string | null = null;
+    let references: string[] = [];
+    let providerThreadId: string | null = input.threadId || predecessor?.providerThreadId || null;
+
+    if (input.inReplyTo && isValidRfcMessageId(input.inReplyTo)) {
+      inReplyTo = formatRfcMessageId(input.inReplyTo);
+      const rawRefs = Array.isArray(input.references)
+        ? input.references
+        : input.references ? [input.references] : [inReplyTo];
+      references = Array.from(new Set(rawRefs.filter(isValidRfcMessageId).map(formatRfcMessageId)));
+    } else if (predecessor) {
+      if (predecessor.messageId && isValidRfcMessageId(predecessor.messageId)) {
+        inReplyTo = formatRfcMessageId(predecessor.messageId);
+        const prevRefs = Array.isArray(predecessor.references)
+          ? predecessor.references.filter(isValidRfcMessageId).map(formatRfcMessageId)
+          : [];
+        references = Array.from(new Set([...prevRefs, inReplyTo]));
+      }
+    }
+
+    // Generate unique outbound RFC messageId for this message
+    const outboundRfcMessageId = input.messageId && isValidRfcMessageId(input.messageId)
+      ? formatRfcMessageId(input.messageId)
+      : generateRfcMessageId(account.email);
+
     // 3. Atomically reserve delivery in MongoDB ledger
     let deliveryRecord: any;
     try {
@@ -580,6 +689,9 @@ export class EmailService {
         senderEmail: account.email,
         recipientEmail: input.to.toLowerCase().trim(),
         subject: input.subject,
+        messageId: outboundRfcMessageId,
+        inReplyTo: inReplyTo || null,
+        references: references || [],
         idempotencyKey,
         templateId: input.templateId || null,
         templateVersion: input.templateVersion || null,
@@ -616,6 +728,7 @@ export class EmailService {
         return {
           messageId: deliveryRecord.providerMessageId || '',
           threadId: deliveryRecord.providerThreadId || null,
+          rfcMessageId: deliveryRecord.messageId || outboundRfcMessageId,
           accepted: [input.to],
           sentAt: deliveryRecord.sentAt || new Date()
         };
@@ -842,13 +955,20 @@ export class EmailService {
         ...input,
         from: input.from || account.email,
         attachments: processedAttachments,
-        html: finalHtml
+        html: finalHtml,
+        messageId: outboundRfcMessageId,
+        inReplyTo: inReplyTo || undefined,
+        references: references.length > 0 ? references : undefined,
+        threadId: providerThreadId || undefined
       });
 
       // 8. Finalize delivery in MongoDB ledger
       await this.deliveryRepo.finalizeDelivery(deliveryRecord._id.toString(), {
         providerMessageId: result.messageId,
-        providerThreadId: (result as any).threadId || null,
+        providerThreadId: (result as any).threadId || providerThreadId || null,
+        messageId: outboundRfcMessageId,
+        inReplyTo: inReplyTo || null,
+        references: references || [],
         sentAt: new Date()
       });
 
@@ -889,6 +1009,9 @@ export class EmailService {
           workspaceId: this.workspaceId,
           deliveryId: deliveryRecord._id.toString(),
           messageId: result.messageId,
+          rfcMessageId: outboundRfcMessageId,
+          inReplyTo: inReplyTo || undefined,
+          referencesCount: references.length,
           to: input.to,
           subject: input.subject
         },
@@ -897,7 +1020,8 @@ export class EmailService {
 
       return {
         messageId: result.messageId,
-        threadId: (result as any).threadId || null,
+        threadId: (result as any).threadId || providerThreadId || null,
+        rfcMessageId: outboundRfcMessageId,
         accepted: [input.to],
         sentAt: new Date()
       };

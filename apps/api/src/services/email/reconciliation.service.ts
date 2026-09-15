@@ -505,7 +505,10 @@ export class ReconciliationService {
           status: { $in: ['SENT', 'AMBIGUOUS'] },
           $or: [
             { providerMessageId: cleanRef },
-            { providerMessageId: ref }
+            { providerMessageId: ref },
+            { messageId: cleanRef },
+            { messageId: ref },
+            { messageId: `<${cleanRef}>` }
           ]
         });
 
@@ -1119,7 +1122,13 @@ export class ReconciliationService {
             workspaceId: this.workspaceId,
             direction: 'OUTBOUND',
             status: { $in: ['SENT', 'AMBIGUOUS'] },
-            $or: [{ providerMessageId: cleanRef }, { providerMessageId: ref }]
+            $or: [
+              { providerMessageId: cleanRef },
+              { providerMessageId: ref },
+              { messageId: cleanRef },
+              { messageId: ref },
+              { messageId: `<${cleanRef}>` }
+            ]
           });
 
           if (matchedDelivery) {

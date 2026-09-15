@@ -91,11 +91,16 @@ export class GmailProvider implements EmailProvider {
         subject: input.subject,
         ...(input.html !== undefined ? { html: input.html } : {}),
         ...(input.text !== undefined ? { text: input.text } : {}),
-        ...(input.attachments !== undefined ? { attachments: input.attachments } : {})
+        ...(input.attachments !== undefined ? { attachments: input.attachments } : {}),
+        ...(input.messageId !== undefined ? { messageId: input.messageId } : {}),
+        ...(input.inReplyTo !== undefined ? { inReplyTo: input.inReplyTo } : {}),
+        ...(input.references !== undefined ? { references: input.references } : {}),
+        ...(input.threadId !== undefined ? { threadId: input.threadId } : {})
       });
       return {
         messageId: sendRes.messageId,
         threadId: sendRes.threadId || null,
+        rfcMessageId: input.messageId,
         accepted: [input.to],
         sentAt: new Date()
       };

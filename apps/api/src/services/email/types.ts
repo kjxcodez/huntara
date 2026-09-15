@@ -74,11 +74,16 @@ export interface SendEmailInput {
   templateVersion?: number | undefined;
   variablesSnapshot?: Record<string, any> | undefined;
   trackingEnabled?: boolean | undefined;
+  messageId?: string | undefined;
+  inReplyTo?: string | undefined;
+  references?: string[] | string | undefined;
+  threadId?: string | undefined;
 }
 
 export interface SendEmailResult {
   messageId: string;
   threadId?: string | null | undefined;
+  rfcMessageId?: string | undefined;
   accepted: string[];
   sentAt?: Date | undefined;
 }

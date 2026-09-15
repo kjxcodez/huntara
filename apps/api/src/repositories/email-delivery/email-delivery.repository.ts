@@ -111,6 +111,9 @@ export class EmailDeliveryRepository extends BaseRepository<EmailDeliveryDocumen
             subject: dto.subject,
             htmlBody: dto.htmlBody || existing.htmlBody,
             textBody: dto.textBody || existing.textBody,
+            messageId: dto.messageId !== undefined ? dto.messageId : existing.messageId,
+            inReplyTo: dto.inReplyTo !== undefined ? dto.inReplyTo : existing.inReplyTo,
+            references: dto.references !== undefined ? dto.references : existing.references,
             attachments: (dto.attachments as any) || existing.attachments,
             openTrackingToken: existing.openTrackingToken || dto.openTrackingToken,
             clickTrackingTokens: existing.clickTrackingTokens?.length ? existing.clickTrackingTokens : ((dto.clickTrackingTokens as any) || []),
@@ -184,6 +187,9 @@ export class EmailDeliveryRepository extends BaseRepository<EmailDeliveryDocumen
         subject: dto.subject,
         htmlBody: dto.htmlBody || null,
         textBody: dto.textBody || null,
+        messageId: dto.messageId || null,
+        inReplyTo: dto.inReplyTo || null,
+        references: dto.references || [],
         templateId: dto.templateId || null,
         templateVersion: dto.templateVersion || null,
         variablesSnapshot: dto.variablesSnapshot || null,
@@ -232,7 +238,14 @@ export class EmailDeliveryRepository extends BaseRepository<EmailDeliveryDocumen
    */
   public async finalizeDelivery(
     id: string,
-    result: { providerMessageId: string; providerThreadId?: string | null | undefined; sentAt?: Date | undefined }
+    result: {
+      providerMessageId: string;
+      providerThreadId?: string | null | undefined;
+      messageId?: string | null | undefined;
+      inReplyTo?: string | null | undefined;
+      references?: string[] | undefined;
+      sentAt?: Date | undefined;
+    }
   ): Promise<EmailDeliveryDocument> {
     const existing = await this.findById(id);
     if (!existing) {
@@ -253,6 +266,9 @@ export class EmailDeliveryRepository extends BaseRepository<EmailDeliveryDocumen
           status: 'SENT',
           providerMessageId: result.providerMessageId,
           providerThreadId: result.providerThreadId || null,
+          ...(result.messageId !== undefined ? { messageId: result.messageId } : {}),
+          ...(result.inReplyTo !== undefined ? { inReplyTo: result.inReplyTo } : {}),
+          ...(result.references !== undefined ? { references: result.references } : {}),
           sentAt: result.sentAt || new Date(),
           leaseExpiresAt: null,
           error: null,

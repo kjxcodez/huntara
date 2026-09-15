@@ -34,6 +34,10 @@ const sendSchema = z
     executionId: z.string().optional(),
     stepIndex: z.number().optional(),
     contactId: z.string().optional(),
+    messageId: z.string().optional(),
+    inReplyTo: z.string().optional(),
+    references: z.union([z.array(z.string()), z.string()]).optional(),
+    threadId: z.string().optional(),
     attachments: z
       .array(
         z
