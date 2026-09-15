@@ -33,12 +33,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import {
-  COUNTRIES,
-  getStatesForCountry,
-  getCitiesForState,
   normalizeCountryName,
   normalizeStateName
 } from '../lib/locations';
+import { GeographySelector } from '../components/discovery/GeographySelector';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -237,13 +235,7 @@ export default function DiscoveryScreen() {
     }
   });
 
-  const availableStates = React.useMemo(() => {
-    return getStatesForCountry(country);
-  }, [country]);
 
-  const availableCities = React.useMemo(() => {
-    return getCitiesForState(country, stateName);
-  }, [country, stateName]);
 
   const handleCreateJob = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -962,81 +954,15 @@ export default function DiscoveryScreen() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="space-y-1">
-                <Label htmlFor="country" className="text-xs font-semibold">
-                  Country <span className="text-danger">*</span>
-                </Label>
-                <Input
-                  id="country"
-                  list="countries-datalist"
-                  placeholder="e.g. United States"
-                  value={country}
-                  onChange={(e) => {
-                    setCountry(e.target.value);
-                    setStateName('');
-                    setCity('');
-                  }}
-                  required
-                  className="rounded-none bg-card border-border-subtle text-xs"
-                />
-                <datalist id="countries-datalist">
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.name}>
-                      {c.name} ({c.code})
-                    </option>
-                  ))}
-                </datalist>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="stateName" className="text-xs font-semibold">
-                  State / Region <span className="text-danger">*</span>
-                </Label>
-                <Input
-                  id="stateName"
-                  list="states-datalist"
-                  placeholder={country ? "e.g. Florida" : "Select Country first"}
-                  value={stateName}
-                  disabled={!country}
-                  onChange={(e) => {
-                    setStateName(e.target.value);
-                    setCity('');
-                  }}
-                  required
-                  className="rounded-none bg-card border-border-subtle text-xs disabled:opacity-50"
-                />
-                <datalist id="states-datalist">
-                  {availableStates.map((s) => (
-                    <option key={s.code} value={s.name}>
-                      {s.name} ({s.code})
-                    </option>
-                  ))}
-                </datalist>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="city" className="text-xs font-semibold">
-                  City <span className="text-muted-foreground font-normal">(Optional)</span>
-                </Label>
-                <Input
-                  id="city"
-                  list="cities-datalist"
-                  placeholder={stateName ? "e.g. Miami" : "Select State first"}
-                  value={city}
-                  disabled={!stateName}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="rounded-none bg-card border-border-subtle text-xs disabled:opacity-50"
-                />
-                <datalist id="cities-datalist">
-                  {availableCities.map((cityName) => (
-                    <option key={cityName} value={cityName}>
-                      {cityName}
-                    </option>
-                  ))}
-                </datalist>
-              </div>
-            </div>
+            <GeographySelector
+              country={country}
+              state={stateName}
+              city={city}
+              onCountryChange={setCountry}
+              onStateChange={setStateName}
+              onCityChange={setCity}
+              required
+            />
 
             <div className="space-y-1">
               <Label htmlFor="jobName" className="text-xs font-semibold">

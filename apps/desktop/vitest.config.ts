@@ -35,6 +35,7 @@ export default defineConfig({
       'src/main/services/adversarial-cross-race-qualification.test.ts'
     ],
     alias: {
+      '@': path.resolve(__dirname, './src'),
       '@leadforge/schema': path.resolve(__dirname, '../../packages/schema/src/index.ts'),
       '@leadforge/sdk': path.resolve(__dirname, '../../packages/sdk/src/index.ts'),
       '@leadforge/core': path.resolve(__dirname, '../../packages/core/src/index.ts'),
