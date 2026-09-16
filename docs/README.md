@@ -14,7 +14,8 @@ This documentation serves as the technical reference for developers, contributor
 
 ### Architecture & Decisions
 
-- **[System Architecture](./architecture/system-overview.mdx)**: Learn about Electron process boundaries, workspace-isolated database pools, and sync event engines.
+- **[Current Architecture Specification](./architecture/current-architecture.md)**: Certified production architecture, persistence boundaries, identity strategy, and subsystem specifications.
+- **[System Architecture Overview](./architecture/system-overview.mdx)**: Electron process boundaries, workspace-isolated database pools, and runtime topologies.
 - **[Third-Party Integrations & Adapters](./integrations/README.mdx)**: Deep dive into Playwright maps scrapers, Cheerio domain crawlers, and LinkedIn Voyager APIs.
 - **[Workflow Engine](./workflows/workflow-engine.mdx)**: Understand sequence execution steps, concurrency locks, and transaction checkpoints.
 - **[Architectural Decision Records](./adr/README.mdx)**: Review the list of formal design records and engineering choices.
@@ -23,6 +24,7 @@ This documentation serves as the technical reference for developers, contributor
 
 - **[Developer Guides](./development/developer-guides.mdx)**: Walkthroughs for extending worker plugins, registering agent tools, and adding database migrations.
 - **[Testing & Quality Assurance](./testing/README.mdx)**: Run local unit, integration, and headless subsystem smoke test suites.
+- **[Testing Architecture Specification](./testing/testing-architecture.md)**: Testing philosophy, layers, Vitest runner architecture, test doubles, and safety invariants.
 - **[Security & Privacy](./security/security-privacy.mdx)**: Review OS safeStorage encryption pipelines, log credentials masking, and security compliance.
 - **[Troubleshooting Guide](./troubleshooting/troubleshooting.mdx)**: Resolve SQLite binary mismatches, corrupt migrations, and connection errors.
 

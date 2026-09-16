@@ -1,7 +1,9 @@
 import { SequenceModel } from '../../db/models/sequence.model.js';
 import { SequenceExecutionModel } from '../../db/models/sequence-execution.model.js';
 import { CampaignModel } from '../../db/models/campaign.model.js';
+import { ContactModel } from '../../db/models/contact.model.js';
 import { SequenceLogModel } from '../../db/models/sequence-log.model.js';
+import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';
 import { SequenceStatus, ExecutionStatus } from '@leadforge/schema';
 import { ConflictError } from '../../errors/index.js';
 
@@ -36,7 +38,6 @@ export class AutomationService {
       _id: id,
       workspaceId: this.workspaceId
     } as any);
-    if (!seq) throw new Error('Sequence not found.');
     return seq;
   }
 
@@ -61,6 +62,27 @@ export class AutomationService {
 
   public async createExecution(data: any): Promise<any> {
     if (data.contactId && data.campaignId) {
+      // Early policy filtering: check effective workspace suppression (recipient, company DNC, domain suppression)
+      const contactDoc = await ContactModel.findOne({
+        _id: data.contactId,
+        workspaceId: this.workspaceId,
+        deletedAt: null
+      });
+
+      if (contactDoc) {
+        const suppressionRepo = new SuppressionRepository(this.workspaceId);
+        const effectiveSuppression = await suppressionRepo.evaluateEffectiveSuppression({
+          email: contactDoc.email || '',
+          companyId: contactDoc.companyId || data.companyId || null
+        });
+
+        if (effectiveSuppression.suppressed) {
+          throw new ConflictError(
+            `Cannot enroll contact "${data.contactId}" in campaign: ${effectiveSuppression.message}`
+          );
+        }
+      }
+
       // Phase 15 (ENROLL-08): Contact cross-campaign active exclusivity check
       const existingActive = await SequenceExecutionModel.findOne({
         workspaceId: this.workspaceId,

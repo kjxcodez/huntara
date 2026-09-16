@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CampaignStatus } from '@leadforge/schema';
 import { useWorkspace } from '../hooks/useWorkspace';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
@@ -80,6 +81,7 @@ export default function CampaignsScreen() {
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id || '';
   const queryClient = useQueryClient();
+  const { refresh, isRefreshing } = useProjectionRefresh('campaigns');
 
   const [activeTab, setActiveTab] = useState('campaigns');
 
@@ -112,6 +114,7 @@ export default function CampaignsScreen() {
   const [campLimit, setCampLimit] = useState(200);
   const [campTimezone, setCampTimezone] = useState('UTC');
   const [campUseSignature, setCampUseSignature] = useState(true);
+  const [campTrackingEnabled, setCampTrackingEnabled] = useState(false);
 
   const [selectedAudienceId, setSelectedAudienceId] = useState(initialAudienceId);
   const [sequenceSteps, setSequenceSteps] = useState<SequenceStepItem[]>([
@@ -377,6 +380,7 @@ export default function CampaignsScreen() {
       setCampDesc('');
       setCampSeqId('');
       setCampAccId('');
+      setCampTrackingEnabled(false);
     }
   });
 
@@ -643,8 +647,10 @@ export default function CampaignsScreen() {
         timezone: campTimezone,
         status: 'ACTIVE',
         idempotencyKey: submissionIdempotencyKey,
+        trackingEnabled: campTrackingEnabled,
         settings: {
-          useSignature: campUseSignature
+          useSignature: campUseSignature,
+          trackingEnabled: campTrackingEnabled
         }
       });
 
@@ -891,6 +897,20 @@ export default function CampaignsScreen() {
       <PageHeader
         title="Outreach Platform"
         description="Manage Gmail senders, campaign lists, automated schedules, and follow-ups."
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={refresh}
+            disabled={isRefreshing}
+            className="h-8 text-xs font-semibold gap-1.5 rounded-none border-border-subtle bg-card text-foreground hover:bg-surface-3"
+            title="Refresh campaigns and outreach data from server"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </Button>
+        }
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -2351,6 +2371,23 @@ export default function CampaignsScreen() {
                   Include Gmail signature on outbound emails
                 </Label>
               </div>
+
+              {/* Email Tracking Option */}
+              <div className="space-y-1 pt-1 pb-1 border-t border-border-subtle/50">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="camp-tracking-enabled"
+                    checked={campTrackingEnabled}
+                    onCheckedChange={(c) => setCampTrackingEnabled(!!c)}
+                  />
+                  <Label htmlFor="camp-tracking-enabled" className="text-xs cursor-pointer select-none font-medium text-foreground">
+                    Enable email tracking
+                  </Label>
+                </div>
+                <p className="text-[11px] text-muted-foreground pl-6">
+                  Track email opens and link clicks for this campaign.
+                </p>
+              </div>
             </div>
 
             {/* Section 5: Review & Safety Summary */}
@@ -2378,6 +2415,10 @@ export default function CampaignsScreen() {
                 <div>
                   <span className="text-foreground font-semibold">Signature:</span>{' '}
                   {campUseSignature ? 'Enabled (Gmail)' : 'Disabled'}
+                </div>
+                <div>
+                  <span className="text-foreground font-semibold">Tracking:</span>{' '}
+                  {campTrackingEnabled ? 'Enabled (Opens & Clicks)' : 'Disabled'}
                 </div>
               </div>
             </div>

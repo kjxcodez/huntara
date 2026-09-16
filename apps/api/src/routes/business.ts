@@ -21,7 +21,7 @@ import { OutreachService } from '../services/outreach/outreach.service.js';
 import { DiscoveryRunService } from '../services/discovery-run/discovery-run.service.js';
 import { AudienceService } from '../services/audience/audience.service.js';
 import { successResponse } from '../utils/index.js';
-import { ForbiddenError } from '../errors/index.js';
+import { ForbiddenError, NotFoundError } from '../errors/index.js';
 
 export const companiesRouter = new OpenAPIHono();
 export const contactsRouter = new OpenAPIHono();
@@ -185,6 +185,46 @@ workspacesRouter.patch('/:id/policy', async (c) => {
 
   const updated = await workspace.save();
   return c.json(successResponse(updated));
+});
+
+// ---------------------------------------------------------------------------
+// 4c. Get Workspace Scheduler Concurrency Policy
+// ---------------------------------------------------------------------------
+workspacesRouter.get('/:id/scheduler-policy', async (c) => {
+  const id = c.req.param('id');
+  const wsId = (c as any).get('workspaceId');
+  if (wsId && wsId !== id) {
+    throw new ForbiddenError('Cross-workspace access prohibited.');
+  }
+  const policy = await workspaceService.getSchedulerPolicy(id);
+  return c.json(successResponse(policy));
+});
+
+// ---------------------------------------------------------------------------
+// 4d. Update Workspace Scheduler Concurrency Policy (OWNER / ADMIN only)
+// ---------------------------------------------------------------------------
+workspacesRouter.put('/:id/scheduler-policy', async (c) => {
+  const id = c.req.param('id');
+  const wsId = (c as any).get('workspaceId');
+  if (wsId && wsId !== id) {
+    throw new ForbiddenError('Cross-workspace access prohibited.');
+  }
+  const body = await c.req.json();
+  const userId = getUserId(c);
+  const updatedPolicy = await workspaceService.updateSchedulerPolicy(id, body, userId);
+  return c.json(successResponse(updatedPolicy));
+});
+
+workspacesRouter.patch('/:id/scheduler-policy', async (c) => {
+  const id = c.req.param('id');
+  const wsId = (c as any).get('workspaceId');
+  if (wsId && wsId !== id) {
+    throw new ForbiddenError('Cross-workspace access prohibited.');
+  }
+  const body = await c.req.json();
+  const userId = getUserId(c);
+  const updatedPolicy = await workspaceService.updateSchedulerPolicy(id, body, userId);
+  return c.json(successResponse(updatedPolicy));
 });
 
 // ---------------------------------------------------------------------------
@@ -516,9 +556,34 @@ companiesRouter.patch('/:id', async (c) => {
 companiesRouter.delete('/:id', async (c) => {
   const wsId = getWorkspaceId(c);
   const id = c.req.param('id');
+  const userId = getUserId(c);
+
+  let mode: any = c.req.query('mode');
+  if (!mode) {
+    try {
+      const body = await c.req.json();
+      mode = body?.mode;
+    } catch {}
+  }
+
   const service = new CompanyService(wsId);
-  await service.deleteCompany(id);
-  return c.json(successResponse({ success: true }));
+  try {
+    const result = await service.deleteCompany(id, { mode, deletedBy: userId });
+    return c.json(successResponse(result));
+  } catch (err: any) {
+    if (err instanceof NotFoundError || err?.name === 'NotFoundError') {
+      return c.json(
+        successResponse({
+          success: true,
+          alreadyDeleted: true,
+          companyDeleted: false,
+          contactsDeletedCount: 0,
+          contactsPreservedCount: 0
+        })
+      );
+    }
+    throw err;
+  }
 });
 
 // ── Contacts Router ───────────────────────────────────────────────────────
@@ -831,8 +896,16 @@ discoveryRunsRouter.delete('/:id', async (c) => {
   const wsId = getWorkspaceId(c);
   const id = c.req.param('id');
   const service = new DiscoveryRunService(wsId);
-  await service.deleteRun(id);
-  return c.json(successResponse({ success: true }));
+  let result: any = { success: true };
+  try {
+    result = await service.deleteRun(id);
+  } catch (err: any) {
+    if (err instanceof NotFoundError || err?.name === 'NotFoundError') {
+      return c.json(successResponse({ success: true, alreadyDeleted: true }));
+    }
+    throw err;
+  }
+  return c.json(successResponse(result));
 });
 
 // ── Company Discovery Runs (Provenance) Router ──────────────────────────────

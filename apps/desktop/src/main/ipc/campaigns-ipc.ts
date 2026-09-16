@@ -2,6 +2,8 @@ import { safeRegister } from './helper';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
+import { ProjectionService } from '../services/projection-service';
+import { resolveMatchingContactIds } from './crm';
 import { randomUUID } from 'crypto';
 
 /**
@@ -10,17 +12,29 @@ import { randomUUID } from 'crypto';
  */
 export function registerCampaignsIpc(): void {
   // 1. Batch enroll contacts into a campaign
-  safeRegister('campaigns:enroll', async (_event, { campaignId, contactIds }) => {
+  safeRegister('campaigns:enroll', async (_event, { campaignId, contactIds, selection }) => {
     if (!campaignId) throw new Error('campaignId is required.');
-    if (!Array.isArray(contactIds) || contactIds.length === 0) {
-      throw new Error('contactIds must be a non-empty array.');
-    }
 
     const runtime = WorkspaceManager.getActiveRuntime();
     if (!runtime) throw new Error('No active workspace runtime');
 
     const db = getDatabase(runtime.workspaceId);
     const sdk = WorkspaceManager.getSdk();
+
+    let targetContactIds: string[] = [];
+    if (selection) {
+      if (selection.mode === 'explicit') {
+        targetContactIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+      } else if (selection.mode === 'all-matching') {
+        targetContactIds = resolveMatchingContactIds(db, runtime.workspaceId, selection.query || {}, selection.excludedIds || []);
+      }
+    } else if (Array.isArray(contactIds)) {
+      targetContactIds = contactIds;
+    }
+
+    if (targetContactIds.length === 0) {
+      throw new Error('contactIds must be a non-empty array or resolved selection.');
+    }
 
     // Load target campaign to get sequenceId and status
     let campaign = db
@@ -62,7 +76,7 @@ export function registerCampaignsIpc(): void {
     const now = new Date().toISOString();
     const enrolledIds: string[] = [];
 
-    for (const contactId of contactIds) {
+    for (const contactId of targetContactIds) {
       // Phase 15 (ENROLL-08): Contact cross-campaign exclusivity check.
       // A contact cannot have more than one active execution across the entire workspace concurrently.
       const activeExec = db
@@ -129,6 +143,10 @@ export function registerCampaignsIpc(): void {
 
     if (isActive && enrolledIds.length > 0) {
       WorkspaceManager.wakeScheduler();
+    }
+
+    if (enrolledIds.length > 0) {
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
     }
 
     console.log(`[IPC] Enrolled ${enrolledIds.length} contact(s) into campaign: ${campaignId}`);
@@ -220,6 +238,8 @@ export function registerCampaignsIpc(): void {
         console.warn('[IPC] Error cancelling jobs via SDK:', err);
       }
 
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
       return { success: true };
     }
   );
@@ -294,6 +314,8 @@ export function registerCampaignsIpc(): void {
         }
       }
 
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
       return { success: true };
     }
   );
@@ -338,6 +360,8 @@ export function registerCampaignsIpc(): void {
       } catch (err) {
         console.warn('[IPC] Error cancelling jobs via SDK:', err);
       }
+
+      ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
 
       return { success: true, count: enrollmentIds.length };
     }
@@ -433,6 +457,8 @@ export function registerCampaignsIpc(): void {
 
     WorkspaceManager.wakeScheduler();
 
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
     console.log(`[IPC] Campaign "${campaignId}" scheduled successfully.`);
     return { success: true, campaignId };
   });
@@ -485,6 +511,8 @@ export function registerCampaignsIpc(): void {
     } catch (err) {
       console.warn('[IPC] Error cancelling paused jobs via SDK:', err);
     }
+
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
 
     return { success: true, campaignId, status: 'PAUSED' };
   });
@@ -566,6 +594,8 @@ export function registerCampaignsIpc(): void {
       WorkspaceManager.wakeScheduler();
     }
 
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
+
     console.log(`[IPC] Resumed campaign ${campaignId}. Enqueued ${enqueuedCount} immediate job(s).`);
     return { success: true, campaignId, status: 'ACTIVE', enqueuedCount };
   });
@@ -615,6 +645,8 @@ export function registerCampaignsIpc(): void {
     } catch (err) {
       console.warn('[IPC] Error cancelling stopped jobs via SDK:', err);
     }
+
+    ProjectionService.broadcastProjectionUpdated('campaigns', runtime.workspaceId);
 
     return { success: true, campaignId, status: 'STOPPED' };
   });

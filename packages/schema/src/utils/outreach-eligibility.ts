@@ -60,6 +60,8 @@ export type OutreachIneligibilityReason =
   | 'CONTACT_ARCHIVED'
   | 'CONTACT_REPLIED'
   | 'EMAIL_SUPPRESSED'
+  | 'COMPANY_DNC'
+  | 'DOMAIN_SUPPRESSED'
   | 'EMAIL_DISPOSABLE'
   | 'EMAIL_INVALID'
   | 'EMAIL_QUARANTINED'
@@ -69,7 +71,9 @@ export type OutreachIneligibilityReason =
   | 'CAMPAIGN_PAUSED'
   | 'CAMPAIGN_NOT_ACTIVE'
   | 'ALREADY_CONTACTED'
-  | 'ALREADY_EXECUTED';
+  | 'ALREADY_EXECUTED'
+  | 'DOMAIN_PACING_THROTTLED'
+  | 'COMPANY_CARDINALITY_EXCEEDED';
 
 export interface OutreachEligibilityInput {
   contact: {
@@ -94,6 +98,8 @@ export interface OutreachEligibilityInput {
   suppression?: {
     reason?: string | undefined;
   } | boolean | null | undefined;
+  companySuppressed?: boolean | null | undefined;
+  domainSuppressed?: boolean | null | undefined;
   campaign?: {
     id?: string | null | undefined;
     status?: string | null | undefined;
@@ -114,7 +120,7 @@ export interface OutreachEligibilityResult {
  * Evaluates contact state, email quality status, domain affiliation, and campaign state.
  */
 export function evaluateOutreachEligibility(input: OutreachEligibilityInput): OutreachEligibilityResult {
-  const { contact, campaign, context, suppression } = input;
+  const { contact, campaign, context, suppression, companySuppressed, domainSuppressed } = input;
   const targetEmail = input.recipientEmail || contact.email;
 
   // 1. Email existence
@@ -122,9 +128,15 @@ export function evaluateOutreachEligibility(input: OutreachEligibilityInput): Ou
     return { eligible: false, reason: 'CONTACT_MISSING_EMAIL' };
   }
 
-  // 1a. Explicit suppression check (Dedicated suppression record)
+  // 1a. Explicit suppression checks (Dedicated suppression records)
   if (suppression) {
     return { eligible: false, reason: 'EMAIL_SUPPRESSED' };
+  }
+  if (companySuppressed) {
+    return { eligible: false, reason: 'COMPANY_DNC' };
+  }
+  if (domainSuppressed) {
+    return { eligible: false, reason: 'DOMAIN_SUPPRESSED' };
   }
 
   // 2. Contact CRM status (suppression checks)

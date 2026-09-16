@@ -593,13 +593,23 @@ export function composeOutboundMessage(input: ComposeMessageInput): ComposeMessa
   });
 
   // 9. Tracking transformations
-  const trackingBaseUrl = input.trackingBaseUrl || 'http://localhost:3000';
-  let openTrackingToken = input.existingTracking?.openTrackingToken || '';
-  let clickTrackingTokens = input.existingTracking?.clickTrackingTokens
-    ? [...input.existingTracking.clickTrackingTokens]
-    : [];
+  // Tracking is strictly opt-in. When trackingEnabled === false, no tracking tokens or transformations are applied.
+  // In unit test scenarios where trackingBaseUrl is explicitly supplied without a trackingEnabled flag,
+  // tracking is active only if trackingBaseUrl is present and trackingEnabled !== false.
+  const isTrackingEnabled = input.trackingEnabled !== undefined
+    ? Boolean(input.trackingEnabled)
+    : Boolean(input.trackingBaseUrl);
 
-  if (htmlBody) {
+  const trackingBaseUrl = input.trackingBaseUrl || '';
+  let openTrackingToken = '';
+  let clickTrackingTokens: Array<{ token: string; targetUrl: string }> = [];
+
+  if (isTrackingEnabled && htmlBody && trackingBaseUrl) {
+    openTrackingToken = input.existingTracking?.openTrackingToken || '';
+    clickTrackingTokens = input.existingTracking?.clickTrackingTokens
+      ? [...input.existingTracking.clickTrackingTokens]
+      : [];
+
     if (!clickTrackingTokens || clickTrackingTokens.length === 0) {
       const clickRes = rewriteLinksForClickTracking(htmlBody, trackingBaseUrl);
       htmlBody = clickRes.rewrittenHtml;

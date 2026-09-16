@@ -31,6 +31,7 @@ export function registerDiscoveryIpc() {
 
     // Save discovery run record directly into SQLite cache
     await LocalCRMRepository.saveFromServer('discovery_runs', created);
+    ProjectionService.broadcastProjectionUpdated('discovery_runs', workspaceId);
 
     // Submit scraper job to scheduler via MongoDB SDK
     const jobId = globalThis.crypto?.randomUUID
@@ -67,10 +68,7 @@ export function registerDiscoveryIpc() {
     if (connState.status === 'ONLINE') {
       try {
         const sdk = WorkspaceManager.getSdk();
-        const serverRuns = await sdk.discovery.listRuns().catch(() => []);
-        if (Array.isArray(serverRuns) && serverRuns.length > 0) {
-          await ProjectionService.projectEntities('discovery_runs', serverRuns, workspaceId);
-        }
+        await ProjectionService.reconcileEntity(workspaceId, 'discovery_runs', sdk, false);
       } catch {
         // Fallback to existing SQLite cache if network/API is temporarily unavailable
       }
@@ -111,6 +109,56 @@ export function registerDiscoveryIpc() {
       .all(workspaceId, runId) as any[];
 
     return rows || [];
+  });
+
+  safeRegister('discovery:run:delete', async (_event, { workspaceId, id }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    if (!id) throw new Error('id is required.');
+
+    const sdk = WorkspaceManager.getSdk();
+
+    // 1. Authoritative deletion via MongoDB API
+    const result = await sdk.discovery.deleteRun(id);
+
+    // 2. Projection cleanup in SQLite:
+    // Soft-delete the discovery run in SQLite cache
+    await LocalCRMRepository.softDeleteFromServer('discovery_runs', workspaceId, id);
+
+    // Hard-delete run-specific company_discovery_runs links from SQLite
+    try {
+      const db = getDatabase(workspaceId);
+      db.prepare('DELETE FROM company_discovery_runs WHERE workspaceId = ? AND discoveryRunId = ?').run(
+        workspaceId,
+        id
+      );
+    } catch (err) {
+      console.warn('[DiscoveryIPC] Note cleaning company_discovery_runs cache:', err);
+    }
+
+    // Soft-delete cascaded companies in SQLite projection
+    if (result?.deletedCompanyIds && Array.isArray(result.deletedCompanyIds)) {
+      for (const compId of result.deletedCompanyIds) {
+        await LocalCRMRepository.softDeleteFromServer('companies', workspaceId, compId);
+      }
+    }
+
+    // Soft-delete cascaded contacts in SQLite projection
+    if (result?.deletedContactIds && Array.isArray(result.deletedContactIds)) {
+      for (const contId of result.deletedContactIds) {
+        await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, contId);
+      }
+    }
+
+    // 3. Broadcast projection update to renderer
+    ProjectionService.broadcastProjectionUpdated('discovery_runs', workspaceId);
+    if (result?.deletedCompanyIds?.length) {
+      ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
+    }
+    if (result?.deletedContactIds?.length) {
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
+
+    return result ?? { success: true };
   });
 }
 

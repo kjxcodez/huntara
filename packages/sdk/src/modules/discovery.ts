@@ -83,8 +83,8 @@ export class DiscoveryModule {
     return this.client.patch<DiscoveryRun>(`/discovery-runs/${id}`, payload);
   }
 
-  public async deleteRun(id: string): Promise<void> {
-    return this.client.delete<void>(`/discovery-runs/${id}`);
+  public async deleteRun(id: string): Promise<{ success: boolean; deletedCompanyIds?: string[]; deletedContactIds?: string[] }> {
+    return this.client.delete<{ success: boolean; deletedCompanyIds?: string[]; deletedContactIds?: string[] }>(`/discovery-runs/${id}`);
   }
 
   // Alias helpers for SyncEngine compatibility
@@ -100,7 +100,7 @@ export class DiscoveryModule {
     return this.updateRun(id, payload);
   }
 
-  public async delete(id: string): Promise<void> {
+  public async delete(id: string): Promise<{ success: boolean; deletedCompanyIds?: string[]; deletedContactIds?: string[] }> {
     return this.deleteRun(id);
   }
 

@@ -73,7 +73,19 @@ LeadForge OS is built on a **MongoDB-First, Disposable Local Cache** architectur
 
 ---
 
-## 3. Disaster Recovery & Operations
+## 3. Subsystem Architecture Specifications
 
-- **Disaster Recovery:** If a client machine fails or SQLite cache becomes unreadable, `resetWorkspaceCache()` safely archives the corrupt file as `.bak` and rebuilds a clean cache from MongoDB.
-- **Permanent CI Guardrails:** Continuous integration runs `scripts/verify-architecture-invariants.ts` to prevent architectural regressions (no SMTP, no SyncEngine, no runner, no BSON ObjectIds).
+For detailed architectural invariants, contracts, and state machines, see:
+- [Immutable Outreach Lineage & Template Versioning](./outreach-lineage.md)
+- [Inbound Reconciliation & Suppression Consistency](./inbound-suppression.md)
+- [Operational Reliability & Mailbox Health](./operational-reliability.md)
+- [System Invariants & Production Qualification Matrix](./system-invariants-matrix.md)
+- [Workflow Engine Evaluation](./workflow_engine_evaluation.md)
+
+---
+
+## 4. Disaster Recovery & Operations
+
+- **Disaster Recovery:** If a client machine fails or SQLite cache becomes unreadable, `resetWorkspaceCache()` safely archives the corrupt file as `.bak` and rebuilds a clean cache from MongoDB via the REST API.
+- **Cache Reconstruction:** SQLite projections are completely rebuildable from authoritative MongoDB state at any time (`FALLBACK-20`).
+

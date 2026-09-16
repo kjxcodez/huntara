@@ -2,7 +2,13 @@ import { safeRegister } from './helper';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
+import { ProjectionService } from '../services/projection-service';
 import { loadSession } from '../lib/session';
+import type { CanonicalContactQuery, BulkContactSelection } from '@leadforge/schema';
+
+import { resolveMatchingContactIds } from './query-resolver';
+export { resolveMatchingContactIds };
+
 
 /**
  * Registers CRM entities (companies, contacts, campaigns, activities) IPC channels
@@ -82,6 +88,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const created = await sdk.companies.create(record);
     await LocalCRMRepository.saveFromServer('companies', created);
+    ProjectionService.broadcastProjectionUpdated('companies', record.workspaceId);
     return created;
   });
 
@@ -91,16 +98,47 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const updated = await sdk.companies.update(id, dto);
     await LocalCRMRepository.saveFromServer('companies', updated);
+    ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
     return updated;
   });
 
-  safeRegister('companies:delete', async (_event, { workspaceId, id }) => {
+  safeRegister('companies:delete', async (_event, payload) => {
+    const { workspaceId, id, mode } = payload || {};
     if (!workspaceId) throw new Error('workspaceId is required.');
     if (!id) throw new Error('id is required.');
-    const sdk = WorkspaceManager.getSdk();
-    await sdk.companies.delete(id);
+
+    const sdk = WorkspaceManager.getSdk(workspaceId);
+    const result = await sdk.companies.delete(id, { mode });
+
+    // 1. Soft-delete company in SQLite cache
     await LocalCRMRepository.softDeleteFromServer('companies', workspaceId, id);
-    return { success: true };
+
+    // 2. Remove company_discovery_runs and company-owned metadata from SQLite
+    try {
+      const db = getDatabase(workspaceId);
+      db.prepare('DELETE FROM company_discovery_runs WHERE workspaceId = ? AND companyId = ?').run(
+        workspaceId,
+        id
+      );
+      db.prepare('DELETE FROM company_intelligence WHERE workspaceId = ? AND companyId = ?').run(workspaceId, id);
+      db.prepare('DELETE FROM website_intelligence WHERE workspaceId = ? AND companyId = ?').run(workspaceId, id);
+      db.prepare('DELETE FROM opportunity_scores WHERE workspaceId = ? AND companyId = ?').run(workspaceId, id);
+    } catch (err) {
+      console.warn('[CRM-IPC] Note cleaning SQLite company-owned cache:', err);
+    }
+
+    // 3. If eligible contacts were deleted authoritatively, soft-delete them in SQLite cache
+    if (result.deletedContactIds && result.deletedContactIds.length > 0) {
+      for (const contactId of result.deletedContactIds) {
+        await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, contactId);
+      }
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
+
+    // 4. Broadcast projection update for companies
+    ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
+
+    return result;
   });
 
   // Contacts
@@ -233,6 +271,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const created = await sdk.contacts.create(record);
     await LocalCRMRepository.saveFromServer('contacts', created);
+    ProjectionService.broadcastProjectionUpdated('contacts', record.workspaceId);
     return created;
   });
 
@@ -242,6 +281,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     const updated = await sdk.contacts.update(id, dto);
     await LocalCRMRepository.saveFromServer('contacts', updated);
+    ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
     return updated;
   });
 
@@ -251,8 +291,115 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     await sdk.contacts.delete(id);
     await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, id);
+    ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
     return { success: true };
   });
+
+  safeRegister('contacts:query:resolve', async (_event, { workspaceId, query, excludedIds }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    const db = getDatabase(workspaceId);
+    const contactIds = resolveMatchingContactIds(db, workspaceId, query || {}, excludedIds || []);
+    return { contactIds, total: contactIds.length };
+  });
+
+  safeRegister('contacts:bulk:delete', async (_event, { workspaceId, selection }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    if (!selection) throw new Error('selection is required.');
+    const db = getDatabase(workspaceId);
+    const sdk = WorkspaceManager.getSdk();
+
+    let targetIds: string[] = [];
+    if (selection.mode === 'explicit') {
+      targetIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+    } else if (selection.mode === 'all-matching') {
+      targetIds = resolveMatchingContactIds(db, workspaceId, selection.query || {}, selection.excludedIds || []);
+    } else {
+      throw new Error(`Unsupported selection mode: ${(selection as any).mode}`);
+    }
+
+    if (targetIds.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const BATCH_SIZE = 100;
+    let deletedCount = 0;
+    for (let i = 0; i < targetIds.length; i += BATCH_SIZE) {
+      const batch = targetIds.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (id) => {
+          try {
+            await sdk.contacts.delete(id).catch(() => null);
+            await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, id);
+            deletedCount++;
+          } catch (err) {
+            console.warn(`[BulkDelete] Failed to delete contact ${id}:`, err);
+          }
+        })
+      );
+    }
+
+    if (deletedCount > 0) {
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
+
+    return { success: true, count: deletedCount };
+  });
+
+  safeRegister('contacts:bulk:update-status', async (_event, { workspaceId, selection, status }) => {
+    if (!workspaceId) throw new Error('workspaceId is required.');
+    if (!selection) throw new Error('selection is required.');
+    if (!status) throw new Error('status is required.');
+    const db = getDatabase(workspaceId);
+    const sdk = WorkspaceManager.getSdk();
+
+    let targetIds: string[] = [];
+    if (selection.mode === 'explicit') {
+      targetIds = Array.isArray(selection.selectedIds) ? selection.selectedIds : [];
+    } else if (selection.mode === 'all-matching') {
+      targetIds = resolveMatchingContactIds(db, workspaceId, selection.query || {}, selection.excludedIds || []);
+    } else {
+      throw new Error(`Unsupported selection mode: ${(selection as any).mode}`);
+    }
+
+    if (targetIds.length === 0) {
+      return { success: true, count: 0 };
+    }
+
+    const BATCH_SIZE = 100;
+    let updatedCount = 0;
+    for (let i = 0; i < targetIds.length; i += BATCH_SIZE) {
+      const batch = targetIds.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(async (id) => {
+          try {
+            const updated = await sdk.contacts.update(id, { status } as any).catch(() => null);
+            if (updated) {
+              await LocalCRMRepository.saveFromServer('contacts', updated);
+            } else {
+              db.prepare('UPDATE contacts SET status = ?, updatedAt = ? WHERE id = ? AND workspaceId = ?').run(
+                 status,
+                 new Date().toISOString(),
+                 id,
+                 workspaceId
+              );
+            }
+            updatedCount++;
+          } catch (err) {
+            console.warn(`[BulkUpdateStatus] Failed to update contact ${id}:`, err);
+          }
+        })
+      );
+    }
+
+    if (updatedCount > 0) {
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
+
+    return { success: true, count: updatedCount };
+  });
+
+  // Helper function exported for use in campaigns-ipc and test runner
+  // (Defined within module scope)
 
 
   // Campaigns
@@ -363,6 +510,7 @@ export function registerCrmIpc() {
     if (result && Array.isArray(result.data)) {
       await LocalCRMRepository.saveManyFromServer('companies', result.data);
     }
+    ProjectionService.broadcastProjectionUpdated('companies', dto.workspaceId);
     return result;
   });
 
@@ -373,6 +521,7 @@ export function registerCrmIpc() {
     if (result && Array.isArray(result.data)) {
       await LocalCRMRepository.saveManyFromServer('contacts', result.data);
     }
+    ProjectionService.broadcastProjectionUpdated('contacts', dto.workspaceId);
     return result;
   });
 
@@ -383,13 +532,16 @@ export function registerCrmIpc() {
     const validStatus = ['DRAFT', 'ACTIVE', 'PAUSED', 'COMPLETED'].includes(rawStatus)
       ? rawStatus
       : 'DRAFT';
+    const trackingEnabled = Boolean(record.trackingEnabled ?? record.settings?.trackingEnabled ?? false);
     const payload = {
       ...record,
       status: validStatus,
+      trackingEnabled,
       idempotencyKey: record.idempotencyKey || undefined
     };
     const created = await sdk.campaigns.create(payload);
     await LocalCRMRepository.saveFromServer('campaigns', created);
+    ProjectionService.broadcastProjectionUpdated('campaigns', record.workspaceId);
     return created;
   });
 
@@ -408,6 +560,7 @@ export function registerCrmIpc() {
     };
     const updated = await sdk.campaigns.update(id, payload);
     await LocalCRMRepository.saveFromServer('campaigns', updated);
+    ProjectionService.broadcastProjectionUpdated('campaigns', workspaceId);
     return updated;
   });
 
@@ -417,6 +570,7 @@ export function registerCrmIpc() {
     const sdk = WorkspaceManager.getSdk();
     await sdk.campaigns.delete(id);
     await LocalCRMRepository.softDeleteFromServer('campaigns', workspaceId, id);
+    ProjectionService.broadcastProjectionUpdated('campaigns', workspaceId);
     return { success: true };
   });
 

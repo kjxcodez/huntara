@@ -18,6 +18,10 @@ export interface SendGmailMessageOptions {
   attachments?: MimeAttachment[] | undefined;
   mixedBoundary?: string | undefined;
   altBoundary?: string | undefined;
+  messageId?: string | undefined;
+  inReplyTo?: string | undefined;
+  references?: string | string[] | undefined;
+  threadId?: string | undefined;
 }
 
 export type GmailTransportFn = (url: string, init: RequestInit) => Promise<Response>;
@@ -75,8 +79,16 @@ export class GmailProvider {
       html: options.html,
       attachments: options.attachments,
       mixedBoundary: options.mixedBoundary,
-      altBoundary: options.altBoundary
+      altBoundary: options.altBoundary,
+      messageId: options.messageId,
+      inReplyTo: options.inReplyTo,
+      references: options.references
     });
+
+    const sendPayload: Record<string, any> = { raw };
+    if (options.threadId) {
+      sendPayload.threadId = options.threadId;
+    }
 
     logger.info(
       {
@@ -85,7 +97,8 @@ export class GmailProvider {
         to: options.to,
         subject: options.subject,
         attachmentsCount: options.attachments?.length || 0,
-        rawPayloadBytes: raw.length
+        rawPayloadBytes: raw.length,
+        threadId: options.threadId || undefined
       },
       'Posting MIME message to Gmail REST API users.me.messages.send'
     );
@@ -98,7 +111,7 @@ export class GmailProvider {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ raw })
+        body: JSON.stringify(sendPayload)
       });
     } catch (netErr: any) {
       // Network disconnect / socket error during sending
@@ -114,8 +127,8 @@ export class GmailProvider {
         'AMBIGUOUS_SEND_TIMEOUT',
         `Network failure while contacting Gmail API: ${netErr.message}`,
         false,
-        true,
-        'transient_network'
+        false,
+        'ambiguous_network'
       );
     }
 

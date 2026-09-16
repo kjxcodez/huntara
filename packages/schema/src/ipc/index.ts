@@ -1,4 +1,4 @@
-import type { CreateCompanyDto, CompanyFilters } from '../dto/company.js';
+import type { CreateCompanyDto, CompanyFilters, DeleteCompanyMode, DeleteCompanyResult } from '../dto/company.js';
 import type { Company } from '../entities/company.js';
 import type { LoginDto, RegisterDto, AuthResponse } from '../dto/auth.js';
 import type { CreateWorkspaceDto, UpdateWorkspaceDto, InviteMemberDto } from '../dto/workspace.js';
@@ -28,6 +28,30 @@ export interface RuntimeConnectivityState {
   activeWorkspaceId: string | null;
 }
 
+export interface CanonicalContactQuery {
+  search?: string | undefined;
+  status?: string | undefined;
+  companyId?: string | undefined;
+  title?: string | undefined;
+  source?: string | undefined;
+  discoveryRunId?: string | undefined;
+  location?: string | undefined;
+  city?: string | undefined;
+  state?: string | undefined;
+  country?: string | undefined;
+}
+
+export type BulkContactSelection =
+  | {
+      mode: 'explicit';
+      selectedIds: string[];
+    }
+  | {
+      mode: 'all-matching';
+      query: CanonicalContactQuery;
+      excludedIds: string[];
+    };
+
 export interface IpcChannelMap {
   'diagnostics:get-system-info': {
     input: { workspaceId?: string };
@@ -56,6 +80,14 @@ export interface IpcChannelMap {
   'companies:create': {
     input: CreateCompanyDto;
     output: Company;
+  };
+  'companies:bulk:create': {
+    input: { workspaceId: string; data: any[] };
+    output: any;
+  };
+  'contacts:bulk:create': {
+    input: { workspaceId: string; data: any[] };
+    output: any;
   };
   'system:status': {
     input: void;
@@ -92,6 +124,10 @@ export interface IpcChannelMap {
   'auth:google:login': {
     input: void;
     output: AuthResponse;
+  };
+  'auth:google:check-chrome': {
+    input: void;
+    output: { installed: boolean; path?: string };
   };
   'settings:getSync': {
     input: void;
@@ -176,8 +212,8 @@ export interface IpcChannelMap {
     output: any;
   };
   'companies:delete': {
-    input: { workspaceId: string; id: string };
-    output: void;
+    input: { workspaceId: string; id: string; mode?: DeleteCompanyMode };
+    output: DeleteCompanyResult;
   };
   'contacts:get': {
     input: string;
@@ -220,7 +256,7 @@ export interface IpcChannelMap {
     output: void;
   };
   'campaigns:enroll': {
-    input: { campaignId: string; contactIds: string[] };
+    input: { campaignId: string; contactIds?: string[]; selection?: BulkContactSelection };
     output: { success: boolean; enrolledCount: number };
   };
   'campaigns:enrollments:list': {
@@ -330,6 +366,17 @@ export interface IpcChannelMap {
     input: { workspaceId: string };
     output: { success: boolean; stats: any };
   };
+  'sync:reconcile': {
+    input: {
+      workspaceId: string;
+      scope?: 'all' | 'audiences' | 'companies' | 'contacts' | 'campaigns' | 'discovery_runs';
+    };
+    output: {
+      success: boolean;
+      scope: string;
+      recordsReconciled: Record<string, number>;
+    };
+  };
 
   'discovery:run:create': {
     input: {
@@ -355,6 +402,10 @@ export interface IpcChannelMap {
   'discovery:run:companies': {
     input: { workspaceId: string; runId: string; forceSync?: boolean };
     output: any[];
+  };
+  'discovery:run:delete': {
+    input: { workspaceId: string; id: string };
+    output: { success: boolean; alreadyDeleted?: boolean };
   };
   'audiences:list': {
     input: { workspaceId: string };
@@ -403,6 +454,29 @@ export interface IpcChannelMap {
     };
     output: any[];
   };
+  'contacts:query:resolve': {
+    input: {
+      workspaceId: string;
+      query: CanonicalContactQuery;
+      excludedIds?: string[];
+    };
+    output: { contactIds: string[]; total: number };
+  };
+  'contacts:bulk:delete': {
+    input: {
+      workspaceId: string;
+      selection: BulkContactSelection;
+    };
+    output: { success: boolean; count: number };
+  };
+  'contacts:bulk:update-status': {
+    input: {
+      workspaceId: string;
+      selection: BulkContactSelection;
+      status: string;
+    };
+    output: { success: boolean; count: number };
+  };
   'companies:distinct-values': {
     input: { workspaceId: string };
     output: { industries: string[]; locations: string[]; cities?: string[]; states?: string[]; countries?: string[] };
@@ -433,45 +507,17 @@ export interface IpcChannelMap {
     input: any;
     output: any[];
   };
-  'discovery:list': {
-    input: any;
-    output: any[];
-  };
-  'discovery:create': {
-    input: { name: string; provider: string; query: string };
-    output: any;
-  };
-  'discovery:get': {
-    input: string;
-    output: any;
-  };
-  'discovery:results': {
-    input: string;
-    output: any[];
-  };
-  'discovery:import': {
-    input: string;
-    output: any;
-  };
-  'discovery:skip': {
-    input: string;
-    output: any;
-  };
   'email-accounts:list': {
     input: void;
     output: any[];
-  };
-  'email-accounts:create': {
-    input: any;
-    output: any;
   };
   'email-accounts:delete': {
     input: string;
     output: void;
   };
-  'email-accounts:test': {
+  'email-accounts:reset-health': {
     input: string;
-    output: { verified: boolean };
+    output: { success: boolean };
   };
   'email-accounts:gmail:connect': {
     input: void;
@@ -585,6 +631,10 @@ export interface IpcChannelMap {
       notes?: string | null;
     };
     output: any;
+  };
+  'email-deliveries:reindex-inbound': {
+    input: { workspaceId: string; limit?: number };
+    output: { processed: number; matched: number };
   };
   'campaigns:schedule': {
     input: string;
@@ -878,10 +928,6 @@ export interface IpcChannelMap {
       workersReady: boolean;
     };
   };
-  'onboarding:generate-sample-data': {
-    input: { workspaceId: string };
-    output: { success: boolean };
-  };
   'onboarding:save-setting': {
     input: { workspaceId: string; key: string; value: string };
     output: { success: boolean };
@@ -1054,6 +1100,95 @@ export interface IpcChannelMap {
   'agent:workflow:progress': {
     input: void;
     output: { executionId: string; step: number; status: string; message?: string };
+  };
+
+  // ── Native Electron & Settings ──────────────────────────────────────────
+  'electron:ready-to-show': {
+    input: void;
+    output: void;
+  };
+  'settings:get-all': {
+    input: void;
+    output: any;
+  };
+
+  // ── Dashboard ────────────────────────────────────────────────────────────
+  'dashboard:stats': {
+    input: { workspaceId: string };
+    output: any;
+  };
+  'dashboard:chart-data': {
+    input: { workspaceId: string; range?: string };
+    output: any;
+  };
+  'dashboard:activity-feed': {
+    input: { workspaceId: string; limit?: number };
+    output: any[];
+  };
+
+  // ── Google Drive & Storage ──────────────────────────────────────────────
+  'drive:about': {
+    input: { connectionId: string };
+    output: any;
+  };
+
+  // ── AI Agent Workflows ───────────────────────────────────────────────────
+  'agent:execute': {
+    input: {
+      workspaceId: string;
+      query: string;
+      traceId: string;
+      actorId: string;
+      aiConfig?: any;
+    };
+    output: any;
+  };
+  'agent:workflow:execute': {
+    input: {
+      workspaceId: string;
+      workflowId: string;
+      inputData?: any;
+    };
+    output: any;
+  };
+
+  // ── Suppressions ─────────────────────────────────────────────────────────
+  'suppressions:list': {
+    input: { workspaceId: string; type?: string; limit?: number };
+    output: any;
+  };
+  'suppressions:check': {
+    input: { workspaceId: string; email?: string; domain?: string; companyId?: string };
+    output: any;
+  };
+  'suppressions:suppress': {
+    input: { workspaceId: string; type: string; value: string; reason?: string };
+    output: any;
+  };
+  'suppressions:unsuppress': {
+    input: { workspaceId: string; id: string };
+    output: any;
+  };
+
+  // ── Browser Engine (Playwright) ──────────────────────────────────────────
+  'browser:status': {
+    input: void;
+    output: {
+      isInstalled: boolean;
+      isInstalling: boolean;
+      browsersPath: string;
+      executablePath?: string | undefined;
+      headlessPath?: string | undefined;
+      lastError?: string | undefined;
+    };
+  };
+  'browser:install': {
+    input: void;
+    output: boolean;
+  };
+  'browser:install-progress': {
+    input: void;
+    output: string;
   };
 }
 

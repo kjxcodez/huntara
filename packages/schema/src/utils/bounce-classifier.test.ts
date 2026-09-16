@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { classifyBounce, parseDsnReport } from './bounce-classifier.js';
-import { BounceCategory } from '../enums/index.js';
+import { classifyBounce, parseDsnReport, mapBounceCategoryToFailureCategory } from './bounce-classifier.js';
+import { BounceCategory, EmailFailureCategory } from '../enums/index.js';
 
 describe('Phase 10: Bounce & Rejection Classifier', () => {
   it('classifies 550 User Unknown as permanent MAILBOX_UNAVAILABLE', () => {
@@ -122,6 +122,33 @@ Diagnostic-Code: smtp; 550-5.1.1 The email account that you tried to reach does 
       expect(parsed?.failedRecipient).toBe('non-existent-lead@targetco.com');
       expect(parsed?.classification.category).toBe(BounceCategory.MAILBOX_UNAVAILABLE);
       expect(parsed?.classification.isHardBounce).toBe(true);
+    });
+  });
+
+  describe('mapBounceCategoryToFailureCategory', () => {
+    it('maps spam and reputation rejections to POLICY', () => {
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.SPAM_REJECTION)).toBe(EmailFailureCategory.POLICY);
+    });
+
+    it('maps policy and authentication rejections to POLICY', () => {
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.POLICY_REJECTION)).toBe(EmailFailureCategory.POLICY);
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.AUTHENTICATION_REJECTION)).toBe(EmailFailureCategory.POLICY);
+    });
+
+    it('maps hard recipient address failures to INVALID_RECIPIENT', () => {
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.MAILBOX_UNAVAILABLE)).toBe(EmailFailureCategory.INVALID_RECIPIENT);
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.DOMAIN_UNAVAILABLE)).toBe(EmailFailureCategory.INVALID_RECIPIENT);
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.HARD_BOUNCE)).toBe(EmailFailureCategory.INVALID_RECIPIENT);
+    });
+
+    it('maps rate limits to RATE_LIMIT', () => {
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.RATE_LIMIT)).toBe(EmailFailureCategory.RATE_LIMIT);
+    });
+
+    it('maps soft bounces and unknown categories to PROVIDER', () => {
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.SOFT_BOUNCE)).toBe(EmailFailureCategory.PROVIDER);
+      expect(mapBounceCategoryToFailureCategory(BounceCategory.UNKNOWN)).toBe(EmailFailureCategory.PROVIDER);
+      expect(mapBounceCategoryToFailureCategory('SOME_NEW_CATEGORY' as any)).toBe(EmailFailureCategory.PROVIDER);
     });
   });
 });

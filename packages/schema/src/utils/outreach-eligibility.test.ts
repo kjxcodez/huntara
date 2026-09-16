@@ -147,6 +147,26 @@ describe('Contact Outreach Eligibility Policy', () => {
     expect(res.reason).toBe('EMAIL_SUPPRESSED');
   });
 
+  it('rejects contact when company is marked DNC', () => {
+    const res = evaluateOutreachEligibility({
+      contact: { email: 'alice@acme.com', status: ContactStatus.NEW },
+      campaign: { status: CampaignStatus.ACTIVE },
+      companySuppressed: true
+    });
+    expect(res.eligible).toBe(false);
+    expect(res.reason).toBe('COMPANY_DNC');
+  });
+
+  it('rejects contact when domain is suppressed', () => {
+    const res = evaluateOutreachEligibility({
+      contact: { email: 'bob@blockeddomain.com', status: ContactStatus.NEW },
+      campaign: { status: CampaignStatus.ACTIVE },
+      domainSuppressed: true
+    });
+    expect(res.eligible).toBe(false);
+    expect(res.reason).toBe('DOMAIN_SUPPRESSED');
+  });
+
   it('rejects contact when email domain is a disposable address', () => {
     const res = evaluateOutreachEligibility({
       contact: { email: 'lead@mailinator.com', status: ContactStatus.NEW },

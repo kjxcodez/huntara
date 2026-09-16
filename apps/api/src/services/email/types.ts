@@ -73,11 +73,17 @@ export interface SendEmailInput {
   templateId?: string | undefined;
   templateVersion?: number | undefined;
   variablesSnapshot?: Record<string, any> | undefined;
+  trackingEnabled?: boolean | undefined;
+  messageId?: string | undefined;
+  inReplyTo?: string | undefined;
+  references?: string[] | string | undefined;
+  threadId?: string | undefined;
 }
 
 export interface SendEmailResult {
   messageId: string;
   threadId?: string | null | undefined;
+  rfcMessageId?: string | undefined;
   accepted: string[];
   sentAt?: Date | undefined;
 }
@@ -121,16 +127,21 @@ export interface EmailProviderErrorShape {
     | 'INVALID_RECIPIENT'
     | 'INVALID_SUBJECT'
     | 'RECIPIENT_SUPPRESSED'
+    | 'COMPANY_DNC'
+    | 'DOMAIN_SUPPRESSED'
     | 'AMBIGUOUS_SEND_TIMEOUT'
     | 'DELIVERY_ALREADY_SENT'
     | 'DELIVERY_ALREADY_RESERVED'
     | 'CAMPAIGN_LIMIT_EXCEEDED'
     | 'CAMPAIGN_NOT_ACTIVE'
     | 'CONTACT_NOT_ELIGIBLE'
+    | 'DOMAIN_PACING_THROTTLED'
+    | 'COMPANY_CARDINALITY_EXCEEDED'
     | 'GMAIL_SEARCH_FAILED'
     | 'GMAIL_INBOUND_LIST_FAILED'
     | 'GMAIL_GET_MESSAGE_FAILED'
-    | 'TRANSIENT_NETWORK_ERROR';
+    | 'TRANSIENT_NETWORK_ERROR'
+    | 'INVALID_TRACKING_CONFIG';
   message: string;
   reauthRequired?: boolean;
   retryable?: boolean;

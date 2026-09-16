@@ -6,7 +6,7 @@ export interface IRepository<T> {
   findMany(filter?: Partial<T>): Promise<T[]>;
   create(data: T): Promise<T>;
   update(id: string, data: Partial<T>): Promise<T>;
-  delete(id: string): Promise<void>;
+  delete(id: string, options?: any): Promise<any>;
 }
 
 /**
@@ -25,7 +25,7 @@ export interface IRemoteRepository<T> {
   list(filter?: Record<string, any>): Promise<T[]>;
   create(data: Record<string, any>): Promise<T>;
   update(id: string, data: Record<string, any>): Promise<T>;
-  delete(id: string): Promise<void>;
+  delete(id: string, options?: any): Promise<any>;
 }
 
 /**

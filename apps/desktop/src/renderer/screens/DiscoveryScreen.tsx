@@ -24,18 +24,19 @@ import {
   BarChart3,
   Activity,
   Linkedin,
-  UserCheck
+  UserCheck,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { PageHeader } from '../components/common/PageHeader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import {
-  COUNTRIES,
-  getStatesForCountry,
-  getCitiesForState,
   normalizeCountryName,
   normalizeStateName
 } from '../lib/locations';
+import { GeographySelector } from '../components/discovery/GeographySelector';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -73,6 +74,7 @@ export default function DiscoveryScreen() {
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id || '';
   const queryClient = useQueryClient();
+  const { refresh, isRefreshing } = useProjectionRefresh('discovery_runs');
 
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -213,13 +215,27 @@ export default function DiscoveryScreen() {
     }
   });
 
-  const availableStates = React.useMemo(() => {
-    return getStatesForCountry(country);
-  }, [country]);
+  const [runToDelete, setRunToDelete] = useState<any | null>(null);
 
-  const availableCities = React.useMemo(() => {
-    return getCitiesForState(country, stateName);
-  }, [country, stateName]);
+  const deleteRunMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return window.ipc.invoke('discovery:run:delete', { workspaceId, id });
+    },
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: ['discovery_runs', 'list', workspaceId] });
+      queryClient.invalidateQueries({ queryKey: ['scheduler_jobs', 'list', workspaceId] });
+      if (selectedJobId === deletedId) {
+        setSelectedJobId(null);
+      }
+      setRunToDelete(null);
+      toast.success('Discovery run deleted.');
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || 'Failed to delete discovery run');
+    }
+  });
+
+
 
   const handleCreateJob = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -361,15 +377,29 @@ export default function DiscoveryScreen() {
         title="Discovery Platform"
         description="Scrape Google Maps leads, enrich contacts, and import directly into your CRM."
         actions={
-          <Button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            size="sm"
-            className="h-8 font-semibold gap-1.5 shrink-0 rounded-none"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            New Discovery Run
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={refresh}
+              disabled={isRefreshing}
+              className="h-8 text-xs font-semibold gap-1.5 rounded-none border-border-subtle bg-card text-foreground hover:bg-surface-3"
+              title="Refresh discovery runs from server"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              size="sm"
+              className="h-8 font-semibold gap-1.5 shrink-0 rounded-none"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Discovery Run
+            </Button>
+          </div>
         }
       />
 
@@ -809,20 +839,36 @@ export default function DiscoveryScreen() {
                                     Cancel
                                   </Button>
                                 ) : (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className={`h-6 text-[10px] gap-1 rounded-none ${isSelected ? 'text-primary' : ''}`}
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      setSelectedJobId(isSelected ? null : run.id);
-                                    }}
-                                  >
-                                    {isSelected ? <CheckCircle className="w-3 h-3 text-primary" /> : null}
-                                    {isSelected ? 'Showing' : 'View Results'}
-                                  </Button>
+                                  <div className="inline-flex items-center gap-1">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className={`h-6 text-[10px] gap-1 rounded-none ${isSelected ? 'text-primary' : ''}`}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setSelectedJobId(isSelected ? null : run.id);
+                                      }}
+                                    >
+                                      {isSelected ? <CheckCircle className="w-3 h-3 text-primary" /> : null}
+                                      {isSelected ? 'Showing' : 'View Results'}
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 text-[10px] text-muted-foreground hover:text-danger hover:bg-danger/10 rounded-none px-2"
+                                      title="Delete discovery run"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setRunToDelete(run);
+                                      }}
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
                                 )}
                               </td>
                             </motion.tr>
@@ -908,81 +954,15 @@ export default function DiscoveryScreen() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div className="space-y-1">
-                <Label htmlFor="country" className="text-xs font-semibold">
-                  Country <span className="text-danger">*</span>
-                </Label>
-                <Input
-                  id="country"
-                  list="countries-datalist"
-                  placeholder="e.g. United States"
-                  value={country}
-                  onChange={(e) => {
-                    setCountry(e.target.value);
-                    setStateName('');
-                    setCity('');
-                  }}
-                  required
-                  className="rounded-none bg-card border-border-subtle text-xs"
-                />
-                <datalist id="countries-datalist">
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.name}>
-                      {c.name} ({c.code})
-                    </option>
-                  ))}
-                </datalist>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="stateName" className="text-xs font-semibold">
-                  State / Region <span className="text-danger">*</span>
-                </Label>
-                <Input
-                  id="stateName"
-                  list="states-datalist"
-                  placeholder={country ? "e.g. Florida" : "Select Country first"}
-                  value={stateName}
-                  disabled={!country}
-                  onChange={(e) => {
-                    setStateName(e.target.value);
-                    setCity('');
-                  }}
-                  required
-                  className="rounded-none bg-card border-border-subtle text-xs disabled:opacity-50"
-                />
-                <datalist id="states-datalist">
-                  {availableStates.map((s) => (
-                    <option key={s.code} value={s.name}>
-                      {s.name} ({s.code})
-                    </option>
-                  ))}
-                </datalist>
-              </div>
-
-              <div className="space-y-1">
-                <Label htmlFor="city" className="text-xs font-semibold">
-                  City <span className="text-muted-foreground font-normal">(Optional)</span>
-                </Label>
-                <Input
-                  id="city"
-                  list="cities-datalist"
-                  placeholder={stateName ? "e.g. Miami" : "Select State first"}
-                  value={city}
-                  disabled={!stateName}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="rounded-none bg-card border-border-subtle text-xs disabled:opacity-50"
-                />
-                <datalist id="cities-datalist">
-                  {availableCities.map((cityName) => (
-                    <option key={cityName} value={cityName}>
-                      {cityName}
-                    </option>
-                  ))}
-                </datalist>
-              </div>
-            </div>
+            <GeographySelector
+              country={country}
+              state={stateName}
+              city={city}
+              onCountryChange={setCountry}
+              onStateChange={setStateName}
+              onCityChange={setCity}
+              required
+            />
 
             <div className="space-y-1">
               <Label htmlFor="jobName" className="text-xs font-semibold">
@@ -1053,6 +1033,60 @@ export default function DiscoveryScreen() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Discovery Run Confirmation Dialog */}
+      <Dialog open={!!runToDelete} onOpenChange={(open) => !open && setRunToDelete(null)}>
+        <DialogContent className="max-w-md rounded-none bg-background border border-border-subtle shadow-elevation-2">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-danger">
+              <AlertTriangle className="w-5 h-5 text-danger" />
+              Delete Discovery Run
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-sm text-foreground/80">
+            <p>
+              Are you sure you want to delete discovery run{' '}
+              <strong className="text-foreground">{runToDelete?.name}</strong>?
+            </p>
+            <div className="p-3 bg-muted/40 border border-border-subtle text-xs space-y-1.5">
+              <p className="font-semibold text-foreground">What will happen:</p>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                <li>The discovery run history will be removed.</li>
+                <li>Associated run-specific jobs and provenance links will be cleaned up.</li>
+                <li>
+                  <strong className="text-foreground">Canonical companies and contacts will NOT be deleted</strong> and remain safe in your CRM.
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2 border-t border-border-subtle">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-none"
+              onClick={() => setRunToDelete(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="rounded-none gap-1.5"
+              disabled={deleteRunMutation.isPending}
+              onClick={() => {
+                if (runToDelete) {
+                  deleteRunMutation.mutate(runToDelete.id);
+                }
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              {deleteRunMutation.isPending ? 'Deleting...' : 'Delete Run'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -4,6 +4,7 @@ export * from './FailureDiagnosticsCard';
 export * from './ConversationTimeline';
 export * from './MessageDetailView';
 export * from './EmailLogsList';
+export * from './EmailLogsFilters';
 export * from './SendTestModal';
 export * from './EmailQualityBadge';
 export * from './InboundReconciliationCard';

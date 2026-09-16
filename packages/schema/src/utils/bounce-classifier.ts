@@ -5,7 +5,7 @@
  * provider diagnostics, and inbound Delivery Status Notifications (DSNs).
  */
 
-import { BounceCategory } from '../enums/index.js';
+import { BounceCategory, EmailFailureCategory } from '../enums/index.js';
 
 export interface BounceClassification {
   category: BounceCategory;
@@ -277,4 +277,31 @@ export function parseDsnReport(
     failedRecipient,
     classification
   };
+}
+
+/**
+ * Maps a canonical BounceCategory to the corresponding EmailFailureCategory.
+ */
+export function mapBounceCategoryToFailureCategory(category: BounceCategory): EmailFailureCategory {
+  switch (category) {
+    case BounceCategory.SPAM_REJECTION:
+    case BounceCategory.POLICY_REJECTION:
+    case BounceCategory.AUTHENTICATION_REJECTION:
+      return EmailFailureCategory.POLICY;
+
+    case BounceCategory.MAILBOX_UNAVAILABLE:
+    case BounceCategory.DOMAIN_UNAVAILABLE:
+    case BounceCategory.HARD_BOUNCE:
+      return EmailFailureCategory.INVALID_RECIPIENT;
+
+    case BounceCategory.RATE_LIMIT:
+      return EmailFailureCategory.RATE_LIMIT;
+
+    case BounceCategory.SOFT_BOUNCE:
+      return EmailFailureCategory.PROVIDER;
+
+    case BounceCategory.UNKNOWN:
+    default:
+      return EmailFailureCategory.PROVIDER;
+  }
 }

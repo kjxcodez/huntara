@@ -78,7 +78,8 @@ export enum CampaignStatus {
 
 export enum CampaignPauseReason {
   USER_REQUESTED = 'USER_REQUESTED',
-  MAILBOX_DISCONNECTED = 'MAILBOX_DISCONNECTED'
+  MAILBOX_DISCONNECTED = 'MAILBOX_DISCONNECTED',
+  OUTBOUND_REJECTION_CIRCUIT_BREAKER = 'OUTBOUND_REJECTION_CIRCUIT_BREAKER'
 }
 
 export enum ContactStatus {
@@ -249,8 +250,17 @@ export enum EmailQualityStatus {
 }
 
 /**
- * Phase 10: Structured reasons for contact / email address suppression.
- * Follows strict precedence hierarchy: DO_NOT_CONTACT > UNSUBSCRIBED > SPAM_COMPLAINT > HARD_BOUNCE > MANUAL_SUPPRESSION > POLICY_BLOCK > INVALID_EMAIL.
+ * Target entity type for workspace suppression policies.
+ */
+export enum SuppressionTargetType {
+  RECIPIENT = 'recipient',
+  COMPANY = 'company',
+  DOMAIN = 'domain'
+}
+
+/**
+ * Phase 10: Structured reasons for contact / email address / company / domain suppression.
+ * Follows strict precedence hierarchy: DO_NOT_CONTACT > COMPANY_DNC > DOMAIN_SUPPRESSION > UNSUBSCRIBED > SPAM_COMPLAINT > HARD_BOUNCE > MANUAL_SUPPRESSION > POLICY_BLOCK > INVALID_EMAIL.
  */
 export enum SuppressionReason {
   DO_NOT_CONTACT = 'DO_NOT_CONTACT',
@@ -259,7 +269,9 @@ export enum SuppressionReason {
   HARD_BOUNCE = 'HARD_BOUNCE',
   MANUAL_SUPPRESSION = 'MANUAL_SUPPRESSION',
   POLICY_BLOCK = 'POLICY_BLOCK',
-  INVALID_EMAIL = 'INVALID_EMAIL'
+  INVALID_EMAIL = 'INVALID_EMAIL',
+  COMPANY_DNC = 'COMPANY_DNC',
+  DOMAIN_SUPPRESSION = 'DOMAIN_SUPPRESSION'
 }
 
 /**

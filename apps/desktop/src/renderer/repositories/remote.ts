@@ -20,9 +20,9 @@ export const RemoteCompanyRepository: IRemoteRepository<any> = {
     return window.ipc.invoke('companies:update', { id, dto: data } as any); // placeholder
   },
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, options?: any): Promise<any> {
     const workspaceId = await window.ipc.invoke('electron:getActiveWorkspace', undefined);
-    return window.ipc.invoke('companies:delete', { workspaceId: workspaceId || '', id });
+    return window.ipc.invoke('companies:delete', { workspaceId: workspaceId || '', id, ...(options || {}) });
   }
 };
 

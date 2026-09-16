@@ -301,6 +301,136 @@ export class ProjectionService {
   }
 
   /**
+   * Reconciles a targeted entity or all entities for a workspace from authoritative MongoDB state.
+   * Pulls authoritative state via sdk, reconciles local SQLite projection (upserting live + tombstoning deleted),
+   * and broadcasts sync:completed.
+   */
+  public static async reconcileEntity(
+    workspaceId: string,
+    scope: 'all' | 'audiences' | 'companies' | 'contacts' | 'campaigns' | 'discovery_runs',
+    sdk: SdkClient,
+    broadcast = true
+  ): Promise<{ success: boolean; scope: string; recordsReconciled: Record<string, number> }> {
+    if (!workspaceId) throw new Error('workspaceId is required for reconciliation');
+
+    AppLogger.info('ProjectionService', `Reconciling entity scope "${scope}"`, workspaceId);
+    const recordsReconciled: Record<string, number> = {};
+
+    const reconcileAudiences = async () => {
+      const res = await sdk.audiences.list();
+      const items = Array.isArray(res) ? res : (res as any)?.data || [];
+      const result = await LocalCRMRepository.reconcileTableFromServer('audiences', workspaceId, items);
+      recordsReconciled['audiences'] = result.upserted;
+    };
+
+    const reconcileCompanies = async () => {
+      let all: any[] = [];
+      let page = 1;
+      const limit = 100;
+      while (true) {
+        const res = await sdk.companies.list({ page, limit } as any);
+        const items = Array.isArray(res) ? res : (res as any)?.data || [];
+        if (!items || items.length === 0) break;
+        all = all.concat(items);
+        if (items.length < limit) break;
+        page++;
+      }
+      const result = await LocalCRMRepository.reconcileTableFromServer('companies', workspaceId, all);
+      recordsReconciled['companies'] = result.upserted;
+    };
+
+    const reconcileContacts = async () => {
+      let all: any[] = [];
+      let page = 1;
+      const limit = 100;
+      while (true) {
+        const res = await sdk.contacts.list({ page, limit } as any);
+        const items = Array.isArray(res) ? res : (res as any)?.data || [];
+        if (!items || items.length === 0) break;
+        all = all.concat(items);
+        if (items.length < limit) break;
+        page++;
+      }
+      const result = await LocalCRMRepository.reconcileTableFromServer('contacts', workspaceId, all);
+      recordsReconciled['contacts'] = result.upserted;
+    };
+
+    const reconcileCampaigns = async () => {
+      const res = await sdk.campaigns.list();
+      const items = Array.isArray(res) ? res : (res as any)?.data || [];
+      const transformed = items.map((c: any) => ({
+        ...c,
+        status: c.status ? String(c.status).toUpperCase() : 'DRAFT'
+      }));
+      const result = await LocalCRMRepository.reconcileTableFromServer('campaigns', workspaceId, transformed);
+      recordsReconciled['campaigns'] = result.upserted;
+
+      try {
+        const seqRes = await sdk.sequences.list();
+        const seqItems = Array.isArray(seqRes) ? seqRes : (seqRes as any)?.data || [];
+        if (seqItems.length > 0) {
+          await LocalCRMRepository.reconcileTableFromServer('sequences', workspaceId, seqItems);
+        }
+      } catch {}
+
+      try {
+        const exRes = await sdk.executions.list();
+        const exItems = Array.isArray(exRes) ? exRes : (exRes as any)?.data || [];
+        const exTransformed = exItems.map((ex: any) => ({
+          ...ex,
+          status: ex.status ? String(ex.status).toUpperCase() : 'PENDING'
+        }));
+        if (exTransformed.length > 0) {
+          await LocalCRMRepository.reconcileTableFromServer('sequence_executions', workspaceId, exTransformed);
+        }
+      } catch {}
+    };
+
+    const reconcileDiscoveryRuns = async () => {
+      const res = await sdk.discovery.listRuns();
+      const items = Array.isArray(res) ? res : (res as any)?.data || [];
+      const result = await LocalCRMRepository.reconcileTableFromServer('discovery_runs', workspaceId, items);
+      recordsReconciled['discovery_runs'] = result.upserted;
+
+      try {
+        const cdr = await sdk.companyDiscoveryRuns.list().catch(() => []);
+        const cdrList = Array.isArray(cdr) ? cdr : (cdr as any)?.data || [];
+        if (cdrList.length > 0) {
+          await LocalCRMRepository.reconcileTableFromServer('company_discovery_runs', workspaceId, cdrList);
+        }
+      } catch {}
+    };
+
+    if (scope === 'audiences') {
+      await reconcileAudiences();
+    } else if (scope === 'companies') {
+      await reconcileCompanies();
+    } else if (scope === 'contacts') {
+      await reconcileContacts();
+    } else if (scope === 'campaigns') {
+      await reconcileCampaigns();
+    } else if (scope === 'discovery_runs') {
+      await reconcileDiscoveryRuns();
+    } else if (scope === 'all') {
+      await reconcileAudiences();
+      await reconcileCompanies();
+      await reconcileContacts();
+      await reconcileCampaigns();
+      await reconcileDiscoveryRuns();
+    }
+
+    if (broadcast) {
+      this.broadcastProjectionUpdated(scope, workspaceId);
+    }
+
+    return {
+      success: true,
+      scope,
+      recordsReconciled
+    };
+  }
+
+  /**
    * Rebuilds the disposable local SQLite projection for a workspace from authoritative MongoDB state.
    * Atomically clears local projection tables for the workspace and runs full hydration.
    */

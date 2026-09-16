@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Search, Filter, Plus, Trash2, Tag, Archive, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Filter, Plus, Trash2, Tag, Archive, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 
 interface EntityToolbarProps {
   search: string;
@@ -11,6 +11,8 @@ interface EntityToolbarProps {
   statusOptions?: string[];
   createLabel: string;
   onCreateTrigger: () => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
   selectedCount?: number;
   onBulkDelete?: () => void;
   onBulkArchive?: () => void;
@@ -35,6 +37,8 @@ export function EntityToolbar({
   statusOptions = [],
   createLabel,
   onCreateTrigger,
+  onRefresh,
+  isRefreshing = false,
   selectedCount = 0,
   onBulkDelete,
   onBulkArchive,
@@ -106,14 +110,31 @@ export function EntityToolbar({
           )}
         </div>
 
-        <Button
-          onClick={onCreateTrigger}
-          size="sm"
-          className="h-8 text-xs font-semibold gap-1.5 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          {createLabel}
-        </Button>
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="h-8 text-xs font-semibold gap-1.5 rounded-none border-border-subtle bg-card text-foreground hover:bg-surface-3"
+              title="Refresh data from server"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </Button>
+          )}
+
+          <Button
+            onClick={onCreateTrigger}
+            size="sm"
+            className="h-8 text-xs font-semibold gap-1.5 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            {createLabel}
+          </Button>
+        </div>
       </div>
 
       {/* Collapsible Structured Filters Bar */}

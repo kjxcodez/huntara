@@ -34,6 +34,7 @@ export interface CampaignDocument
   schedule?: Record<string, any> | string | null;
   timezone: string;
   dailyLimit: number;
+  trackingEnabled?: boolean | null;
   settings?: Record<string, any> | null;
   idempotencyKey?: string | null;
 }
@@ -88,6 +89,10 @@ const campaignSchema = new Schema<CampaignDocument>(
     dailyLimit: {
       type: Number,
       default: 0
+    },
+    trackingEnabled: {
+      type: Boolean,
+      default: false
     },
     settings: {
       type: Schema.Types.Mixed,

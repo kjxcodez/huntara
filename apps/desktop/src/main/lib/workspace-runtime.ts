@@ -123,18 +123,31 @@ export class WorkspaceRuntime {
     // 2. Recover interrupted background jobs and waiting sequences before scheduler starts
     await this.recoverInterruptedJobs();
 
-    // 3. Start Concurrency Scheduler
+    // 3. Start Concurrency Scheduler with MongoDB-backed policy
     sendBootProgress('scheduler:start', '✓ Starting scheduler');
     const schedStart = Date.now();
+    try {
+      const policy = await this.sdk.workspaces.getSchedulerPolicy(this.workspaceId);
+      if (policy) {
+        this.scheduler.setPolicy(policy);
+      }
+    } catch (err: any) {
+      console.warn(
+        `[WorkspaceRuntime] Could not load scheduler policy from MongoDB for ${this.workspaceId}, using canonical default:`,
+        err?.message || err
+      );
+    }
     await this.scheduler.start();
     this.schedulerDuration = Date.now() - schedStart;
 
-    // 4. Trigger Asynchronous Workspace Cache Hydration from MongoDB
+    // 4. Trigger Workspace Cache Hydration from MongoDB
     sendBootProgress('cache:hydrate', '✓ Hydrating local cache from MongoDB');
     const hydrateStart = Date.now();
-    CacheHydrator.hydrateWorkspaceCache(this.workspaceId, this.sdk).catch((err) => {
+    try {
+      await CacheHydrator.hydrateWorkspaceCache(this.workspaceId, this.sdk);
+    } catch (err) {
       console.warn(`[WorkspaceRuntime] Workspace cache hydration error: ${err}`);
-    });
+    }
     this.cacheHydrationDuration = Date.now() - hydrateStart;
 
     // 5. Start EventBridge to forward LocalEventBus events to the renderer process

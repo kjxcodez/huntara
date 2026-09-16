@@ -35,6 +35,10 @@ export interface SendEmailPayload {
   templateId?: string;
   templateVersion?: number;
   variablesSnapshot?: Record<string, any>;
+  messageId?: string;
+  inReplyTo?: string;
+  references?: string[] | string;
+  threadId?: string;
 }
 
 export interface OAuthConnectResult {

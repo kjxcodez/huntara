@@ -81,13 +81,19 @@ export function useDeleteEntity(repo: any) {
   const workspaceId = activeWorkspace?.id || '';
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return repo.delete(id);
+    mutationFn: async (args: string | { id: string; options?: any }) => {
+      const id = typeof args === 'string' ? args : args.id;
+      const options = typeof args === 'string' ? undefined : args.options;
+      return repo.delete(id, options);
     },
-    onSuccess: (_, id) => {
+    onSuccess: (_, args) => {
+      const id = typeof args === 'string' ? args : args.id;
       queryClient.invalidateQueries({ queryKey: [repo.tableName, 'list', workspaceId] });
       queryClient.invalidateQueries({ queryKey: [repo.tableName, 'detail', id] });
       queryClient.invalidateQueries({ queryKey: ['activities', 'list', workspaceId] });
+      if (repo.tableName === 'companies') {
+        queryClient.invalidateQueries({ queryKey: ['contacts', 'list', workspaceId] });
+      }
     }
   });
 }

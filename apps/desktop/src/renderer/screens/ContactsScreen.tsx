@@ -20,6 +20,9 @@ import { Users, X, Mail, Phone, Briefcase, Linkedin } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
 import { ContactStatus } from '@leadforge/schema';
+import { useContactSelection } from '../hooks/useContactSelection';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
+import { areQueriesEqual, type CanonicalContactQuery, type BulkContactSelection } from '../utils/contact-selection';
 import { PageHeader } from '../components/common/PageHeader';
 import { Sheet, SheetContent } from '../components/ui/sheet';
 import { toast } from 'sonner';
@@ -113,7 +116,25 @@ export default function ContactsScreen() {
   const [titleFilter, setTitleFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   const [discoveryRunFilter, setDiscoveryRunFilter] = useState('');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const {
+    isAllMatching,
+    selectedIds,
+    excludedIds,
+    capturedQuery,
+    matchedCount,
+    selectedCount,
+    effectiveSelectedCount,
+    setSelectedIds,
+    isSelected,
+    toggleContact,
+    togglePageSelection,
+    getPageSelectionState,
+    selectAllMatching,
+    clearSelection,
+    pruneStaleIds,
+    getBulkSelectionPayload
+  } = useContactSelection();
+  const { refresh, isRefreshing } = useProjectionRefresh('contacts');
   const [selectedContact, setSelectedContact] = useState<any | null>(null);
 
   // Audience Modal State
@@ -148,13 +169,13 @@ export default function ContactsScreen() {
 
   // Enrollment mutation
   const enrollMutation = useMutation({
-    mutationFn: async (payload: { campaignId: string; contactIds: string[] }) => {
+    mutationFn: async (payload: { campaignId: string; contactIds: string[]; selection?: BulkContactSelection }) => {
       return window.ipc.invoke('campaigns:enroll', payload);
     },
     onSuccess: () => {
       setEnrollOpen(false);
       setEnrollCampaignId('');
-      setSelectedIds([]);
+      clearSelection();
       toast.success('Successfully enrolled selected contact(s) into campaign!');
     },
     onError: (err: any) => {
@@ -272,11 +293,39 @@ export default function ContactsScreen() {
     setDiscoveryRunFilter('');
   };
 
+  const currentQuery: CanonicalContactQuery = React.useMemo(() => ({
+    search: search.trim() || undefined,
+    status: statusFilter || undefined,
+    companyId: companyFilter || undefined,
+    title: titleFilter || undefined,
+    source: sourceFilter || undefined,
+    discoveryRunId: discoveryRunFilter || undefined
+  }), [search, statusFilter, companyFilter, titleFilter, sourceFilter, discoveryRunFilter]);
+
+  const filtersDifferFromCaptured = React.useMemo(() => {
+    if (!isAllMatching || !capturedQuery) return false;
+    return !areQueriesEqual(currentQuery, capturedQuery);
+  }, [isAllMatching, capturedQuery, currentQuery]);
+
   // Selected Contacts for Static Audience creation
   const selectedContactsForAudience: PreloadedContact[] = React.useMemo(() => {
-    if (selectedIds.length === 0) return [];
+    if (effectiveSelectedCount === 0) return [];
+    if (isAllMatching) {
+      const excludedSet = new Set(excludedIds);
+      return contacts
+        .filter((ct: any) => !excludedSet.has(ct.id))
+        .map((ct: any) => ({
+          id: ct.id,
+          firstName: ct.firstName,
+          lastName: ct.lastName,
+          email: ct.email,
+          title: ct.title,
+          companyName: companies.find((comp: any) => comp.id === ct.companyId)?.name
+        }));
+    }
+    const idSet = new Set(selectedIds);
     return contacts
-      .filter((ct: any) => selectedIds.includes(ct.id))
+      .filter((ct: any) => idSet.has(ct.id))
       .map((ct: any) => ({
         id: ct.id,
         firstName: ct.firstName,
@@ -285,7 +334,7 @@ export default function ContactsScreen() {
         title: ct.title,
         companyName: companies.find((comp: any) => comp.id === ct.companyId)?.name
       }));
-  }, [selectedIds, contacts, companies]);
+  }, [effectiveSelectedCount, isAllMatching, excludedIds, selectedIds, contacts, companies]);
 
   // Pagination calculation
   const totalItems = filtered.length;
@@ -293,6 +342,33 @@ export default function ContactsScreen() {
   const adjustedPage = Math.min(Math.max(1, currentPage), totalPages || 1);
   const startIndex = (adjustedPage - 1) * itemsPerPage;
   const paginatedContacts = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  const currentPageIds = React.useMemo(
+    () => paginatedContacts.map((c: any) => c.id),
+    [paginatedContacts]
+  );
+
+  const headerCheckboxRef = React.useRef<HTMLInputElement>(null);
+
+  const headerState = React.useMemo(
+    () => getPageSelectionState(currentPageIds),
+    [getPageSelectionState, currentPageIds]
+  );
+
+  React.useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = headerState.indeterminate;
+    }
+  }, [headerState.indeterminate]);
+
+  // Prune any selected IDs that no longer exist in contacts (e.g. after sync / deletion)
+  React.useEffect(() => {
+    if (contactsQuery.isSuccess && contacts.length > 0 && (selectedIds.length > 0 || excludedIds.length > 0)) {
+      pruneStaleIds(contacts.map((c: any) => c.id));
+    } else if (contactsQuery.isSuccess && contacts.length === 0 && effectiveSelectedCount > 0) {
+      clearSelection();
+    }
+  }, [contactsQuery.isSuccess, contacts, pruneStaleIds, clearSelection, selectedIds.length, excludedIds.length, effectiveSelectedCount]);
 
   const handleCreate = async (data: any) => {
     await createMutation.mutateAsync(data);
@@ -313,40 +389,54 @@ export default function ContactsScreen() {
       if (selectedContact?.id === id) {
         setSelectedContact(null);
       }
+      if (isAllMatching) {
+        toggleContact(id);
+      } else {
+        setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+      }
     }
   };
 
   const handleBulkDelete = async () => {
-    if (confirm(`Are you sure you want to delete the ${selectedIds.length} selected contacts?`)) {
-      await Promise.all(selectedIds.map((id) => deleteMutation.mutateAsync(id)));
-      setSelectedIds([]);
+    if (effectiveSelectedCount === 0) return;
+    const confirmMsg = isAllMatching
+      ? `Are you sure you want to delete all ${effectiveSelectedCount.toLocaleString()} matching contacts? This cannot be undone.`
+      : `Are you sure you want to delete the ${effectiveSelectedCount.toLocaleString()} selected contacts?`;
+    if (confirm(confirmMsg)) {
+      try {
+        const result = await window.ipc.invoke('contacts:bulk:delete', {
+          workspaceId,
+          selection: getBulkSelectionPayload()
+        });
+        toast.success(`Successfully deleted ${result.count.toLocaleString()} contact(s).`);
+        queryClient.invalidateQueries({ queryKey: ['contacts'] });
+        contactsQuery.refetch();
+        clearSelection();
+      } catch (err: any) {
+        toast.error(`Bulk delete failed: ${err.message}`);
+      }
     }
   };
 
   const handleBulkStatusChange = async (status: string) => {
-    if (
-      confirm(
-        `Are you sure you want to update the status of ${selectedIds.length} contacts to "${status}"?`
-      )
-    ) {
-      await Promise.all(
-        selectedIds.map((id) => updateMutation.mutateAsync({ id, data: { status } }))
-      );
-      setSelectedIds([]);
-    }
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === paginatedContacts.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(paginatedContacts.map((c: any) => c.id));
+    if (effectiveSelectedCount === 0) return;
+    const confirmMsg = isAllMatching
+      ? `Are you sure you want to update the status of all ${effectiveSelectedCount.toLocaleString()} matching contacts to "${status}"?`
+      : `Are you sure you want to update the status of ${effectiveSelectedCount.toLocaleString()} contacts to "${status}"?`;
+    if (confirm(confirmMsg)) {
+      try {
+        const result = await window.ipc.invoke('contacts:bulk:update-status', {
+          workspaceId,
+          status,
+          selection: getBulkSelectionPayload()
+        });
+        toast.success(`Successfully updated ${result.count.toLocaleString()} contact(s) to "${status}".`);
+        queryClient.invalidateQueries({ queryKey: ['contacts'] });
+        contactsQuery.refetch();
+        clearSelection();
+      } catch (err: any) {
+        toast.error(`Bulk update failed: ${err.message}`);
+      }
     }
   };
 
@@ -367,7 +457,7 @@ export default function ContactsScreen() {
 
     queryClient.invalidateQueries({ queryKey: ['audiences', 'list', workspaceId] });
     toast.success(`Saved audience segment "${audName.trim()}"!`);
-    setSelectedIds([]);
+    clearSelection();
   };
 
   return (
@@ -386,7 +476,9 @@ export default function ContactsScreen() {
           statusOptions={Object.values(ContactStatus)}
           createLabel="Add Contact"
           onCreateTrigger={() => setCreateOpen(true)}
-          selectedCount={selectedIds.length}
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
+          selectedCount={selectedCount}
           onBulkDelete={handleBulkDelete}
           onBulkStatusChange={handleBulkStatusChange}
           bulkStatusOptions={Object.values(ContactStatus)}
@@ -502,16 +594,75 @@ export default function ContactsScreen() {
             </div>
           </motion.div>
         ) : (
-          <div className="flex flex-col justify-between">
+          <div className="flex flex-col justify-between gap-2.5">
+            {/* Selection Affordance Banner for Page Selection */}
+            {headerState.checked && !isAllMatching && totalItems > paginatedContacts.length && (
+              <div className="bg-primary/10 border border-primary/20 text-foreground px-4 py-2 text-xs flex items-center justify-between rounded-none animate-in fade-in duration-150">
+                <span>
+                  All {paginatedContacts.length} contacts on this page are selected.
+                </span>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-primary font-bold hover:underline p-0 h-auto cursor-pointer"
+                  onClick={() => selectAllMatching(currentQuery, totalItems)}
+                >
+                  Select all {totalItems.toLocaleString()} matching contacts
+                </Button>
+              </div>
+            )}
+
+            {/* Active All-Matching Selection Banner */}
+            {isAllMatching && (
+              <div className="bg-primary/15 border border-primary/30 text-foreground px-4 py-2 text-xs flex items-center justify-between rounded-none animate-in fade-in duration-150">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold">
+                    All {matchedCount.toLocaleString()} matching contacts are selected.
+                  </span>
+                  {excludedIds.length > 0 && (
+                    <span className="text-muted-foreground font-mono text-[11px]">
+                      ({excludedIds.length.toLocaleString()} excluded &mdash; {effectiveSelectedCount.toLocaleString()} targeted)
+                    </span>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2 text-muted-foreground hover:text-foreground underline cursor-pointer"
+                  onClick={clearSelection}
+                >
+                  Clear selection
+                </Button>
+              </div>
+            )}
+
+            {/* Filter Drift Warning Banner */}
+            {isAllMatching && capturedQuery && filtersDifferFromCaptured && (
+              <div className="bg-amber-500/15 border border-amber-500/30 text-foreground px-4 py-2 text-xs flex items-center justify-between rounded-none animate-in fade-in duration-150">
+                <span className="text-amber-600 dark:text-amber-400 font-medium">
+                  Active filters have changed since selection was captured. Bulk operations will apply to the captured query ({effectiveSelectedCount.toLocaleString()} contacts).
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2 text-amber-600 dark:text-amber-400 underline hover:bg-amber-500/20 cursor-pointer"
+                  onClick={clearSelection}
+                >
+                  Reset selection
+                </Button>
+              </div>
+            )}
+
             <div className="bg-card border border-border-subtle overflow-hidden shadow-sm rounded-none">
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="bg-surface-3 border-b border-border-subtle text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
                     <th className="px-4 py-3 w-10">
                       <input
+                        ref={headerCheckboxRef}
                         type="checkbox"
-                        checked={selectedIds.length === paginatedContacts.length && paginatedContacts.length > 0}
-                        onChange={toggleSelectAll}
+                        checked={headerState.checked}
+                        onChange={() => togglePageSelection(currentPageIds)}
                         className="rounded-none border-border-subtle text-primary focus:ring-ring"
                       />
                     </th>
@@ -531,7 +682,7 @@ export default function ContactsScreen() {
                   variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
                 >
                   {paginatedContacts.map((item: any) => {
-                    const isSelected = selectedIds.includes(item.id);
+                    const rowSelected = isSelected(item.id);
                     const isPanelSelected = selectedContact?.id === item.id;
 
                     return (
@@ -549,8 +700,8 @@ export default function ContactsScreen() {
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleSelect(item.id)}
+                            checked={rowSelected}
+                            onChange={() => toggleContact(item.id)}
                             className="rounded-none border-border-subtle text-primary focus:ring-ring"
                           />
                         </td>
@@ -1008,7 +1159,7 @@ export default function ContactsScreen() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-[11px] text-muted-foreground">
-              You are enrolling {selectedIds.length} contact(s) into an outreach campaign.
+              You are enrolling {effectiveSelectedCount.toLocaleString()} contact(s) into an outreach campaign.
             </p>
             <div className="space-y-1">
               <Label htmlFor="enrollCampSelect">Outreach Campaign</Label>
@@ -1037,7 +1188,11 @@ export default function ContactsScreen() {
                     toast.error('Please select a campaign.');
                     return;
                   }
-                  enrollMutation.mutate({ campaignId: enrollCampaignId, contactIds: selectedIds });
+                  enrollMutation.mutate({
+                    campaignId: enrollCampaignId,
+                    contactIds: selectedIds,
+                    selection: getBulkSelectionPayload()
+                  });
                 }}
                 disabled={enrollMutation.isPending}
               >
@@ -1055,10 +1210,10 @@ export default function ContactsScreen() {
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['audiences', 'list', workspaceId] });
           toast.success('Audience saved successfully!');
-          setSelectedIds([]);
+          clearSelection();
           contactsQuery.refetch();
         }}
-        initialMode={selectedIds.length > 0 ? 'static' : 'dynamic'}
+        initialMode={effectiveSelectedCount > 0 ? (isAllMatching ? 'dynamic' : 'static') : 'dynamic'}
         initialSelectedContacts={selectedContactsForAudience}
         initialFilters={{
           search: search || undefined,

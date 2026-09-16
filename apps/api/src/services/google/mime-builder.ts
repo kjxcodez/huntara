@@ -24,6 +24,9 @@ export interface MimeMessageOptions {
   attachments?: MimeAttachment[] | undefined;
   mixedBoundary?: string | undefined;
   altBoundary?: string | undefined;
+  messageId?: string | undefined;
+  inReplyTo?: string | undefined;
+  references?: string | string[] | undefined;
 }
 
 export class MimeBuilder {
@@ -89,6 +92,16 @@ export class MimeBuilder {
   }
 
   /**
+   * Enforces RFC 2822 angle bracket formatting around a message identifier.
+   * Ensures `<id>` format and strips leading/trailing spaces.
+   */
+  public static formatMessageId(msgId: string): string {
+    const trimmed = msgId.trim();
+    if (!trimmed) return '';
+    return trimmed.startsWith('<') && trimmed.endsWith('>') ? trimmed : `<${trimmed}>`;
+  }
+
+  /**
    * Constructs an RFC 2822 compliant message and encodes it as Base64URL without padding.
    */
   public static buildRaw(options: MimeMessageOptions): string {
@@ -112,6 +125,35 @@ export class MimeBuilder {
     if (cc) headers.push(`Cc: ${cc}`);
     if (bcc) headers.push(`Bcc: ${bcc}`);
     headers.push(`Subject: ${encodedSubject}`);
+
+    if (options.messageId) {
+      const cleanMsgId = MimeBuilder.sanitizeHeader(options.messageId, 'Message-ID');
+      const formatted = MimeBuilder.formatMessageId(cleanMsgId);
+      if (formatted) headers.push(`Message-ID: ${formatted}`);
+    }
+
+    if (options.inReplyTo) {
+      const cleanInReplyTo = MimeBuilder.sanitizeHeader(options.inReplyTo, 'In-Reply-To');
+      const formatted = MimeBuilder.formatMessageId(cleanInReplyTo);
+      if (formatted) headers.push(`In-Reply-To: ${formatted}`);
+    }
+
+    if (options.references) {
+      let rawRefs: string[];
+      if (Array.isArray(options.references)) {
+        rawRefs = options.references;
+      } else {
+        rawRefs = options.references.split(/\s+/).filter(Boolean);
+      }
+      const formattedRefs = rawRefs
+        .map((ref) => MimeBuilder.sanitizeHeader(ref, 'References'))
+        .map((ref) => MimeBuilder.formatMessageId(ref))
+        .filter(Boolean);
+      if (formattedRefs.length > 0) {
+        headers.push(`References: ${formattedRefs.join(' ')}`);
+      }
+    }
+
     headers.push('MIME-Version: 1.0');
 
     let mimeContent = '';

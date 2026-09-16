@@ -25,6 +25,7 @@ export const campaignSchema = z.object({
   schedule: z.any().nullable().optional(),
   timezone: z.string().default('UTC'),
   dailyLimit: z.number().int().nonnegative().default(0),
+  trackingEnabled: z.boolean().default(false),
   settings: z.any().nullable().optional(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date()

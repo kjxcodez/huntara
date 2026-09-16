@@ -18,8 +18,11 @@ import {
   canTransitionContactStatus,
   generateEntityId,
   parseDsnReport,
-  sanitizeHtmlForPreview
+  mapBounceCategoryToFailureCategory,
+  sanitizeHtmlForPreview,
+  isCircuitBreakerRejectionCategory
 } from '@leadforge/schema';
+import { CampaignCircuitBreakerService } from '../campaign/campaign-circuit-breaker.service.js';
 import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';
 import { EmailDomainError } from './types.js';
 import { logger } from '../../config/index.js';
@@ -502,7 +505,10 @@ export class ReconciliationService {
           status: { $in: ['SENT', 'AMBIGUOUS'] },
           $or: [
             { providerMessageId: cleanRef },
-            { providerMessageId: ref }
+            { providerMessageId: ref },
+            { messageId: cleanRef },
+            { messageId: ref },
+            { messageId: `<${cleanRef}>` }
           ]
         });
 
@@ -699,15 +705,21 @@ export class ReconciliationService {
           });
         }
 
+        const bounceCategory = dsnReport.classification.category;
+        const failureCategory = mapBounceCategoryToFailureCategory(bounceCategory);
+
         await EmailDeliveryModel.updateOne(
           { _id: bouncedDelivery._id },
           {
             $set: {
               status: 'FAILED',
-              failureCategory: EmailFailureCategory.INVALID_RECIPIENT,
+              failureCategory,
+              failureClassification: bounceCategory,
               failureCode: dsnReport.classification.enhancedStatusCode || String(dsnReport.classification.statusCode || 'BOUNCE'),
               safeHumanMessage: dsnReport.classification.safeDescription,
-              technicalMessage: dsnReport.classification.diagnosticMessage
+              technicalMessage: dsnReport.classification.diagnosticMessage,
+              retryable: !dsnReport.classification.isPermanent,
+              error: dsnReport.classification.safeDescription || dsnReport.classification.diagnosticMessage
             }
           }
         );
@@ -796,6 +808,21 @@ export class ReconciliationService {
                 }
               );
             }
+          }
+        }
+
+        // Evaluate campaign circuit breaker if DSN bounce matches rejection criteria
+        if (bouncedDelivery.campaignId && isCircuitBreakerRejectionCategory(failureCategory)) {
+          try {
+            const breakerService = new CampaignCircuitBreakerService(this.workspaceId);
+            await breakerService.checkAndTripBreaker(this.workspaceId, bouncedDelivery.campaignId, {
+              id: bouncedDelivery._id.toString(),
+              failureCategory,
+              failureCode: dsnReport.classification.enhancedStatusCode || String(dsnReport.classification.statusCode || 'BOUNCE'),
+              technicalMessage: dsnReport.classification.diagnosticMessage
+            });
+          } catch (breakerErr) {
+            logger.warn({ breakerErr, campaignId: bouncedDelivery.campaignId }, 'Failed to evaluate campaign circuit breaker on DSN bounce');
           }
         }
 
@@ -1095,7 +1122,13 @@ export class ReconciliationService {
             workspaceId: this.workspaceId,
             direction: 'OUTBOUND',
             status: { $in: ['SENT', 'AMBIGUOUS'] },
-            $or: [{ providerMessageId: cleanRef }, { providerMessageId: ref }]
+            $or: [
+              { providerMessageId: cleanRef },
+              { providerMessageId: ref },
+              { messageId: cleanRef },
+              { messageId: ref },
+              { messageId: `<${cleanRef}>` }
+            ]
           });
 
           if (matchedDelivery) {

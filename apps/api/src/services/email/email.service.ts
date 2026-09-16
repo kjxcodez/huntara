@@ -2,7 +2,7 @@ import { EmailAccountModel } from '../../db/models/email-account.model.js';
 import { UserTestRecipientModel } from '../../db/models/user-test-recipient.model.js';
 import { CampaignModel } from '../../db/models/campaign.model.js';
 import { ContactModel } from '../../db/models/contact.model.js';
-import { EmailDeliveryModel } from '../../db/models/email-delivery.model.js';
+import { EmailDeliveryModel, type EmailDeliveryDocument } from '../../db/models/email-delivery.model.js';
 import { EmailDeliveryRepository } from '../../repositories/email-delivery/email-delivery.repository.js';
 import { EmailAccountRepository } from '../../repositories/email-account/email-account.repository.js';
 import {
@@ -21,10 +21,15 @@ import {
   BounceCategory,
   SuppressionReason,
   classifyBounce,
+  mapBounceCategoryToFailureCategory,
   evaluateOutreachEligibility,
+  normalizeDomain,
   generateTrackingToken,
   injectOpenTrackingPixel,
-  rewriteLinksForClickTracking
+  rewriteLinksForClickTracking,
+  validateTrackingBaseUrl,
+  isCircuitBreakerRejectionCategory,
+  generateEntityId
 } from '@leadforge/schema';
 import {
   EmailDomainError,
@@ -32,6 +37,8 @@ import {
   type SendEmailResult
 } from './types.js';
 import { EmailAccountService } from './email-account.service.js';
+import { CampaignCircuitBreakerService } from '../campaign/campaign-circuit-breaker.service.js';
+import { DomainPacingService } from '../outreach/domain-pacing.service.js';
 import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';
 import { logger } from '../../config/index.js';
 import crypto from 'crypto';
@@ -51,7 +58,14 @@ export function classifyEmailFailure(err: any): {
   const lowerMsg = msg.toLowerCase();
 
   // 1. Ambiguous Delivery / Network Timeout during send
-  if (err?.code === 'AMBIGUOUS_SEND_TIMEOUT' || lowerMsg.includes('ambiguous_send_timeout')) {
+  if (
+    err?.code === 'AMBIGUOUS_SEND_TIMEOUT' ||
+    err?.category === 'AMBIGUOUS' ||
+    err?.ambiguous === true ||
+    lowerMsg.includes('ambiguous_send_timeout') ||
+    lowerMsg.includes('ambiguous') ||
+    lowerMsg.includes('pending reconciliation')
+  ) {
     return {
       code,
       category: EmailFailureCategory.AMBIGUOUS,
@@ -105,14 +119,27 @@ export function classifyEmailFailure(err: any): {
     };
   }
 
-  // 4. Outreach Policy & Safety Gates (Internal LeadForge policy)
-  if (code === 'CAMPAIGN_NOT_ACTIVE' || code === 'CONTACT_NOT_ELIGIBLE') {
+  // 4. Outreach Policy & Safety Gates (Internal LeadForge policy & Issue #36)
+  if (code === 'CAMPAIGN_NOT_ACTIVE' || code === 'CONTACT_NOT_ELIGIBLE' || code === 'COMPANY_CARDINALITY_EXCEEDED') {
     return {
       code,
       category: EmailFailureCategory.POLICY,
-      safeHumanMessage: 'Outreach policy prevented send: campaign is not active or contact is ineligible.',
+      safeHumanMessage: code === 'COMPANY_CARDINALITY_EXCEEDED'
+        ? 'Outreach policy prevented send: company contact cardinality limit reached for campaign.'
+        : 'Outreach policy prevented send: campaign is not active or contact is ineligible.',
       technicalMessage: msg,
       retryable: false,
+      ambiguous: false
+    };
+  }
+
+  if (code === 'DOMAIN_PACING_THROTTLED') {
+    return {
+      code,
+      category: EmailFailureCategory.RATE_LIMIT,
+      safeHumanMessage: 'Destination domain outbound pacing throttled.',
+      technicalMessage: msg,
+      retryable: true,
       ambiguous: false
     };
   }
@@ -169,39 +196,8 @@ export function classifyEmailFailure(err: any): {
   // 8. Delegate to Canonical Bounce & Rejection Classifier
   const bounce = classifyBounce({ code, message: msg });
   if (bounce && bounce.category !== BounceCategory.UNKNOWN) {
-    let category = EmailFailureCategory.PROVIDER;
-    let retryable = !bounce.isPermanent;
-
-    switch (bounce.category) {
-      case BounceCategory.SPAM_REJECTION:
-      case BounceCategory.POLICY_REJECTION:
-      case BounceCategory.AUTHENTICATION_REJECTION:
-        category = EmailFailureCategory.POLICY;
-        retryable = false;
-        break;
-
-      case BounceCategory.MAILBOX_UNAVAILABLE:
-      case BounceCategory.DOMAIN_UNAVAILABLE:
-      case BounceCategory.HARD_BOUNCE:
-        category = EmailFailureCategory.INVALID_RECIPIENT;
-        retryable = false;
-        break;
-
-      case BounceCategory.RATE_LIMIT:
-        category = EmailFailureCategory.RATE_LIMIT;
-        retryable = true;
-        break;
-
-      case BounceCategory.SOFT_BOUNCE:
-        category = EmailFailureCategory.PROVIDER;
-        retryable = true;
-        break;
-
-      default:
-        category = EmailFailureCategory.PROVIDER;
-        retryable = Boolean(err?.retryable);
-        break;
-    }
+    const category = mapBounceCategoryToFailureCategory(bounce.category);
+    const retryable = !bounce.isPermanent;
 
     return {
       code: bounce.enhancedStatusCode || (bounce.statusCode ? String(bounce.statusCode) : code),
@@ -212,6 +208,20 @@ export function classifyEmailFailure(err: any): {
       ambiguous: false,
       bounceCategory: bounce.category,
       isHardBounce: bounce.isHardBounce
+    };
+  }
+
+  // 8b. Company DNC & Domain Suppression policy rejections (local policy, NOT provider failures or hard bounces)
+  if (code === 'COMPANY_DNC' || code === 'DOMAIN_SUPPRESSED') {
+    return {
+      code,
+      category: EmailFailureCategory.POLICY,
+      safeHumanMessage: 'Outbound dispatch blocked by company or domain suppression policy.',
+      technicalMessage: msg,
+      retryable: false,
+      ambiguous: false,
+      bounceCategory: BounceCategory.POLICY_REJECTION,
+      isHardBounce: false
     };
   }
 
@@ -248,6 +258,42 @@ export function classifyEmailFailure(err: any): {
 }
 
 /**
+ * Generates an RFC 2822 compliant Message-ID.
+ * Format: `<leadforge.${entityId}.${timestamp}@${domain}>`
+ */
+export function generateRfcMessageId(senderEmail?: string): string {
+  const entityId = generateEntityId();
+  const timestamp = Date.now();
+  let domain = 'leadforge.internal';
+  if (senderEmail && senderEmail.includes('@')) {
+    const parts = senderEmail.split('@');
+    if (parts[1] && parts[1].trim()) {
+      domain = parts[1].toLowerCase().trim();
+    }
+  }
+  return `<leadforge.${entityId}.${timestamp}@${domain}>`;
+}
+
+/**
+ * Validates whether a given string adheres to RFC Message-ID syntax `<id-left@id-right>`.
+ * Rejects arbitrary database IDs, Gmail REST API IDs (e.g. '18e5a7b123456789'), or undefined.
+ */
+export function isValidRfcMessageId(id: string | null | undefined): boolean {
+  if (!id || typeof id !== 'string') return false;
+  const trimmed = id.trim();
+  return /^<?[^<>\s@]+@[^<>\s@]+>?$/.test(trimmed);
+}
+
+/**
+ * Enforces enclosing angle brackets on an RFC Message-ID.
+ */
+export function formatRfcMessageId(id: string): string {
+  const trimmed = id.trim();
+  if (!trimmed) return '';
+  return trimmed.startsWith('<') && trimmed.endsWith('>') ? trimmed : `<${trimmed}>`;
+}
+
+/**
  * EmailService owns email operations (send / sendTest / verify) on top of the
  * GmailProvider abstraction and authoritative EmailDelivery ledger in MongoDB.
  */
@@ -273,6 +319,50 @@ export class EmailService {
       firstUsedAt: d.firstUsedAt,
       lastUsedAt: d.lastUsedAt
     }));
+  }
+
+  /**
+   * Resolves the authoritative predecessor outbound delivery for follow-up sequence steps.
+   * Strictly workspace-scoped, matches the exact execution and contact, and requires terminal SENT status.
+   */
+  public async resolvePredecessorDelivery(input: SendEmailInput): Promise<EmailDeliveryDocument | null> {
+    // If explicit inReplyTo was provided by caller, no auto-resolution required
+    if (input.inReplyTo) {
+      return null;
+    }
+
+    // Follow-ups require executionId and stepIndex > 0 (or explicit sequence step lineage)
+    if (input.executionId && typeof input.stepIndex === 'number' && input.stepIndex > 0) {
+      const query: any = {
+        workspaceId: this.workspaceId,
+        executionId: input.executionId,
+        direction: 'OUTBOUND',
+        status: 'SENT'
+      };
+
+      if (input.contactId && input.contactId !== 'direct-contact') {
+        query.contactId = input.contactId;
+      }
+
+      const predecessor = await EmailDeliveryModel.findOne(query).sort({ stepIndex: -1, sentAt: -1 });
+      if (predecessor) {
+        return predecessor;
+      }
+    }
+
+    // Fallback for campaign-scoped steps where executionId might not match but campaignId + contactId + stepIndex > 0 exists
+    if (input.campaignId && input.contactId && typeof input.stepIndex === 'number' && input.stepIndex > 0) {
+      const query: any = {
+        workspaceId: this.workspaceId,
+        campaignId: input.campaignId,
+        contactId: input.contactId,
+        direction: 'OUTBOUND',
+        status: 'SENT'
+      };
+      return await EmailDeliveryModel.findOne(query).sort({ stepIndex: -1, sentAt: -1 });
+    }
+
+    return null;
   }
 
   /**
@@ -349,30 +439,19 @@ export class EmailService {
       );
     }
 
-    // 0a. Pre-flight suppression check: block if recipient is suppressed in workspace (even for direct sends)
+    const normRecipient = input.to.toLowerCase().trim();
     const suppressionRepo = new SuppressionRepository(this.workspaceId);
-    const isSuppressed = await suppressionRepo.isSuppressed(input.to);
+
+    // 1. Workspace recipient suppression check: block if recipient is suppressed in workspace (even for direct sends)
+    const isSuppressed = await suppressionRepo.isSuppressed(normRecipient);
     if (isSuppressed) {
       throw new EmailDomainError(
         'RECIPIENT_SUPPRESSED',
-        `Recipient "${input.to}" is suppressed in this workspace and cannot receive outreach.`
+        `Recipient "${normRecipient}" is suppressed in this workspace and cannot receive outreach.`
       );
     }
 
-    // 0a. Server-authoritative campaign send authorization check
-    let campaignDoc: any = null;
-    if (input.campaignId) {
-      campaignDoc = await CampaignModel.findOne({ _id: input.campaignId, workspaceId: this.workspaceId });
-      if (campaignDoc && campaignDoc.status !== 'ACTIVE') {
-        throw new EmailDomainError(
-          'CAMPAIGN_NOT_ACTIVE',
-          `Campaign "${input.campaignId}" is in status "${campaignDoc.status}". Sending is not authorized.`
-        );
-      }
-    }
-
-    // 0b. Server-authoritative contact outreach eligibility check
-    const normRecipient = input.to.toLowerCase().trim();
+    // Resolve contact document to determine canonical company identity
     let contactDoc: any = null;
     if (input.contactId && input.contactId !== 'direct-contact') {
       contactDoc = await ContactModel.findOne({ _id: input.contactId, workspaceId: this.workspaceId });
@@ -388,6 +467,92 @@ export class EmailService {
       }
     }
 
+    // 2. Company DNC check: block if contact's canonical company is marked Do Not Contact in workspace
+    const companyId = contactDoc?.companyId || null;
+    if (companyId) {
+      const isCompanyDnc = await suppressionRepo.isCompanySuppressed(companyId);
+      if (isCompanyDnc) {
+        logger.info(
+          {
+            workspaceId: this.workspaceId,
+            companyId,
+            contactId: input.contactId,
+            recipient: normRecipient,
+            campaignId: input.campaignId
+          },
+          'Outreach dispatch blocked by company DNC policy'
+        );
+        throw new EmailDomainError(
+          'COMPANY_DNC',
+          `Company "${companyId}" is marked Do Not Contact in this workspace. Outbound outreach to "${normRecipient}" is blocked.`
+        );
+      }
+    }
+
+    // 3. Domain suppression check: block if recipient domain is suppressed in workspace
+    const normDomain = normalizeDomain(normRecipient);
+    if (normDomain) {
+      const isDomainSuppressed = await suppressionRepo.isDomainSuppressed(normDomain);
+      if (isDomainSuppressed) {
+        logger.info(
+          {
+            workspaceId: this.workspaceId,
+            domain: normDomain,
+            contactId: input.contactId,
+            recipient: normRecipient,
+            campaignId: input.campaignId
+          },
+          'Outreach dispatch blocked by domain suppression policy'
+        );
+        throw new EmailDomainError(
+          'DOMAIN_SUPPRESSED',
+          `Domain "${normDomain}" is suppressed in this workspace. Outbound outreach to "${normRecipient}" is blocked.`
+        );
+      }
+    }
+
+    // 4. Server-authoritative campaign send authorization check
+    let campaignDoc: any = null;
+    if (input.campaignId) {
+      campaignDoc = await CampaignModel.findOne({ _id: input.campaignId, workspaceId: this.workspaceId });
+      if (campaignDoc && campaignDoc.status !== 'ACTIVE') {
+        throw new EmailDomainError(
+          'CAMPAIGN_NOT_ACTIVE',
+          `Campaign "${input.campaignId}" is in status "${campaignDoc.status}". Sending is not authorized.`
+        );
+      }
+    }
+
+    // 4b. Authoritative email tracking policy check & fail-closed runtime URL validation
+    const isTrackingEnabled = Boolean(
+      campaignDoc
+        ? (campaignDoc.trackingEnabled ?? campaignDoc.settings?.trackingEnabled ?? false)
+        : (input.trackingEnabled ?? false)
+    );
+
+    let validatedTrackingBaseUrl: string | null = null;
+    if (isTrackingEnabled) {
+      const rawTrackingUrl = process.env.TRACKING_BASE_URL || process.env.API_BASE_URL;
+      const validation = validateTrackingBaseUrl(rawTrackingUrl);
+      if (!validation.isValid) {
+        logger.warn(
+          {
+            workspaceId: this.workspaceId,
+            campaignId: input.campaignId,
+            rawTrackingUrl,
+            error: validation.error
+          },
+          'Outreach send rejected: tracking is enabled but tracking base URL is invalid'
+        );
+        throw new EmailDomainError(
+          'INVALID_TRACKING_CONFIG',
+          'Email tracking is enabled, but the configured tracking URL is invalid. Configure a valid HTTPS tracking URL or disable tracking for this campaign.'
+        );
+      }
+      validatedTrackingBaseUrl = validation.normalizedUrl || null;
+    }
+
+    // 5. Server-authoritative contact outreach eligibility check
     if (contactDoc) {
       const eligibility = evaluateOutreachEligibility({
         contact: {
@@ -425,10 +590,22 @@ export class EmailService {
       );
     }
 
+    // 0d. Server-authoritative company cardinality & domain pacing gate (Issue #36)
+    const pacingService = new DomainPacingService(this.workspaceId);
+    const pacingReservation = await pacingService.checkAndReservePacing({
+      recipientEmail: normRecipient,
+      campaignId: input.campaignId,
+      contactId: input.contactId,
+      companyId: contactDoc?.companyId || null,
+      campaignSettings: campaignDoc?.settings || null,
+      requestId: input.idempotencyKey
+    });
+
     // 1. Atomic send slot reservation (prevents counter race conditions)
     const effectiveLimits = await this.accountRepo.resolveEffectiveLimits(input.accountId);
     const reservation = await this.accountRepo.reserveSendSlot(input.accountId, effectiveLimits);
     if (!reservation.success) {
+      await pacingReservation.releaseDomainLease();
       if (reservation.reason === 'MAILBOX_AUTH_REQUIRED') {
         throw new EmailDomainError(
           'MAILBOX_REAUTH_REQUIRED',
@@ -470,6 +647,34 @@ export class EmailService {
       templateVersion: input.templateVersion || null
     });
 
+    // 2b. Resolve predecessor delivery and RFC threading headers for follow-ups
+    const predecessor = await this.resolvePredecessorDelivery(input);
+
+    let inReplyTo: string | null = null;
+    let references: string[] = [];
+    let providerThreadId: string | null = input.threadId || predecessor?.providerThreadId || null;
+
+    if (input.inReplyTo && isValidRfcMessageId(input.inReplyTo)) {
+      inReplyTo = formatRfcMessageId(input.inReplyTo);
+      const rawRefs = Array.isArray(input.references)
+        ? input.references
+        : input.references ? [input.references] : [inReplyTo];
+      references = Array.from(new Set(rawRefs.filter(isValidRfcMessageId).map(formatRfcMessageId)));
+    } else if (predecessor) {
+      if (predecessor.messageId && isValidRfcMessageId(predecessor.messageId)) {
+        inReplyTo = formatRfcMessageId(predecessor.messageId);
+        const prevRefs = Array.isArray(predecessor.references)
+          ? predecessor.references.filter(isValidRfcMessageId).map(formatRfcMessageId)
+          : [];
+        references = Array.from(new Set([...prevRefs, inReplyTo]));
+      }
+    }
+
+    // Generate unique outbound RFC messageId for this message
+    const outboundRfcMessageId = input.messageId && isValidRfcMessageId(input.messageId)
+      ? formatRfcMessageId(input.messageId)
+      : generateRfcMessageId(account.email);
+
     // 3. Atomically reserve delivery in MongoDB ledger
     let deliveryRecord: any;
     try {
@@ -484,6 +689,9 @@ export class EmailService {
         senderEmail: account.email,
         recipientEmail: input.to.toLowerCase().trim(),
         subject: input.subject,
+        messageId: outboundRfcMessageId,
+        inReplyTo: inReplyTo || null,
+        references: references || [],
         idempotencyKey,
         templateId: input.templateId || null,
         templateVersion: input.templateVersion || null,
@@ -516,15 +724,18 @@ export class EmailService {
           'Idempotency skip: delivery previously recorded as SENT in ledger'
         );
         await this.accountRepo.releaseSendSlot(input.accountId);
+        await pacingReservation.releaseDomainLease();
         return {
           messageId: deliveryRecord.providerMessageId || '',
           threadId: deliveryRecord.providerThreadId || null,
+          rfcMessageId: deliveryRecord.messageId || outboundRfcMessageId,
           accepted: [input.to],
           sentAt: deliveryRecord.sentAt || new Date()
         };
       }
     } catch (reserveErr: any) {
       await this.accountRepo.releaseSendSlot(input.accountId);
+      await pacingReservation.releaseDomainLease();
       throw reserveErr;
     }
 
@@ -686,23 +897,23 @@ export class EmailService {
       }
     }
 
-    // 6. Setup Tracking (open pixel & click redirect) and persist exact rendered outbound message
-    const trackingBaseUrl =
-      process.env.TRACKING_BASE_URL ||
-      process.env.API_BASE_URL ||
-      'http://localhost:3000';
-    const openTrackingToken = deliveryRecord.openTrackingToken || generateTrackingToken();
-    let clickTokens: Array<{ token: string; targetUrl: string }> = deliveryRecord.clickTrackingTokens?.length
-      ? deliveryRecord.clickTrackingTokens
-      : [];
+    // 6. Setup Tracking (open pixel & click redirect) if explicitly enabled and persist exact rendered outbound message
+    let openTrackingToken: string | null = null;
+    let clickTokens: Array<{ token: string; targetUrl: string }> = [];
 
-    if (finalHtml) {
-      const clickRes = rewriteLinksForClickTracking(finalHtml, trackingBaseUrl);
+    if (isTrackingEnabled && finalHtml && validatedTrackingBaseUrl) {
+      const activeOpenToken = deliveryRecord.openTrackingToken || generateTrackingToken();
+      openTrackingToken = activeOpenToken;
+      clickTokens = deliveryRecord.clickTrackingTokens?.length
+        ? deliveryRecord.clickTrackingTokens
+        : [];
+
+      const clickRes = rewriteLinksForClickTracking(finalHtml, validatedTrackingBaseUrl);
       finalHtml = clickRes.rewrittenHtml;
       if (!clickTokens.length) {
         clickTokens = clickRes.tokens;
       }
-      finalHtml = injectOpenTrackingPixel(finalHtml, trackingBaseUrl, openTrackingToken);
+      finalHtml = injectOpenTrackingPixel(finalHtml, validatedTrackingBaseUrl, activeOpenToken);
     }
 
     // Persist exact rendered content & tracking metadata onto delivery record
@@ -744,13 +955,20 @@ export class EmailService {
         ...input,
         from: input.from || account.email,
         attachments: processedAttachments,
-        html: finalHtml
+        html: finalHtml,
+        messageId: outboundRfcMessageId,
+        inReplyTo: inReplyTo || undefined,
+        references: references.length > 0 ? references : undefined,
+        threadId: providerThreadId || undefined
       });
 
       // 8. Finalize delivery in MongoDB ledger
       await this.deliveryRepo.finalizeDelivery(deliveryRecord._id.toString(), {
         providerMessageId: result.messageId,
-        providerThreadId: (result as any).threadId || null,
+        providerThreadId: (result as any).threadId || providerThreadId || null,
+        messageId: outboundRfcMessageId,
+        inReplyTo: inReplyTo || null,
+        references: references || [],
         sentAt: new Date()
       });
 
@@ -791,6 +1009,9 @@ export class EmailService {
           workspaceId: this.workspaceId,
           deliveryId: deliveryRecord._id.toString(),
           messageId: result.messageId,
+          rfcMessageId: outboundRfcMessageId,
+          inReplyTo: inReplyTo || undefined,
+          referencesCount: references.length,
           to: input.to,
           subject: input.subject
         },
@@ -799,7 +1020,8 @@ export class EmailService {
 
       return {
         messageId: result.messageId,
-        threadId: (result as any).threadId || null,
+        threadId: (result as any).threadId || providerThreadId || null,
+        rfcMessageId: outboundRfcMessageId,
         accepted: [input.to],
         sentAt: new Date()
       };
@@ -834,14 +1056,18 @@ export class EmailService {
         });
       }
 
-      if (err.code === 'AMBIGUOUS_SEND_TIMEOUT') {
+      if (
+        err.code === 'AMBIGUOUS_SEND_TIMEOUT' ||
+        failure.category === EmailFailureCategory.AMBIGUOUS ||
+        failure.ambiguous === true
+      ) {
         // Critical Ambiguous Send: Network failed after dispatch.
         // Clear in-flight lease so mailbox is not locked forever, but do NOT release quota or retry blindly!
         await this.accountRepo.clearSendLease(input.accountId);
         await this.deliveryRepo.markAmbiguous(
           deliveryRecord._id.toString(),
           err.message,
-          'Network timeout during Gmail API transmission. Requires manual/reconciliation check.'
+          'Network timeout or indeterminate provider response during transmission. Requires reconciliation.'
         );
         throw err;
       }
@@ -934,6 +1160,21 @@ export class EmailService {
           }
         } catch (suppressErr) {
           logger.warn({ suppressErr, to: input.to }, 'Failed to record hard bounce suppression on outbound send failure');
+        }
+      }
+
+      // Evaluate campaign circuit breaker if this failure is an outbound rejection
+      if (input.campaignId && isCircuitBreakerRejectionCategory(failure.category)) {
+        try {
+          const breakerService = new CampaignCircuitBreakerService(this.workspaceId);
+          await breakerService.checkAndTripBreaker(this.workspaceId, input.campaignId, {
+            id: deliveryRecord._id.toString(),
+            failureCategory: failure.category,
+            failureCode: failure.code,
+            technicalMessage: failure.technicalMessage
+          });
+        } catch (breakerErr) {
+          logger.warn({ breakerErr, campaignId: input.campaignId }, 'Failed to evaluate campaign circuit breaker on outbound send failure');
         }
       }
 

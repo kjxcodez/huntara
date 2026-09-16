@@ -6,10 +6,15 @@ import { slugify } from '@leadforge/core';
 import {
   createWorkspaceDtoSchema,
   updateWorkspaceDtoSchema,
+  updateSchedulerPolicyDtoSchema,
+  DEFAULT_SCHEDULER_POLICY,
+  resolveSchedulerPolicy,
   WorkspaceRole,
   WorkspaceMemberStatus,
   type CreateWorkspaceDto,
   type UpdateWorkspaceDto,
+  type UpdateSchedulerPolicyDto,
+  type SchedulerPolicy,
   type InviteMemberDto
 } from '@leadforge/schema';
 import {
@@ -21,6 +26,7 @@ import {
 import {
   canInviteMembers,
   canManageMembers,
+  canManageWorkspace,
   canTransferOwnership
 } from '../../utils/authorization.js';
 
@@ -396,5 +402,85 @@ export class WorkspaceService {
 
   public async listPendingUserInvitesByEmail(email: string): Promise<WorkspaceDocument[]> {
     return this.workspaceRepository.findPendingInvitesByEmail(email);
+  }
+
+  /**
+   * Retrieves the canonical scheduler concurrency policy for a workspace.
+   * If missing (legacy workspace), bootstraps default values deterministically in MongoDB.
+   */
+  public async getSchedulerPolicy(workspaceId: string): Promise<SchedulerPolicy> {
+    const workspace = await this.getWorkspaceById(workspaceId);
+    const existingRaw = workspace.settings?.schedulerPolicy;
+
+    if (!existingRaw) {
+      // Legacy workspace: bootstrap default policy document in MongoDB
+      const defaultPolicy = {
+        globalMaxConcurrency: DEFAULT_SCHEDULER_POLICY.globalMaxConcurrency,
+        typeLimits: { ...DEFAULT_SCHEDULER_POLICY.typeLimits }
+      };
+
+      workspace.settings = {
+        ...workspace.settings,
+        schedulerPolicy: {
+          ...defaultPolicy,
+          updatedAt: new Date()
+        }
+      };
+
+      try {
+        await workspace.save();
+      } catch {
+        // Non-blocking fallback: if save fails, return canonical default deterministically
+      }
+
+      return defaultPolicy;
+    }
+
+    return resolveSchedulerPolicy(existingRaw);
+  }
+
+  /**
+   * Updates scheduler concurrency policy with strict integer/range validation
+   * and workspace manager role authorization.
+   */
+  public async updateSchedulerPolicy(
+    workspaceId: string,
+    dto: UpdateSchedulerPolicyDto,
+    actorId: string
+  ): Promise<SchedulerPolicy> {
+    const validated = updateSchedulerPolicyDtoSchema.parse(dto);
+    const workspace = await this.getWorkspaceById(workspaceId);
+
+    // Actor authorization: must be OWNER or ADMIN
+    const isOwner = workspace.ownerId === actorId;
+    const member = workspace.members.find((m) => m.userId === actorId);
+    if (!isOwner && (!member || !canManageWorkspace(member.role as WorkspaceRole))) {
+      throw new ForbiddenError('Only workspace owners or administrators can update scheduler policy.');
+    }
+
+    const currentPolicy = resolveSchedulerPolicy(workspace.settings?.schedulerPolicy);
+    const mergedTypeLimits = {
+      ...currentPolicy.typeLimits,
+      ...(validated.typeLimits || {})
+    };
+
+    const newPolicy: SchedulerPolicy = {
+      globalMaxConcurrency:
+        validated.globalMaxConcurrency !== undefined
+          ? validated.globalMaxConcurrency
+          : currentPolicy.globalMaxConcurrency,
+      typeLimits: mergedTypeLimits
+    };
+
+    workspace.settings = {
+      ...workspace.settings,
+      schedulerPolicy: {
+        ...newPolicy,
+        updatedAt: new Date()
+      }
+    };
+
+    await workspace.save();
+    return newPolicy;
   }
 }

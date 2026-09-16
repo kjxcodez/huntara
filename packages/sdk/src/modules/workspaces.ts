@@ -5,7 +5,9 @@ import type {
   WorkspaceRole,
   CreateWorkspaceDto,
   UpdateWorkspaceDto,
-  InviteMemberDto
+  InviteMemberDto,
+  SchedulerPolicy,
+  UpdateSchedulerPolicyDto
 } from '@leadforge/schema';
 
 export class WorkspacesModule {
@@ -69,5 +71,16 @@ export class WorkspacesModule {
 
   public async declineInvite(token: string): Promise<Workspace> {
     return this.client.post<Workspace>('/workspaces/invites/decline', { token });
+  }
+
+  public async getSchedulerPolicy(id: string): Promise<SchedulerPolicy> {
+    return this.client.get<SchedulerPolicy>(`/workspaces/${id}/scheduler-policy`);
+  }
+
+  public async updateSchedulerPolicy(
+    id: string,
+    dto: UpdateSchedulerPolicyDto
+  ): Promise<SchedulerPolicy> {
+    return this.client.put<SchedulerPolicy>(`/workspaces/${id}/scheduler-policy`, dto);
   }
 }

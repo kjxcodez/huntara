@@ -32,11 +32,13 @@ export interface EmailDeliveryDocument
   accountId: string;
   senderEmail: string;
   recipientEmail: string;
+  recipientDomain?: string | null;
   subject: string;
   htmlBody?: string | null;
   textBody?: string | null;
   attachments?: EmailAttachmentDoc[];
   provider?: string;
+  messageId?: string | null;
   providerMessageId?: string | null;
   providerThreadId?: string | null;
   status: EmailDeliveryStatus;
@@ -104,6 +106,7 @@ const emailDeliverySchema = new Schema<EmailDeliveryDocument>(
     accountId: { type: String, required: true, index: true },
     senderEmail: { type: String, required: true, lowercase: true, trim: true },
     recipientEmail: { type: String, required: true, lowercase: true, trim: true },
+    recipientDomain: { type: String, default: null, lowercase: true, trim: true, index: true },
     subject: { type: String, required: true },
     htmlBody: { type: String, default: null },
     textBody: { type: String, default: null },
@@ -122,6 +125,7 @@ const emailDeliverySchema = new Schema<EmailDeliveryDocument>(
       }
     ],
     provider: { type: String, default: 'gmail' },
+    messageId: { type: String, default: null, index: true },
     providerMessageId: { type: String, default: null, index: true },
     providerThreadId: { type: String, default: null, index: true },
     status: {
@@ -209,6 +213,8 @@ emailDeliverySchema.index({ 'clickTrackingTokens.token': 1 }, { sparse: true });
 // 5. Thread & direction indexes for rapid reply correlation and message logs:
 emailDeliverySchema.index({ workspaceId: 1, providerThreadId: 1 });
 emailDeliverySchema.index({ workspaceId: 1, direction: 1, createdAt: -1 });
+emailDeliverySchema.index({ workspaceId: 1, recipientDomain: 1, createdAt: -1 });
+emailDeliverySchema.index({ workspaceId: 1, campaignId: 1, companyId: 1, createdAt: -1 });
 emailDeliverySchema.index({ workspaceId: 1, status: 1, reconciliationLeaseExpiresAt: 1 });
 
 // Note: Permanent outbound send ledger; zero TTL index.

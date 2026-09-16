@@ -23,12 +23,13 @@ export const createCampaignDtoSchema = z.object({
   schedule: z.any().nullable().optional(),
   timezone: z.string().optional(),
   dailyLimit: z.number().int().nonnegative().optional(),
+  trackingEnabled: z.boolean().default(false),
   settings: z.any().nullable().optional()
 });
-export type CreateCampaignDto = z.infer<typeof createCampaignDtoSchema>;
+export type CreateCampaignDto = z.input<typeof createCampaignDtoSchema>;
 
 export const updateCampaignDtoSchema = createCampaignDtoSchema.partial();
-export type UpdateCampaignDto = z.infer<typeof updateCampaignDtoSchema>;
+export type UpdateCampaignDto = z.input<typeof updateCampaignDtoSchema>;
 
 export const campaignFiltersSchema = paginationParamsSchema.extend({
   status: campaignStatusSchema.optional()

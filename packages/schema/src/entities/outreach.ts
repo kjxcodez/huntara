@@ -195,14 +195,17 @@ export type EmailAccount = z.infer<typeof emailAccountSchema>;
 /**
  * Evaluates whether an email account is currently eligible to dispatch outreach.
  */
-export function isMailboxEligibleForDispatch(account: {
-  status?: string | null;
-  health?: {
-    state?: MailboxHealthState | string | null;
-    cooldownUntil?: Date | string | null;
-    consecutiveSendFailures?: number | null;
-  } | null;
-}): { eligible: boolean; reason?: string } {
+export function isMailboxEligibleForDispatch(
+  account: {
+    status?: string | null;
+    health?: {
+      state?: MailboxHealthState | string | null;
+      cooldownUntil?: Date | string | null;
+      consecutiveSendFailures?: number | null;
+    } | null;
+  },
+  referenceTime: Date = new Date()
+): { eligible: boolean; reason?: string } {
   if (account.status !== 'connected') {
     return {
       eligible: false,
@@ -215,7 +218,7 @@ export function isMailboxEligibleForDispatch(account: {
     return { eligible: true };
   }
 
-  const now = new Date();
+  const now = referenceTime;
 
   switch (health.state) {
     case 'HEALTHY':

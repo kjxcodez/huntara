@@ -195,3 +195,92 @@ export function sanitizeHtmlForPreview(
   return sanitized;
 }
 
+export interface TrackingBaseUrlValidationResult {
+  isValid: boolean;
+  error?: string;
+  normalizedUrl?: string;
+}
+
+/**
+ * Validates tracking base URL at runtime.
+ * Guarantees that:
+ * 1. Must be a valid absolute URL with HTTPS protocol.
+ * 2. Rejects insecure HTTP, file:, relative paths, and non-URL formats.
+ * 3. Rejects localhost, loopback, zero IPs, and local domain suffixes.
+ * 4. Rejects private IPv4 subnets (RFC 1918).
+ * 5. Returns normalized URL without trailing slash.
+ */
+export function validateTrackingBaseUrl(url: unknown): TrackingBaseUrlValidationResult {
+  if (typeof url !== 'string' || !url.trim()) {
+    return {
+      isValid: false,
+      error: 'Tracking base URL is required when email tracking is enabled.'
+    };
+  }
+
+  const trimmed = url.trim();
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return {
+      isValid: false,
+      error: `Invalid tracking base URL format: "${trimmed}". Must be a valid absolute HTTPS URL.`
+    };
+  }
+
+  if (parsed.protocol !== 'https:') {
+    return {
+      isValid: false,
+      error: `Disallowed tracking URL protocol "${parsed.protocol}". Only secure HTTPS tracking URLs are permitted.`
+    };
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // Reject localhost, loopback, zero IP, and internal names
+  if (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '0.0.0.0' ||
+    hostname === '::1' ||
+    hostname === '[::1]' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.internal')
+  ) {
+    return {
+      isValid: false,
+      error: `Disallowed local/loopback tracking hostname "${hostname}". Must use a public HTTPS domain.`
+    };
+  }
+
+  // Reject private and reserved IPv4 address ranges
+  const ipv4Match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4Match && ipv4Match[1] && ipv4Match[2]) {
+    const octet1 = parseInt(ipv4Match[1], 10);
+    const octet2 = parseInt(ipv4Match[2], 10);
+
+    if (
+      octet1 === 0 ||
+      octet1 === 10 ||
+      octet1 === 127 ||
+      (octet1 === 169 && octet2 === 254) ||
+      (octet1 === 172 && octet2 >= 16 && octet2 <= 31) ||
+      (octet1 === 192 && octet2 === 168)
+    ) {
+      return {
+        isValid: false,
+        error: `Disallowed private/internal IP address in tracking URL: "${hostname}".`
+      };
+    }
+  }
+
+  const normalizedUrl = `${parsed.protocol}//${parsed.host}${parsed.pathname === '/' ? '' : parsed.pathname.replace(/\/+$/, '')}`;
+  return {
+    isValid: true,
+    normalizedUrl
+  };
+}
+

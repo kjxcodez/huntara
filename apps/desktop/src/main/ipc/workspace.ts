@@ -167,6 +167,15 @@ export function registerWorkspaceIpc(
     const { ProjectionService } = await import('../services/projection-service');
     return ProjectionService.rebuildWorkspaceProjection(runtime.workspaceId, runtime.sdk);
   });
+
+  safeRegister('sync:reconcile', async (_event, payload: { workspaceId: string; scope?: any }) => {
+    const workspaceId = payload?.workspaceId || WorkspaceManager.getActiveRuntime()?.workspaceId;
+    if (!workspaceId) throw new Error('workspaceId is required for sync:reconcile');
+    const runtime = await WorkspaceManager.getOrAwaitActiveRuntime(workspaceId);
+    if (!runtime) throw new Error(`No active workspace runtime for ${workspaceId}`);
+    const { ProjectionService } = await import('../services/projection-service');
+    return ProjectionService.reconcileEntity(runtime.workspaceId, payload.scope || 'all', runtime.sdk, true);
+  });
 }
 
 /**

@@ -33,6 +33,14 @@ vi.mock('../../db/models/email-account.model.js', () => ({
   }
 }));
 
+vi.mock('../../db/models/campaign.model.js', () => ({
+  CampaignModel: {
+    findOne: vi.fn().mockResolvedValue(null),
+    findOneAndUpdate: vi.fn().mockResolvedValue(null),
+    updateOne: vi.fn().mockResolvedValue({ modifiedCount: 0 })
+  }
+}));
+
 vi.mock('../../db/models/sequence-execution.model.js', () => ({
   SequenceExecutionModel: {
     updateMany: vi.fn().mockResolvedValue({ modifiedCount: 0 })

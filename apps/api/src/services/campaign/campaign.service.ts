@@ -68,6 +68,7 @@ export class CampaignService {
         schedule: validated.schedule || null,
         timezone: validated.timezone || 'UTC',
         dailyLimit: validated.dailyLimit !== undefined ? validated.dailyLimit : 0,
+        trackingEnabled: Boolean(validated.trackingEnabled ?? (clientRecord.settings?.trackingEnabled) ?? false),
         settings: validated.settings || null,
         ...(idempotencyKey ? { idempotencyKey } : {})
       });
@@ -219,6 +220,7 @@ export class CampaignService {
     const existing = await this.campaignRepository.findById(id);
     const updatedSettings = { ...(existing.settings || {}) };
     delete updatedSettings.pauseReason;
+    updatedSettings.resumedAt = new Date().toISOString();
     return this.updateCampaign(id, {
       status: CampaignStatus.ACTIVE as any,
       settings: updatedSettings

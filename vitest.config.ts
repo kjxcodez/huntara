@@ -21,16 +21,16 @@ export default defineConfig({
       '**/*.d.ts',
       // Native Electron SQLite integration tests executed via test:integration runner
       'apps/desktop/src/main/services/audiences.test.ts',
-      'apps/desktop/src/main/services/campaign-lifecycle-safety-phase15.test.ts',
+      'apps/desktop/src/main/services/campaign-lifecycle-safety-sqlite.test.ts',
       'apps/desktop/src/main/services/campaign.test.ts',
       'apps/desktop/src/main/services/campaign-analytics.test.ts',
       'apps/desktop/src/main/services/email-quality-intelligence.test.ts',
       'apps/desktop/src/main/services/fresh-database.test.ts',
       'apps/desktop/src/main/services/fresh-database-all-queries.test.ts',
       'apps/desktop/src/main/services/operations-cache.test.ts',
-      'apps/desktop/src/main/services/outreach-lineage-phase16.test.ts',
-      'apps/desktop/src/main/services/inbound-suppression-phase17.test.ts',
-      'apps/desktop/src/main/services/operational-reliability-phase18.test.ts',
+      'apps/desktop/src/main/services/outreach-lineage.test.ts',
+      'apps/desktop/src/main/services/inbound-suppression.test.ts',
+      'apps/desktop/src/main/services/operational-reliability.test.ts',
       'apps/desktop/src/main/services/production-qualification-e2e.test.ts',
       'apps/desktop/src/main/services/crash-matrix-qualification.test.ts',
       'apps/desktop/src/main/services/post-release-stabilization.test.ts',
@@ -39,6 +39,7 @@ export default defineConfig({
       'apps/desktop/src/main/services/adversarial-cross-race-qualification.test.ts'
     ],
     alias: {
+      '@': path.resolve(__dirname, 'apps/desktop/src'),
       '@leadforge/schema': path.resolve(__dirname, 'packages/schema/src/index.ts'),
       '@leadforge/sdk': path.resolve(__dirname, 'packages/sdk/src/index.ts'),
       '@leadforge/core': path.resolve(__dirname, 'packages/core/src/index.ts'),

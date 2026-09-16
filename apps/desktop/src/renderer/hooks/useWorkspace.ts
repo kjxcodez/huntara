@@ -27,6 +27,7 @@ export function useWorkspace() {
       // Re-fetch all user workspaces list to include the new one
       const list = await WorkspaceService.listWorkspaces();
       setWorkspaces(list, workspace);
+      await switchWorkspace(workspace);
       return workspace;
     } catch (err: any) {
       setError(err.message || 'Failed to create workspace.');

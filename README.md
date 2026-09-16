@@ -80,7 +80,7 @@ graph TD
   MP <-->|SyncEngine SdkClient| CN[Cloud Hono Server - MongoDB]
 ```
 
-For a detailed breakdown of process lifecycles, data flows, and schemas, view the [System Architecture Guide](file:///c:/Users/91637/Desktop/Business%20Project/leadforge-os/docs/architecture/README.md).
+For a detailed breakdown of process lifecycles, data flows, and schemas, view the [System Architecture Guide](docs/architecture/current-architecture.md).
 
 ---
 

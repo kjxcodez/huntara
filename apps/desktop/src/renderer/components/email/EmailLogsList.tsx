@@ -16,28 +16,30 @@ import { Button } from '../ui/button';
 import { Skeleton } from '../ui/skeleton';
 import { Badge } from '../ui/badge';
 import { EmailStatusBadge, EngagementPills, DirectionBadge, InboundReconciliationBadge } from './EmailStatusBadge';
+import { EmailLogsFilters } from './EmailLogsFilters';
 
 export interface EmailLogsListProps {
   deliveries: any[];
-  selectedDeliveryId?: string | null;
+  selectedDeliveryId?: string | null | undefined;
   onSelectDelivery: (delivery: any) => void;
-  isLoading?: boolean;
-  page?: number;
-  totalPages?: number;
-  totalItems?: number;
-  onPageChange?: (page: number) => void;
-  searchQuery?: string;
-  onSearchChange?: (query: string) => void;
-  statusFilter?: string;
-  onStatusChange?: (status: string) => void;
-  directionFilter?: string;
-  onDirectionChange?: (direction: string) => void;
-  processingStatusFilter?: string;
-  onProcessingStatusChange?: (status: string) => void;
-  onRefresh?: () => void;
-  onPollReplies?: () => void;
-  isPollingReplies?: boolean;
-  className?: string;
+  isLoading?: boolean | undefined;
+  page?: number | undefined;
+  totalPages?: number | undefined;
+  totalItems?: number | undefined;
+  onPageChange?: ((page: number) => void) | undefined;
+  searchQuery?: string | undefined;
+  onSearchChange?: ((query: string) => void) | undefined;
+  statusFilter?: string | undefined;
+  onStatusChange?: ((status: string) => void) | undefined;
+  directionFilter?: string | undefined;
+  onDirectionChange?: ((direction: string) => void) | undefined;
+  processingStatusFilter?: string | undefined;
+  onProcessingStatusChange?: ((status: string) => void) | undefined;
+  onResetFilters?: (() => void) | undefined;
+  onRefresh?: (() => void) | undefined;
+  onPollReplies?: (() => void) | undefined;
+  isPollingReplies?: boolean | undefined;
+  className?: string | undefined;
 }
 
 export const EmailLogsList: React.FC<EmailLogsListProps> = ({
@@ -57,34 +59,12 @@ export const EmailLogsList: React.FC<EmailLogsListProps> = ({
   onDirectionChange,
   processingStatusFilter = 'all',
   onProcessingStatusChange,
+  onResetFilters,
   onRefresh,
   onPollReplies,
   isPollingReplies = false,
   className = ''
 }) => {
-  const statusOptions = [
-    { label: 'All Statuses', value: 'all' },
-    { label: 'Sent (Accepted)', value: 'SENT' },
-    { label: 'Received', value: 'RECEIVED' },
-    { label: 'Ambiguous', value: 'AMBIGUOUS' },
-    { label: 'Failed', value: 'FAILED' },
-    { label: 'Sending / Retrying', value: 'SENDING' },
-    { label: 'Queued', value: 'QUEUED' }
-  ];
-
-  const directionOptions = [
-    { label: 'All Directions', value: 'all' },
-    { label: 'Outbound', value: 'OUTBOUND' },
-    { label: 'Inbound Replies', value: 'INBOUND' }
-  ];
-
-  const reconciliationOptions = [
-    { label: 'All Reconciliation', value: 'all' },
-    { label: 'Awaiting Correlation', value: 'CORRELATION_PENDING' },
-    { label: 'Matched', value: 'MATCHED' },
-    { label: 'Unmatched', value: 'UNMATCHED' }
-  ];
-
   return (
     <div className={`flex flex-col h-full min-h-0 min-w-0 bg-background border-r border-border/70 overflow-hidden ${className}`}>
       {/* Top Filter & Action Bar */}
@@ -132,64 +112,17 @@ export const EmailLogsList: React.FC<EmailLogsListProps> = ({
           )}
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto text-xs py-0.5 no-scrollbar min-w-0">
-          {/* Status Filter */}
-          <div className="flex items-center gap-1">
-            {statusOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => onStatusChange && onStatusChange(opt.value)}
-                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                  statusFilter === opt.value
-                    ? 'bg-primary text-primary-foreground font-semibold'
-                    : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Direction Filter */}
-          <div className="flex items-center gap-1 pl-2 border-l border-border/60 shrink-0">
-            {directionOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => onDirectionChange && onDirectionChange(opt.value)}
-                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                  directionFilter === opt.value
-                    ? 'bg-accent text-accent-foreground font-semibold'
-                    : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Inbound Processing Filter Sub-bar */}
-        {(directionFilter === 'INBOUND' || processingStatusFilter !== 'all') && (
-          <div className="flex items-center gap-1 overflow-x-auto text-xs pt-1 border-t border-border/40 no-scrollbar">
-            <span className="text-[10px] text-muted-foreground font-medium mr-1 uppercase tracking-wider">
-              Reconciliation:
-            </span>
-            {reconciliationOptions.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => onProcessingStatusChange && onProcessingStatusChange(opt.value)}
-                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer ${
-                  processingStatusFilter === opt.value
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold'
-                    : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* Responsive, Grouped Filter Section */}
+        <EmailLogsFilters
+          statusFilter={statusFilter}
+          onStatusChange={onStatusChange}
+          directionFilter={directionFilter}
+          onDirectionChange={onDirectionChange}
+          processingStatusFilter={processingStatusFilter}
+          onProcessingStatusChange={onProcessingStatusChange}
+          onResetFilters={onResetFilters}
+          className="p-0 border-0 bg-transparent pt-1"
+        />
       </div>
 
       {/* Deliveries Count and Quick Summary */}

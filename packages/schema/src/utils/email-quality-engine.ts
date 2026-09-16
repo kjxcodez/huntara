@@ -20,6 +20,8 @@ import { isKnownRoleAccount, validateEmailStrict, evaluateEmailCandidate } from 
 
 export const SUPPRESSION_PRECEDENCE_WEIGHTS: Record<SuppressionReason, number> = {
   [SuppressionReason.DO_NOT_CONTACT]: 100,
+  [SuppressionReason.COMPANY_DNC]: 95,
+  [SuppressionReason.DOMAIN_SUPPRESSION]: 92,
   [SuppressionReason.UNSUBSCRIBED]: 90,
   [SuppressionReason.SPAM_COMPLAINT]: 80,
   [SuppressionReason.HARD_BOUNCE]: 70,

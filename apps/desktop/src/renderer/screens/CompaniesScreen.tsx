@@ -33,8 +33,10 @@ import {
 } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
-import { CompanyStatus, ContactStatus } from '@leadforge/schema';
+import { DeleteCompanyModal } from '../components/crm/DeleteCompanyModal';
+import { CompanyStatus, ContactStatus, type DeleteCompanyMode } from '@leadforge/schema';
 import { useWorkspace } from '../hooks/useWorkspace';
+import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { motion } from 'framer-motion';
 
 /**
@@ -45,6 +47,7 @@ export default function CompaniesScreen() {
   const { activeWorkspace } = useWorkspace();
   const workspaceId = activeWorkspace?.id || '';
   const queryClient = useQueryClient();
+  const { refresh, isRefreshing } = useProjectionRefresh('companies');
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -60,6 +63,12 @@ export default function CompaniesScreen() {
 
   // Create Audience Modal state
   const [audienceModalOpen, setAudienceModalOpen] = useState(false);
+
+  // Delete Company Modal state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<any | null>(null);
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -246,19 +255,65 @@ export default function CompaniesScreen() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this company?')) {
-      await deleteMutation.mutateAsync(id);
-      if (selectedCompany?.id === id) {
-        setSelectedCompany(null);
-      }
-    }
+  const handleDelete = (id: string) => {
+    const target = companies.find((c: any) => c.id === id);
+    setCompanyToDelete(target || { id, name: 'Company' });
+    setIsBulkDelete(false);
+    setDeleteModalOpen(true);
   };
 
-  const handleBulkDelete = async () => {
-    if (confirm(`Are you sure you want to delete the ${selectedIds.length} selected companies?`)) {
-      await Promise.all(selectedIds.map((id) => deleteMutation.mutateAsync(id)));
-      setSelectedIds([]);
+  const handleBulkDelete = () => {
+    if (selectedIds.length === 0) return;
+    setIsBulkDelete(true);
+    setCompanyToDelete(null);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async (mode: DeleteCompanyMode) => {
+    setIsDeleting(true);
+    try {
+      if (isBulkDelete) {
+        let totalDeletedContacts = 0;
+        let totalPreservedContacts = 0;
+        for (const id of selectedIds) {
+          try {
+            const res: any = await deleteMutation.mutateAsync({ id, options: { mode } });
+            if (res?.contactsDeletedCount) totalDeletedContacts += res.contactsDeletedCount;
+            if (res?.contactsPreservedCount) totalPreservedContacts += res.contactsPreservedCount;
+          } catch (err: any) {
+            console.warn(`[BulkDelete] Error deleting company ${id}:`, err);
+          }
+        }
+        toast.success(
+          mode === 'company-and-eligible-contacts'
+            ? `Deleted ${selectedIds.length} companies and ${totalDeletedContacts} eligible contacts (${totalPreservedContacts} preserved).`
+            : `Deleted ${selectedIds.length} companies (contacts preserved).`
+        );
+        setSelectedIds([]);
+      } else if (companyToDelete) {
+        const res: any = await deleteMutation.mutateAsync({
+          id: companyToDelete.id,
+          options: { mode }
+        });
+        if (selectedCompany?.id === companyToDelete.id) {
+          setSelectedCompany(null);
+        }
+        if (mode === 'company-and-eligible-contacts') {
+          const delContacts = res?.contactsDeletedCount ?? 0;
+          const presContacts = res?.contactsPreservedCount ?? 0;
+          toast.success(
+            `Company deleted. ${delContacts} eligible contacts removed (${presContacts} preserved).`
+          );
+        } else {
+          toast.success('Company deleted successfully. Associated contacts preserved.');
+        }
+      }
+    } catch (err: any) {
+      toast.error(`Deletion failed: ${err?.message || err}`);
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setCompanyToDelete(null);
     }
   };
 
@@ -292,6 +347,8 @@ export default function CompaniesScreen() {
           statusOptions={Object.values(CompanyStatus)}
           createLabel="Add Company"
           onCreateTrigger={() => setCreateOpen(true)}
+          onRefresh={refresh}
+          isRefreshing={isRefreshing}
           selectedCount={selectedIds.length}
           onBulkDelete={handleBulkDelete}
           onBulkCreateAudience={() => setAudienceModalOpen(true)}
@@ -1028,6 +1085,22 @@ export default function CompaniesScreen() {
           location: locationFilter || undefined,
           discoveryRunId: discoveryRunFilter || undefined
         }}
+      />
+
+      {/* ── Delete Company Modal ─────────────────────────────────────────── */}
+      <DeleteCompanyModal
+        open={deleteModalOpen}
+        onOpenChange={(open) => {
+          setDeleteModalOpen(open);
+          if (!open) {
+            setCompanyToDelete(null);
+            setIsBulkDelete(false);
+          }
+        }}
+        company={companyToDelete}
+        bulkCount={isBulkDelete ? selectedIds.length : 1}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
       />
     </div>
   );

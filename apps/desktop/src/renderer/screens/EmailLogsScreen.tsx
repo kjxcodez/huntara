@@ -39,6 +39,34 @@ export default function EmailLogsScreen() {
   const [page, setPage] = useState(1);
   const limit = 50;
 
+  const handleStatusChange = useCallback((status: string) => {
+    setStatusFilter(status);
+    setPage(1);
+  }, []);
+
+  const handleDirectionChange = useCallback((direction: string) => {
+    setDirectionFilter(direction);
+    setPage(1);
+  }, []);
+
+  const handleProcessingStatusChange = useCallback((status: string) => {
+    setProcessingStatusFilter(status);
+    setPage(1);
+  }, []);
+
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setStatusFilter('all');
+    setDirectionFilter('all');
+    setProcessingStatusFilter('all');
+    setSearchQuery('');
+    setPage(1);
+  }, []);
+
   // Deliveries List Query
   const deliveriesQuery = useQuery({
     queryKey: ['email_deliveries', workspaceId, statusFilter, directionFilter, processingStatusFilter, searchQuery, page],
@@ -285,13 +313,14 @@ export default function EmailLogsScreen() {
             totalItems={(deliveriesQuery.data as any)?.total || deliveries.length}
             onPageChange={setPage}
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={handleSearchChange}
             statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
+            onStatusChange={handleStatusChange}
             directionFilter={directionFilter}
-            onDirectionChange={setDirectionFilter}
+            onDirectionChange={handleDirectionChange}
             processingStatusFilter={processingStatusFilter}
-            onProcessingStatusChange={setProcessingStatusFilter}
+            onProcessingStatusChange={handleProcessingStatusChange}
+            onResetFilters={handleResetFilters}
             onRefresh={() => queryClient.invalidateQueries({ queryKey: ['email_deliveries'] })}
             onPollReplies={() => pollRepliesMutation.mutate()}
             isPollingReplies={pollRepliesMutation.isPending}

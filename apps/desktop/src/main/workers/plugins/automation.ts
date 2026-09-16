@@ -1806,10 +1806,25 @@ async function handleSendEmailStep(
   } catch (sendErr: any) {
     const errMsg = sendErr.message || String(sendErr);
 
+    const isCardinalityExceeded =
+      sendErr.code === 'COMPANY_CARDINALITY_EXCEEDED' ||
+      errMsg.includes('COMPANY_CARDINALITY_EXCEEDED') ||
+      errMsg.includes('Company contact cardinality limit reached');
+
+    if (isCardinalityExceeded) {
+      ctx.emitLog(
+        `Contact "${recipientEmail}" deferred: company contact cardinality limit reached for campaign "${campaignId}". Yielding WAITING state.`,
+        'warn'
+      );
+      return { status: 'wait', delaySeconds: 3600, retrySameStep: true };
+    }
+
     const isRateLimited =
       sendErr.status === 429 ||
       sendErr.code === 'EMAIL_RATE_LIMITED' ||
       sendErr.code === 'PROVIDER_RATE_LIMITED' ||
+      sendErr.code === 'DOMAIN_PACING_THROTTLED' ||
+      errMsg.includes('DOMAIN_PACING_THROTTLED') ||
       errMsg.includes('EMAIL_RATE_LIMITED') ||
       errMsg.includes('PROVIDER_RATE_LIMITED') ||
       errMsg.includes('429') ||
@@ -1902,15 +1917,39 @@ async function handleSendEmailStep(
 
     const isAmbiguous =
       sendErr.code === 'AMBIGUOUS_SEND_TIMEOUT' ||
+      sendErr.category === 'AMBIGUOUS' ||
+      sendErr.ambiguous === true ||
       errMsg.includes('AMBIGUOUS_SEND_TIMEOUT') ||
-      errMsg.includes('ambiguous');
+      errMsg.includes('ambiguous') ||
+      errMsg.includes('pending reconciliation');
 
     if (isAmbiguous) {
       ctx.emitLog(
-        `Ambiguous send result encountered: ${errMsg}. Yielding WAITING state for sent-folder reconciliation check. Will NOT blindly retry send.`,
+        `Ambiguous send outcome encountered for recipient ${contact.email}: ${errMsg}. Execution paused pending reconciliation. Will NOT blindly retry.`,
         'warn'
       );
-      return { status: 'wait', delaySeconds: 120, retrySameStep: true };
+      try {
+        if (execCtx.execution.id) {
+          await sdk.executions.update(execCtx.execution.id, {
+            status: 'PAUSED'
+          });
+          await sdk.executions.addLogs(execCtx.execution.id, [
+            {
+              id: generateEntityId(),
+              workspaceId: ctx.workspaceId,
+              executionId: execCtx.execution.id,
+              timestamp: new Date().toISOString(),
+              step: stepIndexNum,
+              action: 'AMBIGUOUS_DELIVERY_PAUSE',
+              status: 'warn',
+              message: `Ambiguous outbound send outcome encountered: ${errMsg}. Execution paused to prevent duplicate dispatch pending reconciliation.`
+            }
+          ]);
+        }
+        await sdk.locks.releaseLock(sequenceId, entityId);
+      } catch {}
+
+      return { status: 'paused' };
     }
 
     ctx.emitLog(

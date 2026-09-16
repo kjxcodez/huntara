@@ -1,9 +1,13 @@
 import mongoose, { Schema } from 'mongoose';
 import { workspacePlugin, type WorkspaceScopedDocument } from '../plugins/index.js';
-import { SuppressionReason } from '@leadforge/schema';
+import { SuppressionReason, SuppressionTargetType } from '@leadforge/schema';
 
 export interface SuppressionDocument extends mongoose.Document, WorkspaceScopedDocument {
-  email: string;
+  targetType: SuppressionTargetType;
+  targetId: string;
+  email?: string | null;
+  companyId?: string | null;
+  domain?: string | null;
   reason: SuppressionReason;
   source: string;
   evidence?: Record<string, any> | null;
@@ -17,7 +21,16 @@ export interface SuppressionDocument extends mongoose.Document, WorkspaceScopedD
 const suppressionSchema = new Schema<SuppressionDocument>(
   {
     workspaceId: { type: String, required: true, index: true },
-    email: { type: String, required: true, trim: true, lowercase: true },
+    targetType: {
+      type: String,
+      enum: Object.values(SuppressionTargetType),
+      default: SuppressionTargetType.RECIPIENT,
+      required: true
+    },
+    targetId: { type: String, required: true, trim: true },
+    email: { type: String, default: null, trim: true, lowercase: true },
+    companyId: { type: String, default: null, trim: true },
+    domain: { type: String, default: null, trim: true, lowercase: true },
     reason: {
       type: String,
       enum: Object.values(SuppressionReason),
@@ -36,7 +49,10 @@ const suppressionSchema = new Schema<SuppressionDocument>(
 );
 
 suppressionSchema.plugin(workspacePlugin);
-suppressionSchema.index({ workspaceId: 1, email: 1 }, { unique: true });
+suppressionSchema.index({ workspaceId: 1, targetType: 1, targetId: 1 }, { unique: true });
+suppressionSchema.index({ workspaceId: 1, targetType: 1, companyId: 1 }, { sparse: true });
+suppressionSchema.index({ workspaceId: 1, targetType: 1, domain: 1 }, { sparse: true });
+suppressionSchema.index({ workspaceId: 1, email: 1 }, { sparse: true });
 suppressionSchema.index({ workspaceId: 1, reason: 1 });
 
 export const SuppressionModel =

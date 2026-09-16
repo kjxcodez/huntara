@@ -37,8 +37,9 @@ yarn-error.log*
 .DS_Store
 stitch_leadforge_dashboard_design_system
 
-# TS build info cache
+# TS build info cache and source maps
 *.tsbuildinfo
+*.map
 
 # LeadForge OS Beta telemetry, logs, and local databases
 report/*

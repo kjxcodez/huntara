@@ -38,7 +38,7 @@ export async function runProductionQualificationE2ETests() {
   const templateId = 'tpl_intro_v1';
   const templateVersion = 1;
 
-  const now = new Date('2026-09-06T10:00:00Z');
+  const now = new Date();
   const nowIso = now.toISOString();
 
   // ── 1. PROVISION WORKSPACE, MAILBOX & CAMPAIGN ──
@@ -295,10 +295,13 @@ export async function runProductionQualificationE2ETests() {
 
   // Check dispatch eligibility during cooldown
   const mailboxCheck = db.prepare('SELECT status FROM email_accounts WHERE id = ?').get(accountId) as any;
-  const cooldownEligibility = isMailboxEligibleForDispatch({
-    status: mailboxCheck.status,
-    health: mailboxHealth
-  });
+  const cooldownEligibility = isMailboxEligibleForDispatch(
+    {
+      status: mailboxCheck.status,
+      health: mailboxHealth
+    },
+    time24hLater
+  );
   assert.strictEqual(cooldownEligibility.eligible, false, 'Mailbox must not be eligible during cooldown');
   assert.ok(cooldownEligibility.reason?.includes('cooldown'), 'Reason must cite cooldown');
 

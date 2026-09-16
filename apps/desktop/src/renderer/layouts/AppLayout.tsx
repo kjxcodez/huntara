@@ -58,7 +58,10 @@ export function AppLayout() {
 
     let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-    const debouncedInvalidate = () => {
+    const debouncedInvalidate = (payload?: any) => {
+      if (payload?.workspaceId && payload.workspaceId !== workspaceId) {
+        return;
+      }
       if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
       syncDebounceTimer = setTimeout(() => {
         console.log('[Renderer] Sync completed — invalidating queries.');

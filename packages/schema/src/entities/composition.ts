@@ -37,6 +37,7 @@ export const composeMessageInputSchema = z.object({
   isHtml: z.boolean().optional(),
   useSignature: z.boolean().optional(),
   trackingBaseUrl: z.string().optional(),
+  trackingEnabled: z.boolean().optional(),
   existingTracking: z
     .object({
       openTrackingToken: z.string().nullable().optional(),

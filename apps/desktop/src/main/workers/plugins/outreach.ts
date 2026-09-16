@@ -361,21 +361,69 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
       sendError = err.message || String(err);
       sendSuccess = false;
 
+      const isAmbiguous =
+        err.code === 'AMBIGUOUS_SEND_TIMEOUT' ||
+        err.category === 'AMBIGUOUS' ||
+        err.ambiguous === true ||
+        sendError.includes('AMBIGUOUS_SEND_TIMEOUT') ||
+        sendError.includes('ambiguous') ||
+        sendError.includes('pending reconciliation');
+
       const isRateLimited =
         err.status === 429 ||
         err.code === 'EMAIL_RATE_LIMITED' ||
         err.code === 'PROVIDER_RATE_LIMITED' ||
+        err.code === 'DOMAIN_PACING_THROTTLED' ||
+        sendError.includes('DOMAIN_PACING_THROTTLED') ||
         sendError.includes('RATE_LIMITED') ||
         sendError.includes('rate limit') ||
         sendError.includes('429');
 
-      if (isRateLimited) {
+      const isCardinalityExceeded =
+        err.code === 'COMPANY_CARDINALITY_EXCEEDED' ||
+        sendError.includes('COMPANY_CARDINALITY_EXCEEDED') ||
+        sendError.includes('cardinality limit reached');
+
+      const isSuppressedOrDnc =
+        err.code === 'COMPANY_DNC' ||
+        err.code === 'DOMAIN_SUPPRESSED' ||
+        err.code === 'RECIPIENT_SUPPRESSED' ||
+        sendError.includes('COMPANY_DNC') ||
+        sendError.includes('DOMAIN_SUPPRESSED') ||
+        sendError.includes('RECIPIENT_SUPPRESSED') ||
+        sendError.includes('Do Not Contact') ||
+        sendError.includes('suppressed in this workspace');
+
+      if (isSuppressedOrDnc) {
+        skippedCount++;
+        ctx.emitLog(
+          `Skipped contact "${contact.email}": blocked by suppression/DNC policy (${err.code || 'POLICY_BLOCKED'}).`,
+          'info'
+        );
+      } else if (isAmbiguous) {
+        skippedCount++;
+        ctx.emitLog(
+          `⚠️ Ambiguous delivery outcome for "${contact.email}": send outcome is unconfirmed (pending reconciliation). Blind re-dispatch suppressed to prevent duplicate sending.`,
+          'warn',
+          {
+            recipient: contact.email,
+            campaignId,
+            error: sendError
+          }
+        );
+      } else if (isCardinalityExceeded) {
+        skippedCount++;
+        ctx.emitLog(
+          `Skipped contact "${contact.email}": company contact cardinality limit reached for campaign.`,
+          'info'
+        );
+      } else if (isRateLimited) {
         const retrySec = typeof err.retryAfterSec === 'number' && err.retryAfterSec > 0
           ? err.retryAfterSec
           : 10;
 
         ctx.emitLog(
-          `Mailbox throttled (retryAfter=${retrySec}s). Backing off before retrying ${contact.email}...`,
+          `Outreach throttled by domain pacing/rate limit (retryAfter=${retrySec}s). Backing off before retrying ${contact.email}...`,
           'warn'
         );
 
@@ -412,8 +460,24 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
             ctx.emitLog(`✅ Email sent on retry to ${contact.email} (messageId: ${messageId})`, 'info');
           } catch (retryErr: any) {
             sendError = retryErr.message || String(retryErr);
-            failureCount++;
-            ctx.emitLog(`❌ Failed to send email on retry to ${contact.email}: ${sendError}`, 'error');
+            const isRetryAmbiguous =
+              retryErr.code === 'AMBIGUOUS_SEND_TIMEOUT' ||
+              retryErr.category === 'AMBIGUOUS' ||
+              retryErr.ambiguous === true ||
+              sendError.includes('AMBIGUOUS_SEND_TIMEOUT') ||
+              sendError.includes('ambiguous') ||
+              sendError.includes('pending reconciliation');
+
+            if (isRetryAmbiguous) {
+              skippedCount++;
+              ctx.emitLog(
+                `⚠️ Ambiguous delivery outcome on retry for "${contact.email}": pending reconciliation. Blind re-dispatch suppressed.`,
+                'warn'
+              );
+            } else {
+              failureCount++;
+              ctx.emitLog(`❌ Failed to send email on retry to ${contact.email}: ${sendError}`, 'error');
+            }
           }
         }
       } else {
@@ -427,10 +491,11 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
 
         // Phase 10: Auto-suppress on hard bounce
         const isHardBounce =
-          err.code === 'INVALID_RECIPIENT' ||
-          err.status === 400 ||
-          sendError.includes('INVALID_RECIPIENT') ||
-          sendError.includes('550');
+          !isSuppressedOrDnc &&
+          (err.code === 'INVALID_RECIPIENT' ||
+            err.status === 400 ||
+            sendError.includes('INVALID_RECIPIENT') ||
+            sendError.includes('550'));
 
         if (isHardBounce) {
           try {

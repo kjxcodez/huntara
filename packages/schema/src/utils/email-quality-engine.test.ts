@@ -96,10 +96,24 @@ describe('Phase 10: Email Quality Decision Engine', () => {
   });
 
   describe('Suppression Precedence', () => {
-    it('enforces DO_NOT_CONTACT > UNSUBSCRIBED > HARD_BOUNCE > INVALID', () => {
+    it('enforces DO_NOT_CONTACT > COMPANY_DNC > DOMAIN_SUPPRESSION > UNSUBSCRIBED > HARD_BOUNCE > INVALID', () => {
       expect(
         compareSuppressionPrecedence(
           SuppressionReason.DO_NOT_CONTACT,
+          SuppressionReason.COMPANY_DNC
+        )
+      ).toBeGreaterThan(0);
+
+      expect(
+        compareSuppressionPrecedence(
+          SuppressionReason.COMPANY_DNC,
+          SuppressionReason.DOMAIN_SUPPRESSION
+        )
+      ).toBeGreaterThan(0);
+
+      expect(
+        compareSuppressionPrecedence(
+          SuppressionReason.DOMAIN_SUPPRESSION,
           SuppressionReason.UNSUBSCRIBED
         )
       ).toBeGreaterThan(0);

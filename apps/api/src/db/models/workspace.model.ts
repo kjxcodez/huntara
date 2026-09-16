@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId, DEFAULT_SCHEDULER_POLICY } from '@leadforge/schema';
 import {
   softDeletePlugin,
   auditPlugin,
@@ -34,6 +34,11 @@ export interface WorkspaceDocument
       dailyLimit?: number | null;
       hourlyLimit?: number | null;
       minSendIntervalMs?: number | null;
+    } | null;
+    schedulerPolicy?: {
+      globalMaxConcurrency: number;
+      typeLimits: Record<string, number>;
+      updatedAt?: Date;
     } | null;
   };
   members: WorkspaceMember[];
@@ -89,6 +94,31 @@ const workspaceSchema = new Schema<WorkspaceDocument>(
           { _id: false }
         ),
         default: null
+      },
+      schedulerPolicy: {
+        type: new Schema(
+          {
+            globalMaxConcurrency: {
+              type: Number,
+              required: true,
+              default: () => DEFAULT_SCHEDULER_POLICY.globalMaxConcurrency
+            },
+            typeLimits: {
+              type: Schema.Types.Mixed,
+              default: () => ({ ...DEFAULT_SCHEDULER_POLICY.typeLimits })
+            },
+            updatedAt: {
+              type: Date,
+              default: Date.now
+            }
+          },
+          { _id: false }
+        ),
+        default: () => ({
+          globalMaxConcurrency: DEFAULT_SCHEDULER_POLICY.globalMaxConcurrency,
+          typeLimits: { ...DEFAULT_SCHEDULER_POLICY.typeLimits },
+          updatedAt: new Date()
+        })
       }
     },
     members: [

@@ -7,7 +7,8 @@ import {
   generateTrackingToken,
   injectOpenTrackingPixel,
   rewriteLinksForClickTracking,
-  sanitizeHtmlForPreview
+  sanitizeHtmlForPreview,
+  validateTrackingBaseUrl
 } from './tracking.js';
 
 describe('Email Tracking Utilities', () => {
@@ -143,6 +144,87 @@ describe('Email Tracking Utilities', () => {
       const sanitized = sanitizeHtmlForPreview(htmlWithLinks);
       expect(sanitized).toContain('target="_blank"');
       expect(sanitized).toContain('rel="noopener noreferrer"');
+    });
+  });
+
+  describe('validateTrackingBaseUrl Runtime Safety', () => {
+    it('accepts valid absolute HTTPS URLs with public hostnames', () => {
+      const res1 = validateTrackingBaseUrl('https://api.leadforge.kapiljangid.pro');
+      expect(res1.isValid).toBe(true);
+      expect(res1.normalizedUrl).toBe('https://api.leadforge.kapiljangid.pro');
+
+      const res2 = validateTrackingBaseUrl('https://track.leadforge.com/');
+      expect(res2.isValid).toBe(true);
+      expect(res2.normalizedUrl).toBe('https://track.leadforge.com');
+
+      const res3 = validateTrackingBaseUrl('https://api.leadforge.ai/custom/path/');
+      expect(res3.isValid).toBe(true);
+      expect(res3.normalizedUrl).toBe('https://api.leadforge.ai/custom/path');
+    });
+
+    it('rejects unencrypted HTTP protocol', () => {
+      const res = validateTrackingBaseUrl('http://api.leadforge.com');
+      expect(res.isValid).toBe(false);
+      expect(res.error).toContain('Only secure HTTPS tracking URLs are permitted');
+    });
+
+    it('rejects localhost, loopback, and zero addresses', () => {
+      const forbidden = [
+        'http://localhost:3000',
+        'https://localhost:3000',
+        'http://localhost',
+        'https://localhost',
+        'http://127.0.0.1:3000',
+        'https://127.0.0.1:3000',
+        'http://127.0.0.1',
+        'https://127.0.0.1',
+        'http://0.0.0.0:3000',
+        'https://0.0.0.0:3000',
+        'http://0.0.0.0',
+        'https://0.0.0.0',
+        'https://app.localhost',
+        'https://node.local',
+        'https://server.internal'
+      ];
+      for (const url of forbidden) {
+        const res = validateTrackingBaseUrl(url);
+        expect(res.isValid).toBe(false);
+      }
+    });
+
+    it('rejects private IPv4 address subnets (RFC 1918)', () => {
+      const privateIps = [
+        'https://10.0.0.1/track',
+        'https://10.254.1.2',
+        'https://192.168.1.1/t',
+        'https://172.16.0.1',
+        'https://172.25.10.1',
+        'https://172.31.255.255',
+        'https://169.254.169.254'
+      ];
+      for (const url of privateIps) {
+        const res = validateTrackingBaseUrl(url);
+        expect(res.isValid).toBe(false);
+        expect(res.error).toContain('Disallowed');
+      }
+    });
+
+    it('rejects relative paths, file:, and malformed non-URLs', () => {
+      const invalid = [
+        '',
+        '   ',
+        null,
+        undefined,
+        'localhost',
+        '127.0.0.1',
+        'file:///path/to/script',
+        '/relative/tracking/path',
+        'not a url at all'
+      ];
+      for (const val of invalid) {
+        const res = validateTrackingBaseUrl(val);
+        expect(res.isValid).toBe(false);
+      }
     });
   });
 });

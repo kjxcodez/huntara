@@ -4,6 +4,7 @@ import { getDatabase } from '../database/connection';
 import { initCacheSchema } from '../database/cache-schema';
 import { AppLogger } from '../lib/logger';
 import { BrowserWindow } from 'electron';
+import { WorkspaceManager } from '../lib/workspace-manager';
 
 export interface HydrationResult {
   success: boolean;
@@ -163,6 +164,28 @@ export class CacheHydrator {
 
     // Hydrate each dataset in dependency order
     for (const { table, fetch, transform } of datasets) {
+      // Check if this workspace has been superseded by a subsequent workspace switch
+      try {
+        const targetWs = WorkspaceManager.getTargetWorkspaceId();
+        if (targetWs && targetWs !== workspaceId) {
+          AppLogger.info(
+            'CacheHydrator',
+            `Aborting hydration for superseded workspace: ${workspaceId} (target is now ${targetWs})`,
+            workspaceId
+          );
+          CacheHydrator.hydrationStates.set(workspaceId, 'STOPPED');
+          return {
+            success: false,
+            workspaceId,
+            durationMs: Date.now() - startTime,
+            recordsHydrated,
+            errors: [{ table: 'all', error: 'Hydration superseded by another workspace switch' }]
+          };
+        }
+      } catch {
+        // WorkspaceManager may not have an active runtime in unit test contexts
+      }
+
       try {
         const rawItems = await fetch();
         if (Array.isArray(rawItems) && rawItems.length > 0) {
@@ -204,7 +227,7 @@ export class CacheHydrator {
       workspaceId
     );
 
-    this.broadcastCacheUpdated();
+    this.broadcastCacheUpdated(workspaceId);
 
     return {
       success,
@@ -266,13 +289,29 @@ export class CacheHydrator {
   /**
    * Broadcasts a cache-updated event to all active renderer windows.
    */
-  private static broadcastCacheUpdated(): void {
+  private static broadcastCacheUpdated(workspaceId: string): void {
+    // Only broadcast if the workspace is still the currently active or target workspace
     try {
-      BrowserWindow.getAllWindows().forEach((win) => {
-        if (!win.isDestroyed()) {
-          win.webContents.send('sync:completed', { timestamp: new Date().toISOString() });
-        }
-      });
+      const targetWs = WorkspaceManager.getTargetWorkspaceId();
+      if (targetWs && targetWs !== workspaceId) {
+        return;
+      }
+    } catch {
+      // Ignore in environments without active runtime
+    }
+
+    try {
+      if (typeof BrowserWindow !== 'undefined' && BrowserWindow.getAllWindows) {
+        BrowserWindow.getAllWindows().forEach((win) => {
+          if (!win.isDestroyed()) {
+            win.webContents.send('sync:completed', {
+              scope: 'all',
+              workspaceId,
+              timestamp: new Date().toISOString()
+            });
+          }
+        });
+      }
     } catch {
       // IPC window context not yet active in test or headless environments
     }

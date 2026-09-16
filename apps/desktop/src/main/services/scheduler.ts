@@ -3,7 +3,15 @@ import { join } from 'path';
 import { randomUUID } from 'crypto';
 import { app } from 'electron';
 import type { SdkClient } from '@leadforge/sdk';
-import type { Job } from '@leadforge/schema';
+import {
+  type Job,
+  DEFAULT_SCHEDULER_POLICY,
+  resolveSchedulerPolicy,
+  type SchedulerPolicy,
+  OUTREACH_JOB_TYPES,
+  DISCOVERY_JOB_TYPES,
+  resolveSchedulerCapacityAllocation
+} from '@leadforge/schema';
 
 const isDev =
   process.env.NODE_ENV === 'development' ||
@@ -72,12 +80,17 @@ export class JobScheduler {
   private readonly heartbeatIntervalMs = 10_000;
   /** ms after the last pong at which the worker is considered stalled and killed. */
   private readonly heartbeatTimeoutMs = 30_000;
-  /** Total maximum active workers across all job types. */
-  private readonly defaultMaxConcurrency = 3;
+  /** Active concurrency limits configured for this workspace runtime. */
+  private policy: SchedulerConfig = {
+    globalMaxConcurrency: DEFAULT_SCHEDULER_POLICY.globalMaxConcurrency,
+    typeLimits: { ...DEFAULT_SCHEDULER_POLICY.typeLimits }
+  };
   /** Tracks the number of currently active workers for each job type. */
   private typeActiveCount = new Map<string, number>();
   /** Tracks terminal jobs to guard against duplicate completion callbacks or late crash events. */
   private terminalJobs = new Set<string>();
+  /** Tracks last claimed job class to alternate fairly when both classes have pending work. */
+  private lastClaimedClass: 'outreach' | 'discovery' | null = null;
   /** Phase 18: Watchdog tracking of worker crashes per job type. */
   private workerCrashes = new Map<string, { count: number; windowStart: number }>();
   /** Periodic timer for automated inbound reply polling and reconciliation. */
@@ -91,6 +104,27 @@ export class JobScheduler {
     private sdk: SdkClient,
     private eventBus: LocalEventBus
   ) {}
+
+  /**
+   * Sets active scheduler policy for this workspace runtime.
+   */
+  public setPolicy(policy: SchedulerConfig | SchedulerPolicy): void {
+    const resolved = resolveSchedulerPolicy(policy);
+    this.policy = {
+      globalMaxConcurrency: resolved.globalMaxConcurrency,
+      typeLimits: { ...resolved.typeLimits }
+    };
+  }
+
+  /**
+   * Returns a copy of the current active scheduler concurrency policy.
+   */
+  public getPolicy(): SchedulerConfig {
+    return {
+      globalMaxConcurrency: this.policy.globalMaxConcurrency,
+      typeLimits: { ...this.policy.typeLimits }
+    };
+  }
 
   public get isActive(): boolean {
     return this.state !== 'STOPPED' && this.state !== 'PAUSED_OFFLINE';
@@ -118,8 +152,12 @@ export class JobScheduler {
 
   /**
    * Starts periodic polling loop and triggers startup recovery of stale leases.
+   * Optionally accepts a runtime-loaded concurrency policy.
    */
-  public async start(): Promise<void> {
+  public async start(policy?: SchedulerConfig | SchedulerPolicy): Promise<void> {
+    if (policy) {
+      this.setPolicy(policy);
+    }
     if (this.state !== 'STOPPED') return;
     this.state = 'ACTIVE';
     this.consecutiveEmptyClaims = 0;
@@ -303,6 +341,7 @@ export class JobScheduler {
     this.activeWorkers.clear();
     this.typeActiveCount.clear();
     this.terminalJobs.clear();
+    this.lastClaimedClass = null;
     AppLogger.info(
       'JobScheduler',
       `Scheduler stopped for workspace: ${this.workspaceId}`,
@@ -652,41 +691,112 @@ export class JobScheduler {
       const availableCapacity = config.globalMaxConcurrency - this.activeWorkers.size;
 
       if (availableCapacity > 0) {
-        const supportedTypes = [
-          'scraper:maps',
-          'crawler:website',
-          'enrich:website',
-          'enrich:linkedin',
-          'enrich:intelligence',
-          'outreach:campaign',
-          'automation:workflow',
-          'outreach:imap-poll',
-          'mock:test'
-        ].filter((t) => {
+        // Calculate currently active worker counts by resource class
+        const activeOutreach = (OUTREACH_JOB_TYPES as readonly string[]).reduce(
+          (sum, t) => sum + (this.typeActiveCount.get(t) ?? 0),
+          0
+        );
+        const activeDiscovery = (DISCOVERY_JOB_TYPES as readonly string[]).reduce(
+          (sum, t) => sum + (this.typeActiveCount.get(t) ?? 0),
+          0
+        );
+
+        // Derive fair capacity targets and limits from authoritative MongoDB policy
+        const allocation = resolveSchedulerCapacityAllocation(config);
+
+        // Filter types that have not exceeded their configured per-type limits
+        const filterEligible = (types: readonly string[]) =>
+          types.filter((t) => {
+            const limit = config.typeLimits[t] ?? 2;
+            const current = this.typeActiveCount.get(t) ?? 0;
+            return limit > 0 && current < limit;
+          });
+
+        const eligibleOutreachTypes = filterEligible(OUTREACH_JOB_TYPES);
+        const eligibleDiscoveryTypes = filterEligible(DISCOVERY_JOB_TYPES);
+        const otherSupportedTypes = ['mock:test'].filter((t) => {
           const limit = config.typeLimits[t] ?? 2;
           const current = this.typeActiveCount.get(t) ?? 0;
-          return current < limit;
+          return limit > 0 && current < limit;
         });
 
-        if (supportedTypes.length > 0) {
-          const workerId = `desktop-${this.workspaceId.slice(0, 8)}-${Date.now()}-${randomUUID().slice(0, 4)}`;
-          this.totalClaimRequests++;
-          const claimed = await this.sdk.jobs.claim(supportedTypes, workerId).catch(() => null);
+        // Determine which class should be offered the first claim opportunity.
+        // Under contention:
+        // - If outreach has less than its protected share and discovery is at/above its target, outreach gets priority.
+        // - If discovery has less than its target and outreach is at/above its share, discovery gets priority.
+        // - If both need capacity, alternate fairly based on lastClaimedClass (defaulting to 'outreach' to ensure protection).
+        let preferredClass: 'outreach' | 'discovery' = 'outreach';
+        const outreachNeedsCapacity = activeOutreach < allocation.targetOutreachCapacity;
+        const discoveryNeedsCapacity = activeDiscovery < allocation.targetDiscoveryCapacity;
 
-          if (claimed) {
-            this.consecutiveEmptyClaims = 0;
-            this.state = 'ACTIVE';
-            this.runJob(claimed, workerId);
+        if (outreachNeedsCapacity && !discoveryNeedsCapacity) {
+          preferredClass = 'outreach';
+        } else if (discoveryNeedsCapacity && !outreachNeedsCapacity) {
+          preferredClass = 'discovery';
+        } else {
+          preferredClass = this.lastClaimedClass === 'outreach' ? 'discovery' : 'outreach';
+        }
 
-            // If capacity still remains, quickly schedule another tick to claim further jobs
-            const remainingCapacity = config.globalMaxConcurrency - this.activeWorkers.size;
-            if (remainingCapacity > 0) {
-              this.scheduleNextTick(50);
-              return;
-            }
-          } else {
-            this.consecutiveEmptyClaims++;
+        // Build ordered claim attempts:
+        // 1. Preferred class (if it has eligible types and hasn't exceeded its max capacity)
+        // 2. Fallback class (if preferred class has no pending jobs or no eligible types)
+        // 3. Other/unclassified types (e.g. mock:test)
+        const claimPlan: Array<{ class: 'outreach' | 'discovery' | 'other'; types: string[] }> = [];
+
+        const canOutreachClaim =
+          eligibleOutreachTypes.length > 0 && activeOutreach < allocation.maxOutreachCapacity;
+        const canDiscoveryClaim =
+          eligibleDiscoveryTypes.length > 0 && activeDiscovery < allocation.maxDiscoveryCapacity;
+
+        if (preferredClass === 'outreach') {
+          if (canOutreachClaim) {
+            claimPlan.push({ class: 'outreach', types: eligibleOutreachTypes });
           }
+          if (canDiscoveryClaim) {
+            claimPlan.push({ class: 'discovery', types: eligibleDiscoveryTypes });
+          }
+        } else {
+          if (canDiscoveryClaim) {
+            claimPlan.push({ class: 'discovery', types: eligibleDiscoveryTypes });
+          }
+          if (canOutreachClaim) {
+            claimPlan.push({ class: 'outreach', types: eligibleOutreachTypes });
+          }
+        }
+
+        if (otherSupportedTypes.length > 0) {
+          claimPlan.push({ class: 'other', types: otherSupportedTypes });
+        }
+
+        let claimed: Job | null = null;
+        let claimedClass: 'outreach' | 'discovery' | 'other' | null = null;
+        const workerId = `desktop-${this.workspaceId.slice(0, 8)}-${Date.now()}-${randomUUID().slice(0, 4)}`;
+
+        for (const attempt of claimPlan) {
+          this.totalClaimRequests++;
+          claimed = await this.sdk.jobs.claim(attempt.types, workerId).catch(() => null);
+          if (claimed) {
+            claimedClass = attempt.class;
+            break;
+          }
+        }
+
+        if (claimed) {
+          this.consecutiveEmptyClaims = 0;
+          this.state = 'ACTIVE';
+          if (claimedClass === 'outreach' || claimedClass === 'discovery') {
+            this.lastClaimedClass = claimedClass;
+          }
+          this.runJob(claimed, workerId);
+
+          // If capacity still remains, quickly schedule another tick to claim further jobs
+          const remainingCapacity = config.globalMaxConcurrency - this.activeWorkers.size;
+          if (remainingCapacity > 0) {
+            this.scheduleNextTick(50);
+            return;
+          }
+        } else {
+          this.consecutiveEmptyClaims++;
         }
       }
     } catch (err) {
@@ -698,19 +808,10 @@ export class JobScheduler {
   }
 
   /**
-   * Reads concurrency configuration with default fallbacks.
+   * Reads active concurrency configuration for this workspace runtime.
    */
   private loadSchedulerConfig(): SchedulerConfig {
-    return {
-      globalMaxConcurrency: this.defaultMaxConcurrency,
-      typeLimits: {
-        'scraper:maps': 1,
-        'crawler:website': 2,
-        'enrich:intelligence': 2,
-        'outreach:campaign': 2,
-        'automation:workflow': 2
-      }
-    };
+    return this.policy;
   }
 
   /**
@@ -898,8 +999,10 @@ export class JobScheduler {
     // Crash / unexpected exit handler
     worker.on('exit', (code, signal) => {
       this.clearHeartbeat(job.id);
-      this.activeWorkers.delete(job.id);
-      this.decrementTypeCount(job.type);
+      const hadWorker = this.activeWorkers.delete(job.id);
+      if (hadWorker && job.type) {
+        this.decrementTypeCount(job.type);
+      }
 
       const errorMsg = `Worker process exited abnormally with code ${code} (signal: ${signal})`;
       if (code !== 0 && code !== null) {
@@ -997,8 +1100,9 @@ export class JobScheduler {
       );
     }
 
-    this.activeWorkers.delete(jobId);
-    if (jobType) this.decrementTypeCount(jobType);
+    const hadWorker = this.activeWorkers.delete(jobId);
+    if (hadWorker && jobType) this.decrementTypeCount(jobType);
+    this.wakeUp();
 
     // Reconcile worker mutations authoritatively into workspace SQLite projection
     await ProjectionService.reconcileJobOutcome(
@@ -1051,12 +1155,15 @@ export class JobScheduler {
       try {
         worker.kill('SIGTERM');
       } catch {}
-      this.activeWorkers.delete(jobId);
+    }
+    const hadWorker = this.activeWorkers.delete(jobId);
+    if (hadWorker && jobType) {
+      this.decrementTypeCount(jobType);
     }
     if (jobType) {
-      this.decrementTypeCount(jobType);
       this.recordWorkerCrash(jobType);
     }
+    this.wakeUp();
 
     if (nextRetry <= maxRetries) {
       const delaySec = Math.min(Math.pow(2, nextRetry), 60);

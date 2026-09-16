@@ -12,6 +12,12 @@ export type CreateWorkspaceDto = z.infer<typeof createWorkspaceDtoSchema>;
 export const updateWorkspaceDtoSchema = createWorkspaceDtoSchema.partial();
 export type UpdateWorkspaceDto = z.infer<typeof updateWorkspaceDtoSchema>;
 
+export const updateSchedulerPolicyDtoSchema = z.object({
+  globalMaxConcurrency: z.number().int().min(1).optional(),
+  typeLimits: z.record(z.string(), z.number().int().min(0)).optional()
+});
+export type UpdateSchedulerPolicyDto = z.infer<typeof updateSchedulerPolicyDtoSchema>;
+
 export const inviteMemberDtoSchema = z.object({
   email: emailField,
   role: z.nativeEnum(WorkspaceRole)
