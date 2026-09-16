@@ -896,15 +896,16 @@ discoveryRunsRouter.delete('/:id', async (c) => {
   const wsId = getWorkspaceId(c);
   const id = c.req.param('id');
   const service = new DiscoveryRunService(wsId);
+  let result: any = { success: true };
   try {
-    await service.deleteRun(id);
+    result = await service.deleteRun(id);
   } catch (err: any) {
     if (err instanceof NotFoundError || err?.name === 'NotFoundError') {
       return c.json(successResponse({ success: true, alreadyDeleted: true }));
     }
     throw err;
   }
-  return c.json(successResponse({ success: true }));
+  return c.json(successResponse(result));
 });
 
 // ── Company Discovery Runs (Provenance) Router ──────────────────────────────

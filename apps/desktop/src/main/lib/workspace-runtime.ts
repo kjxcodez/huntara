@@ -140,12 +140,14 @@ export class WorkspaceRuntime {
     await this.scheduler.start();
     this.schedulerDuration = Date.now() - schedStart;
 
-    // 4. Trigger Asynchronous Workspace Cache Hydration from MongoDB
+    // 4. Trigger Workspace Cache Hydration from MongoDB
     sendBootProgress('cache:hydrate', '✓ Hydrating local cache from MongoDB');
     const hydrateStart = Date.now();
-    CacheHydrator.hydrateWorkspaceCache(this.workspaceId, this.sdk).catch((err) => {
+    try {
+      await CacheHydrator.hydrateWorkspaceCache(this.workspaceId, this.sdk);
+    } catch (err) {
       console.warn(`[WorkspaceRuntime] Workspace cache hydration error: ${err}`);
-    });
+    }
     this.cacheHydrationDuration = Date.now() - hydrateStart;
 
     // 5. Start EventBridge to forward LocalEventBus events to the renderer process

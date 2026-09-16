@@ -117,6 +117,41 @@ describe('Phase 7 — Safe Discovery Run Deletion Test Matrix', () => {
             }
           }
 
+          // Evaluate candidate companies before deleting provenance
+          const candidateLinks = mongoStore.companyDiscoveryRuns.filter((cdr) => cdr.discoveryRunId === id);
+          const deletedCompanyIds: string[] = [];
+          const deletedContactIds: string[] = [];
+
+          for (const link of candidateLinks) {
+            const compId = link.companyId;
+            // Check other runs
+            const hasOtherRun = mongoStore.companyDiscoveryRuns.some(
+              (cdr) => cdr.companyId === compId && cdr.discoveryRunId !== id
+            );
+            if (hasOtherRun) continue;
+
+            const company = mongoStore.companies.find((c) => c.id === compId);
+            if (!company) continue;
+
+            if (new Date(company.createdAt).getTime() < new Date(run.createdAt).getTime()) {
+              continue;
+            }
+
+            // Check if any contact has deliveries
+            const compContacts = mongoStore.contacts.filter((c) => c.companyId === compId);
+            const compContactIds = compContacts.map((c) => c.id);
+            const hasDelivery = mongoStore.deliveries.some((d) => compContactIds.includes(d.contactId));
+            if (hasDelivery) continue;
+
+            // Safe to delete!
+            company.deletedAt = new Date().toISOString();
+            deletedCompanyIds.push(compId);
+            for (const cont of compContacts) {
+              cont.deletedAt = new Date().toISOString();
+              deletedContactIds.push(cont.id);
+            }
+          }
+
           // 2. Hard-delete run-owned provenance records
           mongoStore.companyDiscoveryRuns = mongoStore.companyDiscoveryRuns.filter(
             (cdr) => cdr.discoveryRunId !== id
@@ -124,7 +159,11 @@ describe('Phase 7 — Safe Discovery Run Deletion Test Matrix', () => {
 
           // 3. Soft-delete authoritative DiscoveryRun
           run.deletedAt = new Date().toISOString();
-          return { success: true };
+          return {
+            success: true,
+            deletedCompanyIds: deletedCompanyIds.length > 0 ? deletedCompanyIds : undefined,
+            deletedContactIds: deletedContactIds.length > 0 ? deletedContactIds : undefined
+          };
         })
       },
       jobs: {
@@ -514,20 +553,19 @@ describe('Phase 7 — Safe Discovery Run Deletion Test Matrix', () => {
   });
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Scenario 8: Preserve canonical contact
+  // Scenario 8: Preserve canonical contact with outreach lineage
   // ──────────────────────────────────────────────────────────────────────────
-  it('Scenario 8 — Preserve canonical contact: contacts associated with discovered companies are preserved', async () => {
+  it('Scenario 8 — Preserve canonical contact: contacts with outreach lineage are preserved', async () => {
     await seedBaselineData();
 
     await invokeDeleteIpc({ workspaceId: workspaceA, id: 'run_completed_1' });
 
-    // MongoDB contacts intact
-    expect(mongoStore.contacts.length).toBe(2);
-    expect(mongoStore.contacts.find((c) => c.id === 'cont_1')?.deletedAt).toBeUndefined();
+    // MongoDB contact with outreach history is preserved
+    const preservedContact = mongoStore.contacts.find((c) => c.id === 'cont_1');
+    expect(preservedContact?.deletedAt).toBeUndefined();
 
-    // SQLite contacts intact
+    // SQLite contacts query returns preserved contact
     const contacts = await LocalCRMRepository.findMany('contacts', workspaceA);
-    expect(contacts.length).toBe(2);
     expect(contacts.find((c) => c.id === 'cont_1')?.email).toBe('john@austinplumbing.com');
   });
 
@@ -686,27 +724,39 @@ describe('Phase 7 — Safe Discovery Run Deletion Test Matrix', () => {
   });
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Scenario 19: No company/contact cascade assertion (explicit count integrity)
+  // Scenario 19: Safe company/contact cascade assertion & SQLite projection tombstoning
   // ──────────────────────────────────────────────────────────────────────────
-  it('Scenario 19 — No company/contact cascade assertion: company and contact counts remain 100% identical', async () => {
+  it('Scenario 19 — Safe company/contact cascade assertion: exclusive clean company and contact are deleted, while multi-run and outreach-linked entities are preserved', async () => {
     await seedBaselineData();
 
-    const companiesBefore = (await LocalCRMRepository.findMany('companies', workspaceA)).length;
-    const contactsBefore = (await LocalCRMRepository.findMany('contacts', workspaceA)).length;
+    // Before deletion: 3 companies, 2 contacts in SQLite
+    expect((await LocalCRMRepository.findMany('companies', workspaceA)).length).toBe(3);
+    expect((await LocalCRMRepository.findMany('contacts', workspaceA)).length).toBe(2);
 
-    // Delete multiple runs
-    await invokeDeleteIpc({ workspaceId: workspaceA, id: 'run_completed_1' });
-    await invokeDeleteIpc({ workspaceId: workspaceA, id: 'run_failed_1' });
-    await invokeDeleteIpc({ workspaceId: workspaceA, id: 'run_cancelled_1' });
+    // Delete completed run
+    // - comp_1 is preserved (has delivery del_1 on cont_1)
+    // - comp_shared_3 is preserved (linked to run_cancelled_1)
+    // - comp_2 and cont_2 are exclusively owned by run_completed_1 -> deleted!
+    const res = await invokeDeleteIpc({ workspaceId: workspaceA, id: 'run_completed_1' });
+    expect(res.success).toBe(true);
+    expect(res.deletedCompanyIds).toContain('comp_2');
+    expect(res.deletedContactIds).toContain('cont_2');
 
-    const companiesAfter = (await LocalCRMRepository.findMany('companies', workspaceA)).length;
-    const contactsAfter = (await LocalCRMRepository.findMany('contacts', workspaceA)).length;
+    const companiesAfter = await LocalCRMRepository.findMany('companies', workspaceA);
+    const contactsAfter = await LocalCRMRepository.findMany('contacts', workspaceA);
 
-    // Exact identity: ZERO companies or contacts deleted
-    expect(companiesAfter).toBe(companiesBefore);
-    expect(contactsAfter).toBe(contactsBefore);
-    expect(companiesAfter).toBe(3);
-    expect(contactsAfter).toBe(2);
+    // In SQLite projection: comp_2 and cont_2 are removed from active queries
+    expect(companiesAfter.length).toBe(2);
+    expect(companiesAfter.map((c) => c.id).sort()).toEqual(['comp_1', 'comp_shared_3'].sort());
+    expect(contactsAfter.length).toBe(1);
+    expect(contactsAfter[0].id).toBe('cont_1');
+
+    // Verify projection tombstone in SQLite
+    const db = getDatabase(workspaceA);
+    const comp2Row: any = db.prepare('SELECT * FROM companies WHERE id = ?').get('comp_2');
+    expect(comp2Row.deletedAt).not.toBeNull();
+    const cont2Row: any = db.prepare('SELECT * FROM contacts WHERE id = ?').get('cont_2');
+    expect(cont2Row.deletedAt).not.toBeNull();
   });
 
   // ──────────────────────────────────────────────────────────────────────────

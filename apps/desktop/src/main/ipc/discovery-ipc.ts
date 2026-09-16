@@ -118,7 +118,7 @@ export function registerDiscoveryIpc() {
     const sdk = WorkspaceManager.getSdk();
 
     // 1. Authoritative deletion via MongoDB API
-    await sdk.discovery.deleteRun(id);
+    const result = await sdk.discovery.deleteRun(id);
 
     // 2. Projection cleanup in SQLite:
     // Soft-delete the discovery run in SQLite cache
@@ -135,10 +135,30 @@ export function registerDiscoveryIpc() {
       console.warn('[DiscoveryIPC] Note cleaning company_discovery_runs cache:', err);
     }
 
+    // Soft-delete cascaded companies in SQLite projection
+    if (result?.deletedCompanyIds && Array.isArray(result.deletedCompanyIds)) {
+      for (const compId of result.deletedCompanyIds) {
+        await LocalCRMRepository.softDeleteFromServer('companies', workspaceId, compId);
+      }
+    }
+
+    // Soft-delete cascaded contacts in SQLite projection
+    if (result?.deletedContactIds && Array.isArray(result.deletedContactIds)) {
+      for (const contId of result.deletedContactIds) {
+        await LocalCRMRepository.softDeleteFromServer('contacts', workspaceId, contId);
+      }
+    }
+
     // 3. Broadcast projection update to renderer
     ProjectionService.broadcastProjectionUpdated('discovery_runs', workspaceId);
+    if (result?.deletedCompanyIds?.length) {
+      ProjectionService.broadcastProjectionUpdated('companies', workspaceId);
+    }
+    if (result?.deletedContactIds?.length) {
+      ProjectionService.broadcastProjectionUpdated('contacts', workspaceId);
+    }
 
-    return { success: true };
+    return result ?? { success: true };
   });
 }
 

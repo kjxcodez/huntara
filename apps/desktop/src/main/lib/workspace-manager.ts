@@ -152,6 +152,13 @@ class WorkspaceManagerClass {
   }
 
   /**
+   * Retrieves the target workspace ID currently being transitioned to or active.
+   */
+  public getTargetWorkspaceId(): string | null {
+    return this.targetWorkspaceId || (this.activeRuntime?.workspaceId ?? null);
+  }
+
+  /**
    * Retrieves the JobScheduler for the currently active runtime.
    */
   public getScheduler(): any | null {
