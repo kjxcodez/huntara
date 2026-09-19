@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Download HUNTARA | HUNTARA",
     description: "Get the latest production-ready desktop installer package for HUNTARA on Windows and other platforms.",
-    url: "https://github.com/kjxcodez/leadforge-os/download"
+    url: "https://github.com/kjxcodez/huntara/download"
   }
 }
 

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Open Source Outreach Engine | HUNTARA",
     description: "Review our codebase license, local telemetry philosophy, and help build a faster private cold outbound engine.",
-    url: "https://github.com/kjxcodez/leadforge-os/open-source"
+    url: "https://github.com/kjxcodez/huntara/open-source"
   }
 }
 

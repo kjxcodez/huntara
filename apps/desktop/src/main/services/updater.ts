@@ -222,7 +222,7 @@ export class UpdateManager {
 
   private constructor() {
     // Initialise with GitHub Releases provider
-    this.provider = new GitHubUpdateProvider('kjxcodez', 'leadforge-os');
+    this.provider = new GitHubUpdateProvider('kjxcodez', 'huntara');
     this.registerIpcHandlers();
   }
 

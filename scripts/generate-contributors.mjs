@@ -23,7 +23,7 @@ const SEED_CONTRIBUTORS = [
 ];
 
 async function fetchContributors() {
-  const url = 'https://api.github.com/repos/kjxcodez/leadforge-os/contributors';
+  const url = 'https://api.github.com/repos/kjxcodez/huntara/contributors';
   console.log(`Querying GitHub API: ${url}`);
   
   try {

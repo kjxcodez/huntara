@@ -56,4 +56,4 @@ linux:
 publish:
   provider: github
   owner: kjxcodez
-  repo: leadforge-os
+  repo: huntara

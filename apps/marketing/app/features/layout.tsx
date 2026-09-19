@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Platform Features | HUNTARA",
     description: "Explore Google Maps scrapers, local Ollama contact enrichment, sandboxed Chromium workers, and SMTP mail relay tools.",
-    url: "https://github.com/kjxcodez/leadforge-os/features"
+    url: "https://github.com/kjxcodez/huntara/features"
   }
 }
 

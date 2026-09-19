@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Brand Guidelines & Logo Marks | HUNTARA",
     description: "Official HUNTARA brand assets, logo marks, app icons, and color palettes.",
-    url: "https://github.com/kjxcodez/leadforge-os/brand"
+    url: "https://github.com/kjxcodez/huntara/brand"
   }
 }
 

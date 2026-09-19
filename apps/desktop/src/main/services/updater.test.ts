@@ -91,7 +91,7 @@ describe('Auto-Update Infrastructure Suite', () => {
   });
 
   it('filters and sorts releases by channel (stable vs beta)', async () => {
-    const provider = new GitHubUpdateProvider('kjxcodez', 'leadforge-os');
+    const provider = new GitHubUpdateProvider('kjxcodez', 'huntara');
 
     const mockReleases = [
       {
@@ -159,7 +159,7 @@ describe('Auto-Update Infrastructure Suite', () => {
   });
 
   it('verifies checksum integrity and fallback mechanisms', async () => {
-    const provider = new GitHubUpdateProvider('kjxcodez', 'leadforge-os');
+    const provider = new GitHubUpdateProvider('kjxcodez', 'huntara');
     const testPayload = 'leadforge-update-payload';
     const sha256Hash = crypto.createHash('sha256').update(testPayload).digest('hex');
     const sha512HashB64 = crypto.createHash('sha512').update(testPayload).digest('base64');
@@ -238,7 +238,7 @@ describe('Auto-Update Infrastructure Suite', () => {
 
   it('validates state machine transitions and checksum matching', async () => {
     const manager = UpdateManager.getInstance();
-    const provider = new GitHubUpdateProvider('kjxcodez', 'leadforge-os');
+    const provider = new GitHubUpdateProvider('kjxcodez', 'huntara');
     const testPayload = 'leadforge-update-payload';
     const sha256Hash = crypto.createHash('sha256').update(testPayload).digest('hex');
 

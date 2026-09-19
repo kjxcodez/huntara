@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Terms of Service & Licensing | HUNTARA",
     description: "Terms of service, usage guidelines, and MIT license specifications for HUNTARA software.",
-    url: "https://github.com/kjxcodez/leadforge-os/terms"
+    url: "https://github.com/kjxcodez/huntara/terms"
   }
 }
 

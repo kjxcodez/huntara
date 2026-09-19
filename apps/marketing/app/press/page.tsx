@@ -49,7 +49,7 @@ export default function PressPage() {
 
         {/* Media Assets */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Logo package */}
           <div className="border border-[var(--border)] rounded-lg p-6 bg-[var(--card)] space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
@@ -61,8 +61,8 @@ export default function PressPage() {
                 Contains PNG extracts and logo suite formats of the HUNTARA logo (horizontal, stacked, icon marks) for media prints.
               </p>
             </div>
-            <a 
-              href="/brand" 
+            <a
+              href="/brand"
               className="inline-flex h-9 items-center justify-center rounded border border-[var(--border)] bg-[var(--background)] px-4 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
             >
               Get Logo Assets
@@ -89,7 +89,7 @@ export default function PressPage() {
 
         {/* Extended Section 1: Fact Sheet */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-[var(--border-subtle)] pt-12">
-          
+
           {/* List of Facts */}
           <div className="md:col-span-2 space-y-4 text-left">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -119,8 +119,8 @@ export default function PressPage() {
                 For interview requests with the maintainers or questions about outbound security models, please open an issue in our repository.
               </p>
             </div>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os/issues"
+            <a
+              href="https://github.com/kjxcodez/huntara/issues"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-9 items-center justify-center rounded bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-all cursor-pointer"

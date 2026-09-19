@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "API & Integrations Reference | HUNTARA",
     description: "Direct SQLite query schemas and Node.js code snippets to query HUNTARA local database structures.",
-    url: "https://github.com/kjxcodez/leadforge-os/api-docs"
+    url: "https://github.com/kjxcodez/huntara/api-docs"
   }
 }
 

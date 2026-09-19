@@ -56,7 +56,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/LeadForge.OS-1.2.0-beta-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.2.0-beta/LeadForge.OS-1.2.0-beta-win-x64.exe",
             "sizeBytes": 100336820,
             "sizeFormatted": "95.7 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -87,7 +87,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.5/LeadForge.OS-1.1.1-beta.5-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.5/LeadForge.OS-1.1.1-beta.5-win-x64.exe",
             "sizeBytes": 100312108,
             "sizeFormatted": "95.7 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -118,7 +118,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.2/LeadForge.OS-1.1.1-beta.4.2-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.4.2/LeadForge.OS-1.1.1-beta.4.2-win-x64.exe",
             "sizeBytes": 99874466,
             "sizeFormatted": "95.2 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -149,7 +149,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.1/LeadForge.OS-1.1.1-beta.4.1-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.4.1/LeadForge.OS-1.1.1-beta.4.1-win-x64.exe",
             "sizeBytes": 99870937,
             "sizeFormatted": "95.2 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -180,7 +180,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.3/LeadForge.OS-1.1.1-beta.3-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.3/LeadForge.OS-1.1.1-beta.3-win-x64.exe",
             "sizeBytes": 99871395,
             "sizeFormatted": "95.2 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -211,7 +211,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.2/LeadForge.OS-1.1.1-beta.2-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.2/LeadForge.OS-1.1.1-beta.2-win-x64.exe",
             "sizeBytes": 99907618,
             "sizeFormatted": "95.3 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -242,7 +242,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.1/LeadForge.OS-1.1.1-beta.1-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.1/LeadForge.OS-1.1.1-beta.1-win-x64.exe",
             "sizeBytes": 99874639,
             "sizeFormatted": "95.2 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -273,7 +273,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.6/LeadForge.OS-1.0.0-beta.6-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.0.0-beta.6/LeadForge.OS-1.0.0-beta.6-win-x64.exe",
             "sizeBytes": 99874712,
             "sizeFormatted": "95.2 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -304,7 +304,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.5/LeadForge.OS-1.0.0-beta.5-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.0.0-beta.5/LeadForge.OS-1.0.0-beta.5-win-x64.exe",
             "sizeBytes": 99547638,
             "sizeFormatted": "94.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -335,7 +335,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.4/LeadForge.OS-1.0.0-beta.4-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.0.0-beta.4/LeadForge.OS-1.0.0-beta.4-win-x64.exe",
             "sizeBytes": 99546828,
             "sizeFormatted": "94.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -366,7 +366,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.3/LeadForge.OS-1.0.0-beta.3-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.0.0-beta.3/LeadForge.OS-1.0.0-beta.3-win-x64.exe",
             "sizeBytes": 99546859,
             "sizeFormatted": "94.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -397,7 +397,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.1/LeadForge.OS-0.1.2-beta.1-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.0.0-beta.1/LeadForge.OS-0.1.2-beta.1-win-x64.exe",
             "sizeBytes": 99520493,
             "sizeFormatted": "94.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -428,7 +428,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.2-beta.1/LeadForge.OS-0.1.1-beta.1-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v0.1.2-beta.1/LeadForge.OS-0.1.1-beta.1-win-x64.exe",
             "sizeBytes": 98456697,
             "sizeFormatted": "93.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -459,7 +459,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.1-beta.1/LeadForge.OS-0.1.0-beta.1-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v0.1.1-beta.1/LeadForge.OS-0.1.0-beta.1-win-x64.exe",
             "sizeBytes": 98454876,
             "sizeFormatted": "93.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
@@ -490,7 +490,7 @@ export const GENERATED_RELEASES: Release[] = [
             "architectureLabel": "x64",
             "artifactType": "NSIS Installer",
             "extension": "exe",
-            "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.0-beta.2/LeadForge.OS-0.1.0-beta.1-win-x64.exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v0.1.0-beta.2/LeadForge.OS-0.1.0-beta.1-win-x64.exe",
             "sizeBytes": 98454858,
             "sizeFormatted": "93.9 MB",
             "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"

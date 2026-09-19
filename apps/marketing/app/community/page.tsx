@@ -50,9 +50,9 @@ export default function CommunityPage() {
             <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
               Ask architectural questions, propose feature changes, or share custom parsing scripts.
             </p>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os/discussions" 
-              target="_blank" 
+            <a
+              href="https://github.com/kjxcodez/huntara/discussions"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-[var(--primary)] font-semibold hover:underline"
             >

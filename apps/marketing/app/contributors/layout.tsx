@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Contributors Repository | HUNTARA",
     description: "Credits to the developers, open-source maintainers, and documentation writers of the HUNTARA outbound engine.",
-    url: "https://github.com/kjxcodez/leadforge-os/contributors"
+    url: "https://github.com/kjxcodez/huntara/contributors"
   }
 }
 

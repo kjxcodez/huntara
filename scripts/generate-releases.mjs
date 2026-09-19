@@ -179,7 +179,7 @@ export const SEED_RELEASES = [
             architectureLabel: 'x64',
             artifactType: 'NSIS Installer',
             extension: 'exe',
-            downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/HUNTARA-1.2.0-beta-win-x64.exe',
+            downloadUrl: 'https://github.com/kjxcodez/huntara/releases/download/v1.2.0-beta/HUNTARA-1.2.0-beta-win-x64.exe',
             sizeBytes: 100336820,
             sizeFormatted: '95.7 MB',
             checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
@@ -212,7 +212,7 @@ export const SEED_RELEASES = [
             architectureLabel: 'x64',
             artifactType: 'NSIS Installer',
             extension: 'exe',
-            downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.5/HUNTARA-1.1.1-beta.5-win-x64.exe',
+            downloadUrl: 'https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.5/HUNTARA-1.1.1-beta.5-win-x64.exe',
             sizeBytes: 100312108,
             sizeFormatted: '95.7 MB',
             checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
@@ -245,7 +245,7 @@ export const SEED_RELEASES = [
             architectureLabel: 'x64',
             artifactType: 'NSIS Installer',
             extension: 'exe',
-            downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.2/HUNTARA-1.1.1-beta.4.2-win-x64.exe',
+            downloadUrl: 'https://github.com/kjxcodez/huntara/releases/download/v1.1.1-beta.4.2/HUNTARA-1.1.1-beta.4.2-win-x64.exe',
             sizeBytes: 99874466,
             sizeFormatted: '95.2 MB',
             checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
@@ -257,7 +257,7 @@ export const SEED_RELEASES = [
 ];
 
 export async function fetchReleases() {
-  const url = 'https://api.github.com/repos/kjxcodez/leadforge-os/releases';
+  const url = 'https://api.github.com/repos/kjxcodez/huntara/releases';
   console.log(`Querying GitHub API: ${url}`);
 
   try {

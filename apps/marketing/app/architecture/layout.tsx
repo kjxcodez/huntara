@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Local-First Architecture | HUNTARA",
     description: "Technical outline of HUNTARA multithreaded Chromium scrapers, Ollama LLM integration, and SQLite WAL database architecture.",
-    url: "https://github.com/kjxcodez/leadforge-os/architecture"
+    url: "https://github.com/kjxcodez/huntara/architecture"
   }
 }
 

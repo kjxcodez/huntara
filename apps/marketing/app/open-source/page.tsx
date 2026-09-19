@@ -57,7 +57,7 @@ export default function OpenSourcePage() {
 
         {/* Repositories */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Main Monorepo */}
           <div className="border border-[var(--border)] rounded-lg p-6 bg-[var(--card)] space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
@@ -69,9 +69,9 @@ export default function OpenSourcePage() {
                 Contains the Electron shell interface, the main React workflow builder dashboard, and background circular log daemons.
               </p>
             </div>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os" 
-              target="_blank" 
+            <a
+              href="https://github.com/kjxcodez/huntara"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-9 items-center justify-center rounded border border-[var(--border)] bg-[var(--background)] px-4 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
             >
@@ -90,7 +90,7 @@ export default function OpenSourcePage() {
                 We welcome pull requests for email verification scrapers, custom SQLite WAL enhancements, and brand guidelines updates.
               </p>
             </div>
-            <a 
+            <a
               href="/contributors"
               className="inline-flex h-9 items-center justify-center rounded border border-[var(--border)] bg-[var(--background)] px-4 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
             >

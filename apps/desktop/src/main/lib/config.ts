@@ -94,7 +94,7 @@ export function loadConfig(): AppConfig {
     version: pkgVersion,
     packageIdentifier: 'com.huntara.app',
     releaseChannel: 'beta',
-    updaterUrl: 'https://api.github.com/repos/kjxcodez/leadforge-os/releases/latest'
+    updaterUrl: 'https://api.github.com/repos/kjxcodez/huntara/releases/latest'
   };
 
   let localData: any = {};

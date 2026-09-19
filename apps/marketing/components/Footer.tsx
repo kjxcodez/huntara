@@ -82,7 +82,7 @@ export function Footer() {
           <div className="flex gap-6 items-center">
             <Link href="/docs" className="hover:text-[var(--foreground)] transition-colors duration-150">Documentation</Link>
             <Link href="/releases" className="hover:text-[var(--foreground)] transition-colors duration-150">Releases</Link>
-            <a href="https://github.com/kjxcodez/leadforge-os" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors duration-150 font-mono">
+            <a href="https://github.com/kjxcodez/huntara" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors duration-150 font-mono">
               GitHub
             </a>
           </div>
@@ -90,7 +90,7 @@ export function Footer() {
 
         {/* Big Background Outline Text */}
         <div className="w-full text-center select-none relative group flex items-center justify-center overflow-visible z-0 pointer-events-none">
-         
+
           <div className="h-[40dvh] w-screen flex items-center justify-center pointer-events-auto z-10">
             <TextHoverEffect text="HUNTARA" />
           </div>

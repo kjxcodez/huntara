@@ -66,8 +66,8 @@ export default function ContributorsPage() {
         {/* Contributors grid */}
         <motion.div variants={childVariants} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {contributors.map((contrib) => (
-            <a 
-              key={contrib.name} 
+            <a
+              key={contrib.name}
               href={contrib.github}
               target="_blank"
               rel="noopener noreferrer"
@@ -120,9 +120,9 @@ export default function ContributorsPage() {
               Find issues labeled `good first issue` or `help wanted` in our repository. Read our contribution guidelines to align with SQLite WAL architecture.
             </p>
           </div>
-          <a 
-            href="https://github.com/kjxcodez/leadforge-os" 
-            target="_blank" 
+          <a
+            href="https://github.com/kjxcodez/huntara"
+            target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-9 items-center justify-center rounded bg-[var(--primary)] px-4 text-xs font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-all cursor-pointer"
           >

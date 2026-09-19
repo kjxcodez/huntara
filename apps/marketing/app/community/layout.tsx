@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Operator Community | HUNTARA",
     description: "Find official GitHub discussions, Discord channels, and community resources to contribute to HUNTARA.",
-    url: "https://github.com/kjxcodez/leadforge-os/community"
+    url: "https://github.com/kjxcodez/huntara/community"
   }
 }
 
