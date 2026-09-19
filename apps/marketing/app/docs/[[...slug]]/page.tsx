@@ -29,9 +29,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   return {
     title: doc.frontmatter.title,
-    description: doc.frontmatter.description || `Documentation for ${doc.frontmatter.title} in LeadForge OS.`,
+    description: doc.frontmatter.description || `Documentation for ${doc.frontmatter.title} in HUNTARA.`,
     openGraph: {
-      title: `${doc.frontmatter.title} | LeadForge OS Docs`,
+      title: `${doc.frontmatter.title} | HUNTARA Docs`,
       description: doc.frontmatter.description
     }
   }

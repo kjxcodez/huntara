@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy & Data Guidelines",
   description: "Review our local data security, zero tracker telemetry, and SQLite database storage encryption policies.",
   openGraph: {
-    title: "Privacy Policy & Data Guidelines | LeadForge OS",
+    title: "Privacy Policy & Data Guidelines | HUNTARA",
     description: "Review our local data security, zero tracker telemetry, and SQLite database storage encryption policies.",
     url: "https://github.com/kjxcodez/leadforge-os/privacy"
   }

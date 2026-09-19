@@ -97,7 +97,7 @@ export default function FeaturesPage() {
             Platform Capabilities
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge OS Features
+            HUNTARA Features
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
             obsessively engineered to give you direct control of your cold sales pipelines, running entirely on your machine.

@@ -56,10 +56,10 @@ export default function ContributorsPage() {
             Active Maintainers
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Contributors
+            HUNTARA Contributors
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Meet the engineers, architects, and technical contributors driving the development of the LeadForge local-first outbound environment.
+            Meet the engineers, architects, and technical contributors driving the development of the HUNTARA local-first outbound environment.
           </motion.p>
         </div>
 

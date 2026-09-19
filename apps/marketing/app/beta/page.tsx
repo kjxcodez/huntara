@@ -87,7 +87,7 @@ export default function BetaPage() {
             Join the Beta
           </motion.h1>
           <motion.p variants={childVariants} className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Test the latest pre-release versions of LeadForge OS. Help us find edge cases in SMTP handshakes and WAL checkpoints.
+            Test the latest pre-release versions of HUNTARA. Help us find edge cases in SMTP handshakes and WAL checkpoints.
           </motion.p>
         </div>
 

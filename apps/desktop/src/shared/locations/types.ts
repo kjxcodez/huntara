@@ -1,5 +1,5 @@
 /**
- * Canonical ISO Geographic Data Types for LeadForge OS
+ * Canonical ISO Geographic Data Types for HUNTARA
  */
 
 export interface LocationCountry {

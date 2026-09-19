@@ -102,7 +102,7 @@ export class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundar
                   Something went wrong
                 </h1>
                 <p className="text-[12px] text-muted-foreground leading-relaxed max-w-xs">
-                  LeadForge OS encountered an unexpected error. Your data is safe — reload to recover.
+                  HUNTARA encountered an unexpected error. Your data is safe — reload to recover.
                 </p>
               </div>
             </div>

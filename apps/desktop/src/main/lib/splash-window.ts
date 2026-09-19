@@ -64,7 +64,7 @@ export function createSplashWindow(): void {
             left: -20%;
             width: 75%;
             height: 75%;
-            background: rgba(255, 140, 0, 0.14); /* Forge Orange */
+            background: rgba(250, 113, 37, 0.18); /* HUNTARA Orange */
             filter: blur(90px);
             pointer-events: none;
           }
@@ -108,8 +108,8 @@ export function createSplashWindow(): void {
           .logo-frame {
             width: 56px;
             height: 56px;
-            background: rgba(255, 140, 0, 0.06);
-            border: 1px solid rgba(255, 140, 0, 0.2);
+            background: rgba(250, 113, 37, 0.08);
+            border: 1px solid rgba(250, 113, 37, 0.25);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -126,12 +126,12 @@ export function createSplashWindow(): void {
           .logo-frame svg {
             width: 28px;
             height: 28px;
-            color: #ff8c00;
+            color: #FA7125;
             position: relative;
             z-index: 2;
           }
           .title {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 800;
             letter-spacing: 0.25em;
             text-transform: uppercase;
@@ -139,12 +139,11 @@ export function createSplashWindow(): void {
             color: #ffffff;
           }
           .subtitle {
-            font-size: 9px;
-            color: #71717a;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            margin-top: 4px;
+            font-size: 10px;
+            color: #a1a1aa;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            margin-top: 6px;
           }
           .version {
             font-size: 10px;
@@ -178,7 +177,7 @@ export function createSplashWindow(): void {
 
         <div class="card">
           <!-- top-left dots -->
-          <svg class="dots dots-tl" viewBox="0 0 100 100" fill="currentColor" style="color: #ff8c00;">
+          <svg class="dots dots-tl" viewBox="0 0 100 100" fill="currentColor" style="color: #FA7125;">
             <circle cx="10" cy="10" r="7"/><circle cx="50" cy="10" r="7"/><circle cx="90" cy="10" r="7"/>
             <circle cx="10" cy="50" r="7"/><circle cx="50" cy="50" r="7"/><circle cx="90" cy="50" r="7"/>
             <circle cx="10" cy="90" r="7"/><circle cx="50" cy="90" r="7"/><circle cx="90" cy="90" r="7"/>
@@ -202,8 +201,8 @@ export function createSplashWindow(): void {
             }
           </div>
 
-          <div class="title">LeadForge OS</div>
-          <div class="subtitle">Intelligent Sales Outbound OS</div>
+          <div class="title">HUNTARA</div>
+          <div class="subtitle">Find the companies worth selling to.</div>
           <div class="version">v. ${appVersion}</div>
 
           <div class="segments" id="segments-container"></div>
@@ -236,7 +235,7 @@ export function createSplashWindow(): void {
             else if (stepId === 'ready') filled = 12;
 
             for (let i = 0; i < totalSegments; i++) {
-              segments[i].style.backgroundColor = i < filled ? '#ff8c00' : '#18181b';
+              segments[i].style.backgroundColor = i < filled ? '#FA7125' : '#18181b';
             }
           };
         </script>

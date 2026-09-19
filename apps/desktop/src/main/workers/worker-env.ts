@@ -14,7 +14,7 @@ export function resolveWorkerApiUrl(ctx: JobContext): string {
   const rawUrl = ctx.payload?._config?.apiUrl || process.env.API_URL;
   if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) {
     throw new Error(
-      'LeadForge could not determine the API server URL for this environment. Please ensure the job was dispatched by the LeadForge Scheduler.'
+      'HUNTARA could not determine the API server URL for this environment. Please ensure the job was dispatched by the HUNTARA Scheduler.'
     );
   }
   let trimmed = rawUrl.trim().replace(/\/+$/, '');

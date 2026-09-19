@@ -32,10 +32,10 @@ export default function CommunityPage() {
             Operator Hub
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Community
+            HUNTARA Community
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Collaborate with other local-first operators, share scrapers, or help shape the future of LeadForge OS.
+            Collaborate with other local-first operators, share scrapers, or help shape the future of HUNTARA.
           </motion.p>
         </div>
 

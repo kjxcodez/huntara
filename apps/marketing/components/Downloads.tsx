@@ -41,9 +41,9 @@ export function Downloads() {
   const latestRelease = GENERATED_RELEASES.find(r => !r.prerelease) || GENERATED_RELEASES[0]
   const winAsset = latestRelease?.assets.find(a => a.name.endsWith('.exe'))
   
-  const winName = winAsset?.name || "LeadForge.OS-0.1.2-beta.1-win-x64.exe"
+  const winName = winAsset?.name || "HUNTARA-0.1.2-beta.1-win-x64.exe"
   const winHash = winAsset?.checksum || "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-  const winUrl = winAsset?.downloadUrl || "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.1/LeadForge.OS-0.1.2-beta.1-win-x64.exe"
+  const winUrl = winAsset?.downloadUrl || "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.1/HUNTARA-0.1.2-beta.1-win-x64.exe"
   const winVersion = latestRelease?.version || "v1.0.0-beta.1"
 
   const checksumData = {
@@ -53,12 +53,12 @@ export function Downloads() {
       cmd: `certutil -hashfile ${winName} SHA256`
     },
     mac: {
-      filename: "LeadForge-OS-macOS (Coming Soon)",
+      filename: "HUNTARA-macOS (Coming Soon)",
       hash: "Not Available Yet",
       cmd: "echo 'macOS release is planned'"
     },
     linux: {
-      filename: "LeadForge-OS-Linux (Coming Soon)",
+      filename: "HUNTARA-Linux (Coming Soon)",
       hash: "Not Available Yet",
       cmd: "echo 'Linux release is planned'"
     }
@@ -79,7 +79,7 @@ export function Downloads() {
             maxSize={1.5}
             particleDensity={40}
             className="w-full h-full opacity-35"
-            particleColor="#E8622C"
+            particleColor="#FA7125"
           />
         </div>
       )}
@@ -93,7 +93,7 @@ export function Downloads() {
             Signed Releases
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-white mb-4 md:text-4xl">
-            Get LeadForge OS
+            Get HUNTARA
           </h2>
           <p className="text-[var(--text-secondary)] leading-relaxed text-xs sm:text-sm">
             Signed binaries cryptographically checked on every package push. Detects platform architecture instantly.
@@ -107,7 +107,7 @@ export function Downloads() {
           <div
             className={`flex flex-col justify-between rounded-lg border bg-[rgba(10,10,12,0.5)] p-6 text-center transition-all duration-200 relative overflow-hidden ${
               detectedPlatform === "win" 
-                ? "border-primary/50 shadow-[0_0_20px_rgba(232,98,44,0.06)] scale-[1.01]" 
+                ? "border-primary/50 shadow-[0_0_20px_rgba(250,113,37,0.06)] scale-[1.01]" 
                 : "border-[var(--border-subtle)] hover:border-[var(--border-strong)]"
             }`}
           >

@@ -286,7 +286,7 @@ export async function crawlWebsite(ctx: JobContext): Promise<any> {
   }
 
   const origin = new URL(website).origin;
-  const userAgent = 'LeadForgeBot/1.0 (+https://leadforge.ai/bot)';
+  const userAgent = 'HuntaraBot/1.0 (+https://huntara.com/bot)';
   let robots: any = null;
 
   try {

@@ -31,17 +31,20 @@ export function getDefaultWorkspacesDirs(): string[] {
 
   // OS standard Electron userData path
   const platform = os.platform();
-  let appDataDir = '';
-  if (platform === 'win32') {
-    appDataDir = process.env.APPDATA ? path.join(process.env.APPDATA, 'LeadForge', 'workspaces') : '';
-  } else if (platform === 'darwin') {
-    appDataDir = path.join(os.homedir(), 'Library', 'Application Support', 'LeadForge', 'workspaces');
-  } else {
-    appDataDir = path.join(os.homedir(), '.config', 'LeadForge', 'workspaces');
-  }
+  const appNames = ['HUNTARA', 'Huntara', 'LeadForge'];
+  for (const appName of appNames) {
+    let appDataDir = '';
+    if (platform === 'win32') {
+      appDataDir = process.env.APPDATA ? path.join(process.env.APPDATA, appName, 'workspaces') : '';
+    } else if (platform === 'darwin') {
+      appDataDir = path.join(os.homedir(), 'Library', 'Application Support', appName, 'workspaces');
+    } else {
+      appDataDir = path.join(os.homedir(), '.config', appName, 'workspaces');
+    }
 
-  if (appDataDir && fs.existsSync(appDataDir)) {
-    dirs.push(appDataDir);
+    if (appDataDir && fs.existsSync(appDataDir) && !dirs.includes(appDataDir)) {
+      dirs.push(appDataDir);
+    }
   }
 
   // Local development workspace directories

@@ -1,5 +1,5 @@
 /**
- * LeadForge OS Canonical Geographic Engine
+ * HUNTARA Canonical Geographic Engine
  * Provides version-pinned, local, offline-capable ISO-3166 location lookups,
  * natural-language searching, and bidirectional normalization.
  */

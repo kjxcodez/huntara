@@ -18,7 +18,7 @@ import { useState, useEffect } from 'react';
 import { WorkspaceSwitcher } from '../ui/WorkspaceSwitcher';
 import SidebarLinks from './SidebarLinks';
 import SidebarBottomNav from './SidebarBottomNav';
-import logoLight from '../../assets/app-icon-light.png';
+import huntaraMark from '../../assets/huntara-mark.png';
 
 const NAV_ITEMS = [
   { to: '/dashboard',   label: 'Dashboard',         icon: LayoutDashboard },
@@ -67,11 +67,11 @@ export function AppSidebar({ activeWorkspace }: { activeWorkspace: any }) {
     >
       <SidebarHeader className="flex flex-row items-center gap-2.5 px-3 pt-4 pb-5">
         <div className="w-7 h-7 flex items-center justify-center shrink-0 overflow-hidden">
-          <img src={logoLight} className="h-6 w-6 object-contain" alt="LeadForge Logo" />
+          <img src={huntaraMark} className="h-6 w-6 object-contain" alt="HUNTARA Logo" />
         </div>
         <div className="min-w-0 overflow-hidden">
           <p className="text-sm font-semibold tracking-tight text-foreground leading-none">
-            LeadForge
+            HUNTARA
           </p>
           <WorkspaceSwitcher />
         </div>

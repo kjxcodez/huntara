@@ -35,7 +35,7 @@ export default function AboutPage() {
             The Local-First Sales Manifesto
           </motion.h1>
           <motion.p variants={childVariants} className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            LeadForge OS was built by engineering operators who believe professional software tools should be fast, private, and precise.
+            HUNTARA was built by engineering operators who believe professional software tools should be fast, private, and precise.
           </motion.p>
         </div>
 
@@ -70,7 +70,7 @@ export default function AboutPage() {
           </div>
 
           <p>
-            LeadForge OS is built for operators who prioritize execution and craftsmanship over startup hype. We are proud to build it open-source.
+            HUNTARA is built for operators who prioritize execution and craftsmanship over startup hype. We are proud to build it open-source.
           </p>
         </motion.div>
       </motion.div>

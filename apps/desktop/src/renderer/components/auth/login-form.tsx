@@ -56,7 +56,7 @@ export function LoginForm({
   return (
     <FormCard>
       <AuthHeader
-        title="Welcome to LeadForge OS"
+        title="Welcome to HUNTARA"
         subtitle="Sign in with your professional credentials"
       />
 

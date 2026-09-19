@@ -55,7 +55,7 @@ export function RegisterForm({
     <FormCard>
       <AuthHeader
         title="Create your account"
-        subtitle="Get started with LeadForge OS"
+        subtitle="Get started with HUNTARA"
       />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

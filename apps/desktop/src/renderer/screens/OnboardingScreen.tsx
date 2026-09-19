@@ -18,10 +18,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
-import logoLight from '../assets/app-icon-light.png';
+import huntaraMark from '../assets/huntara-mark.png';
 
 /**
- * OnboardingScreen — Step-by-step workspace onboarding for LeadForge OS.
+ * OnboardingScreen — Step-by-step workspace onboarding for HUNTARA.
  *
  * Updates:
  *   - Combined Workspace setup Name configuration directly into Step 1.
@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
     if (currentWs?.name) {
       setWsName(currentWs.name);
     } else if (!wsName) {
-      setWsName('LeadForge Workspace');
+      setWsName('HUNTARA Workspace');
     }
   }, [activeWorkspace, workspaces]);
 
@@ -77,7 +77,7 @@ export default function OnboardingScreen() {
   const handleCreateWorkspace = async () => {
     setLoading(true);
     try {
-      const targetName = wsName.trim() || 'LeadForge Workspace';
+      const targetName = wsName.trim() || 'HUNTARA Workspace';
 
       // Reuse existing workspace or create a new one only if none exists
       let ws = activeWorkspace || (workspaces && workspaces.length > 0 ? workspaces[0] : null);
@@ -205,11 +205,11 @@ export default function OnboardingScreen() {
         <div className="flex items-center justify-between border-b border-border-subtle pb-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-none bg-primary/10 flex items-center justify-center p-1.5 shrink-0 overflow-hidden">
-              <img src={logoLight} className="h-full w-full object-contain" alt="LeadForge Logo" />
+              <img src={huntaraMark} className="h-full w-full object-contain" alt="HUNTARA Logo" />
             </div>
             <div>
               <h1 className="text-sm font-extrabold tracking-tight text-foreground uppercase">
-                LeadForge OS
+                HUNTARA
               </h1>
               <span className="text-[10px] text-muted-foreground block font-bold uppercase mt-0.5">
                 Workspace Initialization
@@ -503,7 +503,7 @@ export default function OnboardingScreen() {
               <div className="space-y-1">
                 <h2 className="text-base font-bold text-foreground">Outbound Email Integration</h2>
                 <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  LeadForge OS connects directly to Gmail using official Google OAuth 2.0 authorization.
+                  HUNTARA connects directly to Gmail using official Google OAuth 2.0 authorization.
                   You can connect your mailbox in Settings anytime without giving out your password.
                 </p>
               </div>
@@ -512,7 +512,7 @@ export default function OnboardingScreen() {
                 <div className="bg-info-muted border border-info/20 rounded-none p-3 text-[10px] leading-relaxed text-info font-medium flex gap-2">
                   <Info className="w-4 h-4 text-info shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-info">Secure Google Authorization:</span> Mailboxes are managed in <strong>Settings → Email Accounts</strong>. OAuth consent opens safely in Google Chrome, giving LeadForge OS permission to dispatch campaign emails securely.
+                    <span className="font-bold text-info">Secure Google Authorization:</span> Mailboxes are managed in <strong>Settings → Email Accounts</strong>. OAuth consent opens safely in Google Chrome, giving HUNTARA permission to dispatch campaign emails securely.
                   </div>
                 </div>
               </div>
@@ -566,7 +566,7 @@ export default function OnboardingScreen() {
                   Back
                 </Button>
                 <Button type="button" size="sm" onClick={handleCreateWorkspace} disabled={loading} className="px-6 rounded-none text-[10px]">
-                  {loading ? 'Initializing Workspace...' : 'Launch LeadForge OS'}
+                  {loading ? 'Initializing Workspace...' : 'Launch HUNTARA'}
                 </Button>
               </div>
             </motion.div>

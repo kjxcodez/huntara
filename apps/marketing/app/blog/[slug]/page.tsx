@@ -22,7 +22,7 @@ export default function BlogPostPage({ params }: PageProps) {
       body: (
         <div className="space-y-6 text-xs text-[var(--text-secondary)] leading-relaxed">
           <p>
-            When we built LeadForge OS, the primary challenge we wanted to tackle was not just speed or privacy, but 
+            When we built HUNTARA, the primary challenge we wanted to tackle was not just speed or privacy, but 
             the fundamental ownership of sales records. In traditional cold email pipeline management, operators upload 
             hundreds of prospects, API credentials, and email drafts into multi-tenant SaaS dashboards.
           </p>
@@ -35,7 +35,7 @@ export default function BlogPostPage({ params }: PageProps) {
             <li><strong>Bloated Markups:</strong> You pay for cloud server hosting markups to run CPU-heavy scrapers, WHOIS handshakes, and crawlers.</li>
           </ul>
           <p>
-            By shifting to a local-first system, LeadForge OS resolves all three issues. All contacts sit safely on your disk inside 
+            By shifting to a local-first system, HUNTARA resolves all three issues. All contacts sit safely on your disk inside 
             an SQLite database, and the CPU cores of your own machine handle the heavy parser loads, making the system fast, secure, 
             and free of cloud markup fees.
           </p>

@@ -823,7 +823,7 @@ function GoogleDriveIntegrationCard({ workspaceId }: { workspaceId: string }) {
           <div>
             <p className="text-xs font-semibold text-foreground">Connect Google Drive to Enable File Attachments</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Secure OAuth authorization allows LeadForge OS to access selected files in your Google Drive.
+              Secure OAuth authorization allows HUNTARA to access selected files in your Google Drive.
             </p>
           </div>
           <Button
@@ -919,7 +919,7 @@ function AutoUpdateSection() {
           <span>Application Updates</span>
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Verify and install latest features, patches, and security updates for LeadForge OS.
+          Verify and install latest features, patches, and security updates for HUNTARA.
         </p>
       </div>
 
@@ -1148,7 +1148,7 @@ function EmailAccountsSection() {
         <div className="p-6 text-center border border-dashed border-border-subtle rounded-none bg-surface-3/30 space-y-2">
           <p className="text-xs font-semibold text-foreground">No Gmail Accounts Connected</p>
           <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
-            Click <strong>Connect Gmail</strong> to authorize your mailbox in Chrome. LeadForge OS never sees your password.
+            Click <strong>Connect Gmail</strong> to authorize your mailbox in Chrome. HUNTARA never sees your password.
           </p>
         </div>
       ) : (

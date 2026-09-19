@@ -57,7 +57,7 @@ export default function PricingPage() {
             Free while in beta.
           </h1>
           <p className="text-base text-[var(--text-secondary)]">
-            LeadForge OS runs on your hardware. We do not charge bloated cloud hosting markups because you run the system yourself.
+            HUNTARA runs on your hardware. We do not charge bloated cloud hosting markups because you run the system yourself.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export default function PricingPage() {
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-[var(--foreground)]">LeadForge OS Open Beta</h2>
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">HUNTARA Open Beta</h2>
                   <p className="text-[11px] text-[var(--text-secondary)] mt-1">
                     Complete local-first pipeline environment running locally inside your system container.
                   </p>

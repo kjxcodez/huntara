@@ -19,7 +19,7 @@ export default function PressPage() {
   }
 
   const factSheet = [
-    { label: "Official Name", val: "LeadForge OS" },
+    { label: "Official Name", val: "HUNTARA" },
     { label: "Initial Release", val: "August 1, 2026 (v1.0.0-beta.1)" },
     { label: "Platform Target", val: "Windows 10 / 11 (x64 desktop environment)" },
     { label: "Core Architecture", val: "Local-first SQLite with WAL write streams" },
@@ -40,10 +40,10 @@ export default function PressPage() {
             Press Kit
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Press Kit
+            HUNTARA Press Kit
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Media resources and boilerplate text for publications writing about LeadForge OS, data sovereignty, and secure local-first architectures.
+            Media resources and boilerplate text for publications writing about HUNTARA, data sovereignty, and secure local-first architectures.
           </motion.p>
         </div>
 
@@ -58,7 +58,7 @@ export default function PressPage() {
               </div>
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Brand Logo Package</h2>
               <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                Contains SVG vector formats of the LeadForge logo (light, dark, monochrome) for media prints.
+                Contains PNG extracts and logo suite formats of the HUNTARA logo (horizontal, stacked, icon marks) for media prints.
               </p>
             </div>
             <a 
@@ -81,7 +81,7 @@ export default function PressPage() {
               </p>
             </div>
             <div className="bg-[var(--background)] border border-[var(--border-subtle)] p-3.5 rounded text-[10px] text-[var(--text-secondary)] leading-relaxed font-mono">
-              &ldquo;LeadForge OS is a local-first desktop operating system for sales discovery and direct SMTP outreach, storing all records securely inside SQLite.&rdquo;
+              &ldquo;HUNTARA helps businesses find and understand their next customers. Find the companies worth selling to.&rdquo;
             </div>
           </div>
 

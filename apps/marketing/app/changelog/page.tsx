@@ -51,7 +51,7 @@ export default function ChangelogPage() {
             Latest Updates
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Dated logs of added, changed, and fixed items inside LeadForge OS release timelines.
+            Dated logs of added, changed, and fixed items inside HUNTARA release timelines.
           </motion.p>
         </div>
 

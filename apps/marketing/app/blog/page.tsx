@@ -50,7 +50,7 @@ export default function BlogPage() {
             Engineering Blog
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge OS Logs
+            HUNTARA Logs
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
             Technical writing on database performance, local-first protocols, and SMTP routing mechanisms.

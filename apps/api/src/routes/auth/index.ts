@@ -317,7 +317,7 @@ function pageShell(title: string, body: string): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${title} — LeadForge OS</title>
+  <title>${title} — HUNTARA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
@@ -329,8 +329,8 @@ function pageShell(title: string, body: string): string {
       --bg-surface-2: #1B1B1F;
       --border-subtle: #232327;
       --border-default: #2E2E33;
-      --accent:       #E8622C;
-      --accent-hover: #F17441;
+      --accent:       #FA7125;
+      --accent-hover: #FB8846;
       --text-primary: #F4F4F5;
       --text-secondary: #A3A3AB;
       --text-tertiary: #6E6E76;
@@ -497,7 +497,7 @@ function pageShell(title: string, body: string): string {
   </style>
 </head>
 <body>
-  <div class="wordmark">LEAD<em>FORGE</em> OS</div>
+  <div class="wordmark">HUNT<em>ARA</em></div>
   <div class="card">
     ${body}
   </div>
@@ -601,7 +601,7 @@ router.get('/verify-success', (c) => {
     <div class="icon-box success">✓</div>
     <h1 style="text-align:center;">Email verified</h1>
     <p class="subtitle" style="text-align:center;">
-      Your email address has been confirmed. Your LeadForge OS account is now active.
+      Your email address has been confirmed. Your HUNTARA account is now active.
     </p>
     <div class="divider"></div>
     <p class="caption" style="text-align:center;">

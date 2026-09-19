@@ -2875,7 +2875,7 @@ export const ActionRegistry: Record<string, AutomationAction> = {
       if (typeof process !== 'undefined' && typeof process.send === 'function') {
         process.send({
           type: 'notify',
-          title: `LeadForge OS - ${type.toUpperCase()}`,
+          title: `HUNTARA - ${type.toUpperCase()}`,
           body: message
         });
       }

@@ -1,5 +1,5 @@
 /**
- * IPC Protocol Types — LeadForge OS Worker Runtime
+ * IPC Protocol Types — HUNTARA Worker Runtime
  *
  * Defines the typed message contracts between the Electron Main process
  * and forked Node.js worker child processes.

@@ -2,10 +2,10 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Local-First Architecture",
-  description: "Technical outline of LeadForge OS multithreaded Chromium scrapers, Ollama LLM integration, and SQLite WAL database architecture.",
+  description: "Technical outline of HUNTARA multithreaded Chromium scrapers, Ollama LLM integration, and SQLite WAL database architecture.",
   openGraph: {
-    title: "Local-First Architecture | LeadForge OS",
-    description: "Technical outline of LeadForge OS multithreaded Chromium scrapers, Ollama LLM integration, and SQLite WAL database architecture.",
+    title: "Local-First Architecture | HUNTARA",
+    description: "Technical outline of HUNTARA multithreaded Chromium scrapers, Ollama LLM integration, and SQLite WAL database architecture.",
     url: "https://github.com/kjxcodez/leadforge-os/architecture"
   }
 }

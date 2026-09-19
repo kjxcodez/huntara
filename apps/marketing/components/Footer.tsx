@@ -15,14 +15,11 @@ export function Footer() {
           {/* Brand Col */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight text-[var(--foreground)]">
-              <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none">
-                <path d="M4 4H20V13.5L13.5 20H4V4Z" fill="#F4F4F5" />
-                <path d="M13.5 20V13.5H20L13.5 20Z" fill="#E8622C" />
-              </svg>
-              LeadForge OS
+              <img src="/huntara-mark.png" alt="HUNTARA" className="h-[22px] w-[22px] object-contain" />
+              HUNTARA
             </Link>
             <p className="leading-relaxed max-w-[220px]">
-              A local-first desktop OS for discovering, enriching, and closing your next customer.
+              HUNTARA helps businesses find and understand their next customers.
             </p>
           </div>
 
@@ -78,7 +75,7 @@ export function Footer() {
         {/* Footer Bottom */}
         <div className="border-t border-[var(--border-subtle)] pt-6 flex flex-col md:flex-row justify-between gap-4 select-none">
           <div className="flex gap-4 items-center">
-            <span>© 2026 LeadForge OS. All rights reserved.</span>
+            <span>© 2026 HUNTARA. All rights reserved.</span>
             <span className="h-3 w-px bg-[var(--border-subtle)]"></span>
             <Link href="/status" className="hover:text-[var(--foreground)] flex items-center gap-1.5 transition-colors duration-150">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse"></span>
@@ -99,7 +96,7 @@ export function Footer() {
         <div className="w-full text-center select-none relative group flex items-center justify-center overflow-visible z-0 pointer-events-none">
          
           <div className="h-[40dvh] w-screen flex items-center justify-center pointer-events-auto z-10">
-            <TextHoverEffect text="LEADFORGE" />
+            <TextHoverEffect text="HUNTARA" />
           </div>
         </div>
       </div>

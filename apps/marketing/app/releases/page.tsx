@@ -48,7 +48,7 @@ export default function ReleasesPage() {
             Releases Repository
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Archive of stable and previous builds of LeadForge OS. Verify assets using checksum digests.
+            Archive of stable and previous builds of HUNTARA. Verify assets using checksum digests.
           </motion.p>
         </div>
 

@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * LeadForge OS — Design System Tokens
+ * HUNTARA — Design System Tokens
  *
  * This file is the single source of truth for all CSS custom properties
  * used by the renderer. Every value here is derived from DESIGN.md.
@@ -24,7 +24,7 @@
   --color-popover:            var(--popover);
   --color-popover-foreground: var(--popover-foreground);
 
-  /* ── Brand: Forge Orange (primary = CTA, active nav, key data) ───────── */
+  /* ── Brand: HUNTARA Orange (primary = CTA, active nav, key data) ─────── */
   --color-primary:            var(--primary);
   --color-primary-foreground: var(--primary-foreground);
 
@@ -113,8 +113,8 @@
   --text-tertiary:     #87878E;
   --text-disabled:     #ADADB0;
 
-  /* ── Forge Orange (darkened ~8% for AA contrast on white — DESIGN.md §2) */
-  --primary:            #D6551F;
+  /* ── HUNTARA Orange (calibrated for AA contrast on white background) ── */
+  --primary:            #E05E18;
   --primary-foreground: #FAFAF9;
 
   /* ── Secondary surface (button bg, etc.) ─────────────────────────────── */
@@ -137,8 +137,8 @@
   --border-strong:  #C4C4C0;
   --input:          #DADAD7;
 
-  /* ── Focus ring = Forge Orange ───────────────────────────────────────── */
-  --ring: #D6551F;
+  /* ── Focus ring = HUNTARA Orange ─────────────────────────────────────── */
+  --ring: #E05E18;
 
   /* ── Semantic state colors ───────────────────────────────────────────── */
   --success:       #3FB27F;
@@ -170,8 +170,8 @@
   --text-tertiary:    #6E6E76;     /* color-text-tertiary */
   --text-disabled:    #4A4A50;     /* color-text-disabled */
 
-  /* ── Forge Orange — DESIGN.md §2 Accent ─────────────────────────────── */
-  --primary:            #E8622C;   /* color-accent */
+  /* ── HUNTARA Orange — Brand Accent ──────────────────────────────────── */
+  --primary:            #FA7125;   /* color-accent */
   --primary-foreground: #0A0A0B;   /* color-text-on-accent */
 
   /* ── Secondary surface ───────────────────────────────────────────────── */
@@ -194,8 +194,8 @@
   --border-strong:  #3D3D44;   /* color-border-strong */
   --input:          #2E2E33;
 
-  /* ── Focus ring = Forge Orange ───────────────────────────────────────── */
-  --ring: #E8622C;
+  /* ── Focus ring = HUNTARA Orange ─────────────────────────────────────── */
+  --ring: #FA7125;
 
   /* ── Semantic state colors (DESIGN.md §2 — desaturated, instrumentation) */
   --success:       #3FB27F;

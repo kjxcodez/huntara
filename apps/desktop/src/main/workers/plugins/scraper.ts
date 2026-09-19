@@ -182,7 +182,7 @@ export async function scrapeMaps(ctx: JobContext): Promise<any> {
     } catch (launchErr: any) {
       if (launchErr?.message?.includes("Executable doesn't exist")) {
         throw new Error(
-          `Playwright Chromium browser engine is not installed on this system (Path: ${process.env.PLAYWRIGHT_BROWSERS_PATH || 'default'}). Please check internet connectivity and restart LeadForge OS to download required browser components.`
+          `Playwright Chromium browser engine is not installed on this system (Path: ${process.env.PLAYWRIGHT_BROWSERS_PATH || 'default'}). Please check internet connectivity and restart HUNTARA to download required browser components.`
         );
       }
       throw launchErr;

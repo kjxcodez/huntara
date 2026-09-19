@@ -23,9 +23,9 @@ export function Navbar() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
               className="relative flex h-[26px] w-[26px] items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--card)] shadow-[0_1px_4px_rgba(0,0,0,0.2)]"
             >
-              <img src="/app-icon-dark.png" className="h-[18px] w-[18px] object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(232,98,44,0.5)]" alt="LeadForge OS Logo" />
+              <img src="/app-icon-dark.png" className="h-[18px] w-[18px] object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(250,113,37,0.5)]" alt="HUNTARA Logo" />
             </motion.div>
-            LeadForge OS
+            HUNTARA
           </Link>
           <div className="hidden gap-8 text-xs font-medium text-[var(--muted-foreground)] md:flex">
             <Link href="/features" id="nav-link-features" className="hover:text-[var(--foreground)] transition-colors duration-150">Features</Link>

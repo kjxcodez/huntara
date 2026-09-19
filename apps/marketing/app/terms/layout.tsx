@@ -2,10 +2,10 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Terms of Service & Licensing",
-  description: "Terms of service, usage guidelines, and MIT license specifications for LeadForge OS software.",
+  description: "Terms of service, usage guidelines, and MIT license specifications for HUNTARA software.",
   openGraph: {
-    title: "Terms of Service & Licensing | LeadForge OS",
-    description: "Terms of service, usage guidelines, and MIT license specifications for LeadForge OS software.",
+    title: "Terms of Service & Licensing | HUNTARA",
+    description: "Terms of service, usage guidelines, and MIT license specifications for HUNTARA software.",
     url: "https://github.com/kjxcodez/leadforge-os/terms"
   }
 }

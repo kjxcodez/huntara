@@ -208,7 +208,7 @@ export const DirectionBadge: React.FC<DirectionBadgeProps> = ({
 
   return (
     <span
-      title="Outbound email sent from LeadForge"
+      title="Outbound email sent from HUNTARA"
       className={`inline-flex items-center font-medium rounded-md border bg-primary/10 text-primary border-primary/20 ${paddingClass} ${className}`}
     >
       <ArrowUpRight className="w-3 h-3 mr-1 text-primary" />

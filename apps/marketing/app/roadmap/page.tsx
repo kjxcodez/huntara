@@ -82,7 +82,7 @@ export default function RoadmapPage() {
             Development Roadmap
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Follow the active development checklist of LeadForge OS. Everything is built open-source.
+            Follow the active development checklist of HUNTARA. Everything is built open-source.
           </motion.p>
         </div>
 

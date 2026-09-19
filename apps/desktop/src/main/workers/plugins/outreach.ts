@@ -92,9 +92,9 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
     } catch {}
   }
 
-  if (!subject) subject = `Message from ${account.name || 'LeadForge'}`;
+  if (!subject) subject = `Message from ${account.name || 'HUNTARA'}`;
   if (!body) {
-    body = `Hello {{firstName}},\n\nThis message was sent via LeadForge OS.\n\nBest regards,\n${account.name || 'LeadForge'}`;
+    body = `Hello {{firstName}},\n\nThis message was sent via HUNTARA.\n\nBest regards,\n${account.name || 'HUNTARA'}`;
   }
 
   // Process attachments
@@ -307,7 +307,7 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
           }
         : null,
       sender: {
-        name: account.name || 'LeadForge',
+        name: account.name || 'HUNTARA',
         email: account.email
       },
       sequence: {

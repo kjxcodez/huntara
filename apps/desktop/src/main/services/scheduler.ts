@@ -937,7 +937,7 @@ export class JobScheduler {
         case 'notify': {
           const { Notification } = require('electron');
           if (Notification.isSupported()) {
-            new Notification({ title: msg.title || 'LeadForge OS', body: msg.body }).show();
+            new Notification({ title: msg.title || 'HUNTARA', body: msg.body }).show();
           }
           break;
         }

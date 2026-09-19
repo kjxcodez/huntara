@@ -95,12 +95,12 @@ if (fs.existsSync(builderConfigPath)) {
     });
   }
   if (
-    !content.includes('productName: LeadForge OS') &&
-    !content.includes('productName: "LeadForge OS"')
+    !content.includes('productName: HUNTARA') &&
+    !content.includes('productName: "HUNTARA"')
   ) {
     issues.push({
       file: 'apps/desktop/electron-builder.yml',
-      message: 'Product name in builder does not match LeadForge OS standard.',
+      message: 'Product name in builder does not match HUNTARA standard.',
       severity: 'warning'
     });
   }

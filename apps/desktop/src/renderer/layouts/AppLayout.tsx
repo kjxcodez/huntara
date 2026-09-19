@@ -128,7 +128,7 @@ export function AppLayout() {
               Create a workspace
             </h2>
             <p className="text-[13px] text-muted-foreground leading-relaxed">
-              You need a workspace to start using LeadForge OS.
+              You need a workspace to start using HUNTARA.
             </p>
           </div>
           <CreateWorkspaceForm />

@@ -48,10 +48,10 @@ export default function OpenSourcePage() {
             MIT Licensed
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Open Source
+            HUNTARA Open Source
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            The core LeadForge OS desktop application, database drivers, and local automation libraries are fully open-source. Help us build a safer outbound sales stack.
+            The core HUNTARA desktop application, database drivers, and local automation libraries are fully open-source. Help us build a safer outbound sales stack.
           </motion.p>
         </div>
 
@@ -128,7 +128,7 @@ export default function OpenSourcePage() {
               <Scale className="h-4 w-4 text-[var(--primary)]" /> Commercial Permission
             </h3>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              LeadForge OS is licensed under the permissive MIT license. You are free to fork the codebase, write custom integrations, redistribute it, or use it for commercial consulting operations without royalty fees or seat licenses.
+              HUNTARA is licensed under the permissive MIT license. You are free to fork the codebase, write custom integrations, redistribute it, or use it for commercial consulting operations without royalty fees or seat licenses.
             </p>
           </div>
         </motion.div>

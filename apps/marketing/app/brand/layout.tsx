@@ -2,10 +2,10 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Brand Guidelines & Logo Marks",
-  description: "Download official LeadForge OS logo marks, app icons, color palettes, and branding assets.",
+  description: "Official HUNTARA brand assets, logo marks, app icons, and color palettes.",
   openGraph: {
-    title: "Brand Guidelines & Logo Marks | LeadForge OS",
-    description: "Download official LeadForge OS logo marks, app icons, color palettes, and branding assets.",
+    title: "Brand Guidelines & Logo Marks | HUNTARA",
+    description: "Official HUNTARA brand assets, logo marks, app icons, and color palettes.",
     url: "https://github.com/kjxcodez/leadforge-os/brand"
   }
 }
