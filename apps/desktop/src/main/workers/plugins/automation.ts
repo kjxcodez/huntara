@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto';
-import { AIRuntime, PromptsLibrary } from '@leadforge/ai';
+import { AIRuntime, PromptsLibrary } from '@huntara/ai';
 import type { JobContext } from '../../../shared/types/job';
-import { SdkClient, renderCanonicalVariables, formatEmailBody, captureVariablesSnapshot } from '@leadforge/sdk';
-import { generateEntityId, CampaignStatus, evaluateOutreachEligibility } from '@leadforge/schema';
+import { SdkClient, renderCanonicalVariables, formatEmailBody, captureVariablesSnapshot } from '@huntara/sdk';
+import { generateEntityId, CampaignStatus, evaluateOutreachEligibility } from '@huntara/schema';
 import { resolveWorkerApiUrl } from '../worker-env';
 
 function decryptSecretFallback(val: string): string {
@@ -706,7 +706,7 @@ export async function executeAutomationWorkflow(ctx: JobContext): Promise<any> {
 
   // Initialize SdkClient for authoritative API/MongoDB persistence
   const apiUrl = resolveWorkerApiUrl(ctx);
-  const authToken = ctx.payload._secrets?.sessionToken || process.env.LEADFORGE_API_TOKEN || '';
+  const authToken = ctx.payload._secrets?.sessionToken || process.env.HUNTARA_API_TOKEN || process.env.LEADFORGE_API_TOKEN || '';
   const sdk = new SdkClient({
     baseUrl: apiUrl,
     token: authToken,

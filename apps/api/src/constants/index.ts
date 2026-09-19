@@ -4,7 +4,7 @@ import {
   LIMITS as SHARED_LIMITS,
   TIMEOUTS as SHARED_TIMEOUTS,
   COLLECTION_NAMES as SHARED_COLLECTION_NAMES
-} from '@leadforge/core';
+} from '@huntara/core';
 
 export const API_VERSION = SHARED_API_VERSION;
 export const API_PREFIX = SHARED_API_PREFIX;

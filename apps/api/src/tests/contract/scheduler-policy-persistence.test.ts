@@ -3,7 +3,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { errorHandler } from '../../middleware/error-handler.js';
 import { workspacesRouter } from '../../routes/business.js';
 import { WorkspaceService } from '../../services/workspace/workspace.service.js';
-import { DEFAULT_SCHEDULER_POLICY } from '@leadforge/schema';
+import { DEFAULT_SCHEDULER_POLICY } from '@huntara/schema';
 
 const mockWorkspaceFind = vi.fn();
 

@@ -1,7 +1,7 @@
 import { BaseRepository } from '../base/base.repository.js';
 import { EmailDeliveryModel, type EmailDeliveryDocument } from '../../db/models/email-delivery.model.js';
-import type { EmailDeliveryStatus, ReserveEmailDeliveryDto } from '@leadforge/schema';
-import { generateEntityId, normalizeDomain } from '@leadforge/schema';
+import type { EmailDeliveryStatus, ReserveEmailDeliveryDto } from '@huntara/schema';
+import { generateEntityId, normalizeDomain } from '@huntara/schema';
 import { EmailDomainError } from '../../services/email/types.js';
 
 export const VALID_DELIVERY_TRANSITIONS: Record<EmailDeliveryStatus, EmailDeliveryStatus[]> = {

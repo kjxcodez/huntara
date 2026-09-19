@@ -15,7 +15,7 @@ import {
   evaluateEmailCandidate,
   type EmailVerificationResult,
   type EmailQualityEvidence
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export interface EmailVerificationProvider {
   readonly name: string;

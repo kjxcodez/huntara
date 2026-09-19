@@ -1,6 +1,6 @@
 import { BaseRepository } from '../base/base.repository.js';
 import { EmailEventModel, type EmailEventDocument } from '../../db/models/email-event.model.js';
-import { generateEntityId, type EmailEventType } from '@leadforge/schema';
+import { generateEntityId, type EmailEventType } from '@huntara/schema';
 
 export interface CreateEmailEventDto {
   deliveryId: string;

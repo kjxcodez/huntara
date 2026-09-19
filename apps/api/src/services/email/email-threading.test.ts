@@ -11,7 +11,7 @@ import { EmailDeliveryModel } from '../../db/models/email-delivery.model.js';
 import { ContactModel } from '../../db/models/contact.model.js';
 import { EmailAccountModel } from '../../db/models/email-account.model.js';
 import { CampaignModel } from '../../db/models/campaign.model.js';
-import { ContactStatus } from '@leadforge/schema';
+import { ContactStatus } from '@huntara/schema';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

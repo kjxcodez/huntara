@@ -443,7 +443,7 @@ async function main() {
             }
           }
 
-          if (!isImported && !pkgJson.private && pkgName !== '@leadforge/sdk') {
+          if (!isImported && !pkgJson.private && pkgName !== '@huntara/sdk') {
             issues.push({
               category: 'orphan_export',
               message: `Exported symbol "${name}" in "${pkgJson.name}" is never imported by any other packages.`,

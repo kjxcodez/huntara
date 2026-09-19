@@ -1,5 +1,5 @@
 import { HttpClient } from '../http/client.js';
-import type { WorkspaceMemory } from '@leadforge/schema';
+import type { WorkspaceMemory } from '@huntara/schema';
 
 export class WorkspaceMemoryModule {
   constructor(private client: HttpClient) {}

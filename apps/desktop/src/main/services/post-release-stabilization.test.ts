@@ -1,6 +1,6 @@
 import assert from 'assert';
 import Database from 'better-sqlite3';
-import { plainTextToHtml, formatEmailBody, renderCanonicalVariables, type CanonicalVariableContext } from '@leadforge/sdk';
+import { plainTextToHtml, formatEmailBody, renderCanonicalVariables, type CanonicalVariableContext } from '@huntara/sdk';
 import { initCacheSchema } from '../database/cache-schema.js';
 
 export async function runPostReleaseStabilizationTests() {

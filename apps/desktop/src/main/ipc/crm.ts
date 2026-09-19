@@ -4,7 +4,7 @@ import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { ProjectionService } from '../services/projection-service';
 import { loadSession } from '../lib/session';
-import type { CanonicalContactQuery, BulkContactSelection } from '@leadforge/schema';
+import type { CanonicalContactQuery, BulkContactSelection } from '@huntara/schema';
 
 import { resolveMatchingContactIds } from './query-resolver';
 export { resolveMatchingContactIds };

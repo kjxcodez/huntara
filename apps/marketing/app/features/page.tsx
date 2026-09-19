@@ -38,9 +38,9 @@ export default function FeaturesPage() {
       color: "text-[var(--success)]"
     },
     {
-      title: "LinkedIn Voyager API",
-      icon: ShieldAlert,
-      description: "Direct executive contacts extraction matching targets with company personnel leveraging native session cookies.",
+      title: "Decision Maker Intelligence",
+      icon: ShieldCheck,
+      description: "Matches prospective target accounts with verified leadership roles, titles, and public profile data.",
       color: "text-[var(--primary)]"
     },
     {
@@ -128,7 +128,7 @@ export default function FeaturesPage() {
         {/* Extended Comparison Section */}
         <motion.div variants={childVariants} className="space-y-6 pt-6 text-left">
           <div className="space-y-2 max-w-xl">
-            <h2 className="text-xl font-bold text-white font-mono">LeadForge OS vs. Cloud Outbound Platforms</h2>
+            <h2 className="text-xl font-bold text-white font-mono">HUNTARA vs. Cloud Outbound Platforms</h2>
             <p className="text-[11px] text-[var(--text-secondary)]">
               Understand the core architectural advantages of running Outbound pipelines locally instead of renting SaaS seats.
             </p>
@@ -139,7 +139,7 @@ export default function FeaturesPage() {
               <thead>
                 <tr className="bg-[var(--muted)] text-[10px] uppercase font-mono text-[var(--text-tertiary)] border-b border-[var(--border)] select-none">
                   <th className="px-4 py-2 font-normal">Architecture Capability</th>
-                  <th className="px-4 py-2 font-semibold text-[var(--primary)]">LeadForge OS</th>
+                  <th className="px-4 py-2 font-semibold text-[var(--primary)]">HUNTARA</th>
                   <th className="px-4 py-2 font-normal">Traditional Outbound SaaS</th>
                 </tr>
               </thead>
@@ -164,7 +164,7 @@ export default function FeaturesPage() {
               100% Privacy Compliance
             </h3>
             <p className="text-xs text-[var(--text-secondary)] max-w-xl leading-relaxed">
-              We never upload your database logs, lead columns, or proxy keys to LeadForge. The data belongs entirely to you, sitting safely in local directories.
+              We never upload your database logs, lead columns, or proxy keys to external servers. The data belongs entirely to you, sitting safely in local directories.
             </p>
           </div>
           <a 

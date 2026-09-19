@@ -5,7 +5,7 @@ category: "Getting Started"
 order: 1
 ---
 
-By the end of this guide, you will have a fully configured local workspace running LeadForge OS in development mode.
+By the end of this guide, you will have a fully configured local workspace running HUNTARA in development mode.
 
 ## Prerequisites
 
@@ -43,13 +43,13 @@ By the end of this guide, you will have a fully configured local workspace runni
    pnpm dev --filter=api
 
    # Start Electron Desktop UI only
-   pnpm dev --filter=@leadforge/desktop
+   pnpm dev --filter=@huntara/desktop
    ```
 
 ## Verification
 
 Upon first launch, the desktop application should open a React-based Chromium window and automatically:
-1. Initialize the workspace database in the local directory (`userData/workspaces` under AppData/Roaming/leadforge on Windows).
+1. Initialize the workspace database in the canonical local directory (`%APPDATA%/HUNTARA/workspaces` on Windows, `~/Library/Application Support/HUNTARA/workspaces` on macOS).
 2. Execute SQL migrations to initialize the CRM database schemas.
 3. Seed mock data representing company, contact, and email outreach records.
 

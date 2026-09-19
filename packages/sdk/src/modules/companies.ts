@@ -9,7 +9,7 @@ import type {
   BulkOperationResult,
   DeleteCompanyMode,
   DeleteCompanyResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class CompaniesModule {
   constructor(private client: HttpClient) {}

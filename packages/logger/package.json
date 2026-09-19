@@ -1,5 +1,5 @@
 {
-  "name": "@leadforge/logger",
+  "name": "@huntara/logger",
   "version": "1.2.0-beta",
   "private": true,
   "type": "module",

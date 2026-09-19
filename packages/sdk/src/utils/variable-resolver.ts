@@ -5,7 +5,7 @@ import {
   rewriteLinksForClickTracking,
   type ComposeMessageInput,
   type ComposeMessageResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 /**
  * Canonical Variable Context structure for template rendering across LeadForge.

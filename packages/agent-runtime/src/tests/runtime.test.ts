@@ -4,8 +4,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { AgentRuntime, ResearchAgent } from '../index.js';
-import { ToolRegistry } from '@leadforge/agent-core';
-import type { Tool, ToolResult, ExecutionContext } from '@leadforge/agent-core';
+import { ToolRegistry } from '@huntara/agent-core';
+import type { Tool, ToolResult, ExecutionContext } from '@huntara/agent-core';
 import { z } from 'zod';
 
 const mockSearchTool: Tool = {

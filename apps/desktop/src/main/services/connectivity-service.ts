@@ -1,10 +1,10 @@
 import { BrowserWindow } from 'electron';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 import type {
   RuntimeConnectivityState,
   ConnectivityStatus,
   ConnectivityErrorCode
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { AppLogger } from '../lib/logger';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { loadConfig } from '../lib/config';

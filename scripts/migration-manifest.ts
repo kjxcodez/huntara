@@ -87,7 +87,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -102,7 +107,13 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
       description: row.description ? String(row.description) : null,
       revenueRange: row.revenueRange ? String(row.revenueRange) : null,
       foundedYear: row.foundedYear ? parseNumber(row.foundedYear, 0) : null,
-      techStack: Array.isArray(parseJsonField(row.techStack)) ? parseJsonField(row.techStack) : (row.techStack ? String(row.techStack).split(',').map(s => s.trim()) : []),
+      techStack: Array.isArray(parseJsonField(row.techStack))
+        ? parseJsonField(row.techStack)
+        : row.techStack
+          ? String(row.techStack)
+              .split(',')
+              .map((s) => s.trim())
+          : [],
       socialProfiles: parseJsonField(row.socialProfiles, {}),
       tags: Array.isArray(parseJsonField(row.tags)) ? parseJsonField(row.tags) : [],
       customFields: parseJsonField(row.customFields, {}),
@@ -120,8 +131,19 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id', nullable: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id',
+        nullable: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -155,7 +177,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -178,7 +205,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
       authType: row.authType ? String(row.authType) : 'PASSWORD',
       oauthProvider: row.oauthProvider ? String(row.oauthProvider) : undefined,
       oauthTokens: parseJsonField(row.oauthTokens, undefined),
-      errorDetails: typeof row.errorDetails === 'string' ? row.errorDetails : (row.errorDetails ? JSON.stringify(row.errorDetails) : undefined),
+      errorDetails:
+        typeof row.errorDetails === 'string'
+          ? row.errorDetails
+          : row.errorDetails
+            ? JSON.stringify(row.errorDetails)
+            : undefined,
       createdAt: parseDate(row.createdAt) || new Date(),
       updatedAt: parseDate(row.updatedAt) || new Date()
     })
@@ -192,7 +224,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -215,7 +252,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -238,9 +280,26 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'sequences', 'email_accounts'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'sequenceId', targetTable: 'sequences', targetCollection: 'sequences', targetField: '_id', nullable: true },
-      { field: 'sendingAccountId', targetTable: 'email_accounts', targetCollection: 'emailaccounts', targetField: '_id', nullable: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'sequenceId',
+        targetTable: 'sequences',
+        targetCollection: 'sequences',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'sendingAccountId',
+        targetTable: 'email_accounts',
+        targetCollection: 'emailaccounts',
+        targetField: '_id',
+        nullable: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -253,7 +312,14 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
       targetAudienceId: row.targetAudienceId ? String(row.targetAudienceId) : undefined,
       dailyLimit: parseNumber(row.dailyLimit, 50),
       settings: parseJsonField(row.settings, {}),
-      statistics: parseJsonField(row.statistics, { sent: 0, delivered: 0, opened: 0, clicked: 0, replied: 0, bounced: 0 }),
+      statistics: parseJsonField(row.statistics, {
+        sent: 0,
+        delivered: 0,
+        opened: 0,
+        clicked: 0,
+        replied: 0,
+        bounced: 0
+      }),
       createdAt: parseDate(row.createdAt) || new Date(),
       updatedAt: parseDate(row.updatedAt) || new Date()
     })
@@ -267,11 +333,38 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'sequences', 'campaigns', 'contacts'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'sequenceId', targetTable: 'sequences', targetCollection: 'sequences', targetField: '_id' },
-      { field: 'campaignId', targetTable: 'campaigns', targetCollection: 'campaigns', targetField: '_id', nullable: true },
-      { field: 'contactId', targetTable: 'contacts', targetCollection: 'contacts', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id', nullable: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'sequenceId',
+        targetTable: 'sequences',
+        targetCollection: 'sequences',
+        targetField: '_id'
+      },
+      {
+        field: 'campaignId',
+        targetTable: 'campaigns',
+        targetCollection: 'campaigns',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'contactId',
+        targetTable: 'contacts',
+        targetCollection: 'contacts',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id',
+        nullable: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -299,8 +392,18 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'sequence_executions'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'executionId', targetTable: 'sequence_executions', targetCollection: 'sequenceexecutions', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'executionId',
+        targetTable: 'sequence_executions',
+        targetCollection: 'sequenceexecutions',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -323,8 +426,20 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'contacts'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'staticMemberIds', targetTable: 'contacts', targetCollection: 'contacts', targetField: '_id', isArray: true, nullable: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'staticMemberIds',
+        targetTable: 'contacts',
+        targetCollection: 'contacts',
+        targetField: '_id',
+        isArray: true,
+        nullable: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -333,7 +448,9 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
       description: row.description ? String(row.description) : undefined,
       type: String(row.type || 'STATIC'),
       filterDefinition: parseJsonField(row.filterDefinition, {}),
-      staticMemberIds: Array.isArray(parseJsonField(row.staticMemberIds)) ? parseJsonField(row.staticMemberIds).map(String) : [],
+      staticMemberIds: Array.isArray(parseJsonField(row.staticMemberIds))
+        ? parseJsonField(row.staticMemberIds).map(String)
+        : [],
       memberCount: parseNumber(row.memberCount, 0),
       createdAt: parseDate(row.createdAt) || new Date(),
       updatedAt: parseDate(row.updatedAt) || new Date()
@@ -348,7 +465,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -373,9 +495,24 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'discovery_runs', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'discoveryRunId', targetTable: 'discovery_runs', targetCollection: 'discoveryruns', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'discoveryRunId',
+        targetTable: 'discovery_runs',
+        targetCollection: 'discoveryruns',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -398,7 +535,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -432,7 +574,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -454,12 +601,18 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'sequences'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => {
-      const lockKey = row.id && String(row.id).includes(':') 
-        ? String(row.id) 
-        : `${row.workspaceId || wsId}:${row.sequenceId}:${row.entityId}`;
+      const lockKey =
+        row.id && String(row.id).includes(':')
+          ? String(row.id)
+          : `${row.workspaceId || wsId}:${row.sequenceId}:${row.entityId}`;
       return {
         _id: lockKey,
         workspaceId: String(row.workspaceId || wsId),
@@ -478,15 +631,64 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     mongoCollection: 'emaildeliveries',
     idField: 'id',
     workspaceField: 'workspaceId',
-    dependencies: ['workspaces', 'campaigns', 'sequences', 'sequence_executions', 'contacts', 'companies', 'email_accounts'],
+    dependencies: [
+      'workspaces',
+      'campaigns',
+      'sequences',
+      'sequence_executions',
+      'contacts',
+      'companies',
+      'email_accounts'
+    ],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'campaignId', targetTable: 'campaigns', targetCollection: 'campaigns', targetField: '_id', nullable: true },
-      { field: 'sequenceId', targetTable: 'sequences', targetCollection: 'sequences', targetField: '_id', nullable: true },
-      { field: 'executionId', targetTable: 'sequence_executions', targetCollection: 'sequenceexecutions', targetField: '_id', nullable: true },
-      { field: 'contactId', targetTable: 'contacts', targetCollection: 'contacts', targetField: '_id', nullable: true },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id', nullable: true },
-      { field: 'accountId', targetTable: 'email_accounts', targetCollection: 'emailaccounts', targetField: '_id', nullable: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'campaignId',
+        targetTable: 'campaigns',
+        targetCollection: 'campaigns',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'sequenceId',
+        targetTable: 'sequences',
+        targetCollection: 'sequences',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'executionId',
+        targetTable: 'sequence_executions',
+        targetCollection: 'sequenceexecutions',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'contactId',
+        targetTable: 'contacts',
+        targetCollection: 'contacts',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'accountId',
+        targetTable: 'email_accounts',
+        targetCollection: 'emailaccounts',
+        targetField: '_id',
+        nullable: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -498,8 +700,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
       contactId: row.contactId ? String(row.contactId) : undefined,
       companyId: row.companyId ? String(row.companyId) : undefined,
       accountId: row.accountId ? String(row.accountId) : undefined,
-      senderEmail: String(row.senderEmail || '').toLowerCase().trim(),
-      recipientEmail: String(row.recipientEmail || '').toLowerCase().trim(),
+      senderEmail: String(row.senderEmail || '')
+        .toLowerCase()
+        .trim(),
+      recipientEmail: String(row.recipientEmail || '')
+        .toLowerCase()
+        .trim(),
       subject: String(row.subject || ''),
       body: row.body ? String(row.body) : undefined,
       status: String(row.status || 'SENT'),
@@ -524,19 +730,37 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
       workspaceId: String(row.workspaceId || wsId),
       companyId: String(row.companyId),
       summary: String(row.summary || ''),
-      painPoints: Array.isArray(parseJsonField(row.painPoints)) ? parseJsonField(row.painPoints) : [],
-      valuePropositions: Array.isArray(parseJsonField(row.valuePropositions)) ? parseJsonField(row.valuePropositions) : [],
+      painPoints: Array.isArray(parseJsonField(row.painPoints))
+        ? parseJsonField(row.painPoints)
+        : [],
+      valuePropositions: Array.isArray(parseJsonField(row.valuePropositions))
+        ? parseJsonField(row.valuePropositions)
+        : [],
       offerings: Array.isArray(parseJsonField(row.offerings)) ? parseJsonField(row.offerings) : [],
-      targetAudience: Array.isArray(parseJsonField(row.targetAudience)) ? parseJsonField(row.targetAudience) : [],
-      buyingSignals: Array.isArray(parseJsonField(row.buyingSignals)) ? parseJsonField(row.buyingSignals) : [],
+      targetAudience: Array.isArray(parseJsonField(row.targetAudience))
+        ? parseJsonField(row.targetAudience)
+        : [],
+      buyingSignals: Array.isArray(parseJsonField(row.buyingSignals))
+        ? parseJsonField(row.buyingSignals)
+        : [],
       confidenceScore: parseNumber(row.confidenceScore, 0.8),
       modelUsed: row.modelUsed ? String(row.modelUsed) : 'gpt-4o-mini',
       lastEnrichedAt: parseDate(row.lastEnrichedAt) || new Date(),
@@ -553,14 +777,26 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
       workspaceId: String(row.workspaceId || wsId),
       companyId: String(row.companyId),
-      domain: String(row.domain || '').toLowerCase().trim(),
+      domain: String(row.domain || '')
+        .toLowerCase()
+        .trim(),
       techStack: Array.isArray(parseJsonField(row.techStack)) ? parseJsonField(row.techStack) : [],
       keyPages: Array.isArray(parseJsonField(row.keyPages)) ? parseJsonField(row.keyPages) : [],
       metaDescription: row.metaDescription ? String(row.metaDescription) : undefined,
@@ -580,16 +816,30 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'contacts'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'contactId', targetTable: 'contacts', targetCollection: 'contacts', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'contactId',
+        targetTable: 'contacts',
+        targetCollection: 'contacts',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
       workspaceId: String(row.workspaceId || wsId),
       contactId: String(row.contactId),
       summary: String(row.summary || ''),
-      keyResponsibilities: Array.isArray(parseJsonField(row.keyResponsibilities)) ? parseJsonField(row.keyResponsibilities) : [],
-      talkingPoints: Array.isArray(parseJsonField(row.talkingPoints)) ? parseJsonField(row.talkingPoints) : [],
+      keyResponsibilities: Array.isArray(parseJsonField(row.keyResponsibilities))
+        ? parseJsonField(row.keyResponsibilities)
+        : [],
+      talkingPoints: Array.isArray(parseJsonField(row.talkingPoints))
+        ? parseJsonField(row.talkingPoints)
+        : [],
       communicationStyle: row.communicationStyle ? String(row.communicationStyle) : undefined,
       confidenceScore: parseNumber(row.confidenceScore, 0.8),
       modelUsed: row.modelUsed ? String(row.modelUsed) : 'gpt-4o-mini',
@@ -607,8 +857,18 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -632,8 +892,18 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -657,8 +927,18 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -681,9 +961,24 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies', 'intelligence_sources'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' },
-      { field: 'sourceId', targetTable: 'intelligence_sources', targetCollection: 'intelligencesources', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      },
+      {
+        field: 'sourceId',
+        targetTable: 'intelligence_sources',
+        targetCollection: 'intelligencesources',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -706,15 +1001,33 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies', 'intelligence_evidence'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' },
-      { field: 'evidenceIds', targetTable: 'intelligence_evidence', targetCollection: 'intelligenceevidences', targetField: '_id', isArray: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      },
+      {
+        field: 'evidenceIds',
+        targetTable: 'intelligence_evidence',
+        targetCollection: 'intelligenceevidences',
+        targetField: '_id',
+        isArray: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
       workspaceId: String(row.workspaceId || wsId),
       companyId: String(row.companyId),
-      evidenceIds: Array.isArray(parseJsonField(row.evidenceIds)) ? parseJsonField(row.evidenceIds).map(String) : [],
+      evidenceIds: Array.isArray(parseJsonField(row.evidenceIds))
+        ? parseJsonField(row.evidenceIds).map(String)
+        : [],
       claimText: String(row.claimText || ''),
       claimCategory: String(row.claimCategory || 'OFFERING'),
       confidence: parseNumber(row.confidence, 0.9),
@@ -730,15 +1043,33 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'companies', 'intelligence_claims'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id' },
-      { field: 'supportingClaimIds', targetTable: 'intelligence_claims', targetCollection: 'intelligenceclaims', targetField: '_id', isArray: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id'
+      },
+      {
+        field: 'supportingClaimIds',
+        targetTable: 'intelligence_claims',
+        targetCollection: 'intelligenceclaims',
+        targetField: '_id',
+        isArray: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
       workspaceId: String(row.workspaceId || wsId),
       companyId: String(row.companyId),
-      supportingClaimIds: Array.isArray(parseJsonField(row.supportingClaimIds)) ? parseJsonField(row.supportingClaimIds).map(String) : [],
+      supportingClaimIds: Array.isArray(parseJsonField(row.supportingClaimIds))
+        ? parseJsonField(row.supportingClaimIds).map(String)
+        : [],
       inferenceText: String(row.inferenceText || ''),
       inferenceType: String(row.inferenceType || 'PAIN_POINT'),
       confidence: parseNumber(row.confidence, 0.85),
@@ -754,7 +1085,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id || `${wsId}:${row.scope}:${row.key}`),
@@ -775,7 +1111,12 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),
@@ -798,10 +1139,33 @@ export const MIGRATION_TABLE_ORDER: TableMigrationConfig[] = [
     workspaceField: 'workspaceId',
     dependencies: ['workspaces', 'campaigns', 'contacts', 'companies'],
     foreignKeys: [
-      { field: 'workspaceId', targetTable: 'workspaces', targetCollection: 'workspaces', targetField: '_id' },
-      { field: 'campaignId', targetTable: 'campaigns', targetCollection: 'campaigns', targetField: '_id', nullable: true },
-      { field: 'contactId', targetTable: 'contacts', targetCollection: 'contacts', targetField: '_id', nullable: true },
-      { field: 'companyId', targetTable: 'companies', targetCollection: 'companies', targetField: '_id', nullable: true }
+      {
+        field: 'workspaceId',
+        targetTable: 'workspaces',
+        targetCollection: 'workspaces',
+        targetField: '_id'
+      },
+      {
+        field: 'campaignId',
+        targetTable: 'campaigns',
+        targetCollection: 'campaigns',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'contactId',
+        targetTable: 'contacts',
+        targetCollection: 'contacts',
+        targetField: '_id',
+        nullable: true
+      },
+      {
+        field: 'companyId',
+        targetTable: 'companies',
+        targetCollection: 'companies',
+        targetField: '_id',
+        nullable: true
+      }
     ],
     transform: (row, wsId) => ({
       _id: String(row.id),

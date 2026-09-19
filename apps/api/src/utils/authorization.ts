@@ -1,4 +1,4 @@
-import { WorkspaceRole, WorkspacePermission } from '@leadforge/schema';
+import { WorkspaceRole, WorkspacePermission } from '@huntara/schema';
 
 // ---------------------------------------------------------------------------
 // Role Permissions Mapping

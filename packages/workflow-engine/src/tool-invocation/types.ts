@@ -1,4 +1,4 @@
-import type { ToolError, ToolResult } from '@leadforge/agent-core';
+import type { ToolError, ToolResult } from '@huntara/agent-core';
 
 export interface ToolRequest {
   readonly requestId: string; // UUID per invocation

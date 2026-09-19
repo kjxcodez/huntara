@@ -18,7 +18,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { calculateImapFetchRange, pollImapReplies } from './imap-poller';
-import { ContactStatus } from '@leadforge/schema';
+import { ContactStatus } from '@huntara/schema';
 import type { JobContext } from '../../../shared/types/job';
 
 // ── Mock imapflow and sdk ───────────────────────────────────────────────────
@@ -83,7 +83,7 @@ let mockContacts: Map<string, any> = new Map();
 let mockContactUpdates: Array<{ id: string; patch: any }> = [];
 let mockExecutionUpdates: Array<{ id: string; patch: any }> = [];
 
-vi.mock('@leadforge/sdk', () => {
+vi.mock('@huntara/sdk', () => {
   return {
     SdkClient: class MockSdkClient {
       outreach = {

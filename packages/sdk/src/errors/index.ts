@@ -1,4 +1,4 @@
-import { ErrorCode } from '@leadforge/schema';
+import { ErrorCode } from '@huntara/schema';
 
 export class SdkError extends Error {
   public readonly code: string;

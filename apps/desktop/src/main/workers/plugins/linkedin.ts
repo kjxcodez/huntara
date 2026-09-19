@@ -1,6 +1,6 @@
 import type { JobContext } from '../../../shared/types/job';
-import { SdkClient } from '@leadforge/sdk';
-import { generateEntityId, ContactStatus } from '@leadforge/schema';
+import { SdkClient } from '@huntara/sdk';
+import { generateEntityId, ContactStatus } from '@huntara/schema';
 import { resolveWorkerApiUrl } from '../worker-env';
 
 interface LinkedInProfile {
@@ -61,7 +61,7 @@ export async function enrichLinkedIn(ctx: JobContext): Promise<any> {
 
   // Initialize SdkClient for authoritative API/MongoDB persistence
   const apiUrl = resolveWorkerApiUrl(ctx);
-  const authToken = ctx.payload._secrets?.sessionToken || process.env.LEADFORGE_API_TOKEN || '';
+  const authToken = ctx.payload._secrets?.sessionToken || process.env.HUNTARA_API_TOKEN || process.env.LEADFORGE_API_TOKEN || '';
   const sdk = new SdkClient({
     baseUrl: apiUrl,
     token: authToken,

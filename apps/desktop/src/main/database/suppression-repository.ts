@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { SuppressionReason, compareSuppressionPrecedence } from '@leadforge/schema';
+import { SuppressionReason, compareSuppressionPrecedence } from '@huntara/schema';
 
 export interface SqliteSuppressionRow {
   id: string;

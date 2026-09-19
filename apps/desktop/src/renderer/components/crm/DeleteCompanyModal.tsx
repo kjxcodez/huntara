@@ -10,7 +10,7 @@ import {
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { AlertTriangle, Building2, Shield, History, Radio } from 'lucide-react';
-import type { DeleteCompanyMode } from '@leadforge/schema';
+import type { DeleteCompanyMode } from '@huntara/schema';
 
 interface DeleteCompanyModalProps {
   open: boolean;

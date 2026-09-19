@@ -1,5 +1,5 @@
 {
-  "name": "@leadforge/core",
+  "name": "@huntara/core",
   "version": "1.2.0-beta",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@leadforge/schema": "workspace:*",
+    "@huntara/schema": "workspace:*",
     "dotenv": "^16.4.5",
     "zod": "^3.24.1"
   }

@@ -1,4 +1,4 @@
-import { SdkClient } from '@leadforge/sdk';
+import { SdkClient } from '@huntara/sdk';
 import { registerAuthIpc } from './auth';
 import { registerWorkspaceIpc } from './workspace';
 import { registerCrmIpc } from './crm';

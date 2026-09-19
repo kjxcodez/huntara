@@ -6,7 +6,7 @@ import {
   OUTREACH_JOB_TYPES,
   DISCOVERY_JOB_TYPES,
   type Job
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 // Mock electron app
 vi.mock('electron', () => ({

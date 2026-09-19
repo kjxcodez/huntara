@@ -1,4 +1,4 @@
-import { loadAndValidateEnv } from '@leadforge/core';
+import { loadAndValidateEnv } from '@huntara/core';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 

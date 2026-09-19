@@ -5,7 +5,7 @@ import { emailQualityRouter } from '../../routes/email-quality.js';
 import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';
 import { EmailQualityService } from '../../services/email/email-quality.service.js';
 import { errorHandler } from '../../middleware/error-handler.js';
-import { EmailQualityStatus, SuppressionReason } from '@leadforge/schema';
+import { EmailQualityStatus, SuppressionReason } from '@huntara/schema';
 
 vi.mock('../../repositories/suppression/suppression.repository.js');
 vi.mock('../../services/email/email-quality.service.js');

@@ -2,8 +2,8 @@ import * as cheerio from 'cheerio';
 import robotsParser from 'robots-parser';
 import pLimit from 'p-limit';
 import type { JobContext } from '../../../shared/types/job';
-import { SdkClient } from '@leadforge/sdk';
-import { generateEntityId, ContactStatus, ContactEmailStatus, sanitizeAndValidateEmail } from '@leadforge/schema';
+import { SdkClient } from '@huntara/sdk';
+import { generateEntityId, ContactStatus, ContactEmailStatus, sanitizeAndValidateEmail } from '@huntara/schema';
 import { resolveWorkerApiUrl } from '../worker-env';
 import { extractCandidatesFromHtml } from './crawler-extractor.js';
 
@@ -253,7 +253,7 @@ export async function crawlWebsite(ctx: JobContext): Promise<any> {
 
   // Initialize SdkClient for authoritative API/MongoDB persistence
   const apiUrl = resolveWorkerApiUrl(ctx);
-  const authToken = ctx.payload._secrets?.sessionToken || process.env.LEADFORGE_API_TOKEN || '';
+  const authToken = ctx.payload._secrets?.sessionToken || process.env.HUNTARA_API_TOKEN || process.env.LEADFORGE_API_TOKEN || '';
   const sdk = new SdkClient({
     baseUrl: apiUrl,
     token: authToken,

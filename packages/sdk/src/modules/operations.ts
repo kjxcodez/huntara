@@ -6,7 +6,7 @@ import type {
   OperationTimelineEvent,
   OperationsQueryDto,
   RetryOperationDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class OperationsModule {
   constructor(private client: HttpClient) {}

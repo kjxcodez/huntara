@@ -21,7 +21,7 @@ import type {
   IntelligenceInference,
   CreateIntelligenceInferenceDto,
   BulkOperationResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class IntelligenceModule {
   constructor(private client: HttpClient) {}

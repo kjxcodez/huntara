@@ -1,5 +1,5 @@
 import { safeRegister } from './helper';
-import { SdkClient } from '@leadforge/sdk';
+import { SdkClient } from '@huntara/sdk';
 import { saveSession, loadSession, clearSession } from '../lib/session';
 import { performGoogleOAuth } from '../lib/google-oauth';
 import { detectChrome } from '../lib/chrome-detect';

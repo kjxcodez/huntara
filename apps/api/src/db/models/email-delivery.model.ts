@@ -5,7 +5,7 @@ import {
   type WorkspaceScopedDocument,
   type TimestampDocument
 } from '../plugins/index.js';
-import type { EmailDeliveryStatus } from '@leadforge/schema';
+import type { EmailDeliveryStatus } from '@huntara/schema';
 
 export interface EmailAttachmentDoc {
   filename: string;

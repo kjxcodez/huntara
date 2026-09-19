@@ -11,7 +11,7 @@ import {
   normalizeDomain,
   ContactStatus,
   ContactEmailStatus
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { logger } from '../../config/index.js';
 
 export interface EffectiveSuppressionResult {

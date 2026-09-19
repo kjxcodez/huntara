@@ -1,5 +1,5 @@
 import { HttpClient } from '../http/client.js';
-import type { AuditLog, CreateAuditLogDto } from '@leadforge/schema';
+import type { AuditLog, CreateAuditLogDto } from '@huntara/schema';
 
 export class AuditLogsModule {
   constructor(private client: HttpClient) {}

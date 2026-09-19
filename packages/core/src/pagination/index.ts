@@ -1,4 +1,4 @@
-import type { PaginationParams, SortOrder, PaginationMeta } from '@leadforge/schema';
+import type { PaginationParams, SortOrder, PaginationMeta } from '@huntara/schema';
 import { LIMITS } from '../constants/index.js';
 
 export function getPaginationParams(query: Record<string, any>): Required<PaginationParams> {

@@ -1,5 +1,5 @@
 {
-  "name": "@leadforge/workflow-engine",
+  "name": "@huntara/workflow-engine",
   "version": "1.2.0-beta",
   "private": true,
   "type": "module",
@@ -17,8 +17,8 @@
     "test": "vitest run src"
   },
   "dependencies": {
-    "@leadforge/agent-core": "workspace:*",
-    "@leadforge/ai": "workspace:*",
+    "@huntara/agent-core": "workspace:*",
+    "@huntara/ai": "workspace:*",
     "zod": "^3.24.1"
   }
 }

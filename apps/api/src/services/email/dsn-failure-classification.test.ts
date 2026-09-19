@@ -13,7 +13,7 @@ import {
   ContactStatus,
   ContactEmailStatus,
   EmailEventType
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 // Mocks
 vi.mock('../../db/models/email-delivery.model.js', () => ({

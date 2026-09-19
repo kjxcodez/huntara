@@ -1,5 +1,5 @@
 import { HttpClient } from '../http/client.js';
-import type { LoginDto, RegisterDto, AuthResponse, ForgotPasswordDto } from '@leadforge/schema';
+import type { LoginDto, RegisterDto, AuthResponse, ForgotPasswordDto } from '@huntara/schema';
 
 export class AuthModule {
   constructor(private client: HttpClient) {}

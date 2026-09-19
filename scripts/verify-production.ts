@@ -18,6 +18,7 @@ function scanDir(dir: string, callback: (filePath: string) => void) {
     dir.includes('dist') ||
     dir.includes('out') ||
     dir.includes('.turbo') ||
+    dir.includes('.next') ||
     dir.includes('.git') ||
     dir.includes('report') ||
     dir.includes('tests')
@@ -46,6 +47,8 @@ scanDir(path.join(rootDir, 'apps'), (filePath) => {
     filePath.endsWith('verify-production.ts') ||
     filePath.endsWith('doctor.ts') ||
     filePath.endsWith('release-check.ts') ||
+    filePath.includes('.test.') ||
+    filePath.includes('.spec.') ||
     filePath.endsWith('.env')
   )
     return;
@@ -67,6 +70,8 @@ scanDir(path.join(rootDir, 'apps'), (filePath) => {
 });
 
 scanDir(path.join(rootDir, 'packages'), (filePath) => {
+  if (filePath.includes('.test.') || filePath.includes('.spec.')) return;
+
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
   lines.forEach((line, index) => {
@@ -94,10 +99,7 @@ if (fs.existsSync(builderConfigPath)) {
       severity: 'warning'
     });
   }
-  if (
-    !content.includes('productName: HUNTARA') &&
-    !content.includes('productName: "HUNTARA"')
-  ) {
+  if (!content.includes('productName: HUNTARA') && !content.includes('productName: "HUNTARA"')) {
     issues.push({
       file: 'apps/desktop/electron-builder.yml',
       message: 'Product name in builder does not match HUNTARA standard.',

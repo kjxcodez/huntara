@@ -9,7 +9,7 @@ import type {
   TemplateVersion,
   CreateEmailTemplateDto,
   UpdateEmailTemplateDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export interface SendEmailPayload {
   accountId: string;

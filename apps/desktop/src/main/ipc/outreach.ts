@@ -1,5 +1,5 @@
 import { safeRegister } from './helper';
-import { SdkClient } from '@leadforge/sdk';
+import { SdkClient } from '@huntara/sdk';
 import { shell } from 'electron';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { LocalCRMRepository } from '../database/repositories/local-crm';

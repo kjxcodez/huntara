@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 
 export interface UserTestRecipientDocument extends mongoose.Document<string> {
   _id: string;

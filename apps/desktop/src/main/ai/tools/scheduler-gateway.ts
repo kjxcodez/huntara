@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import type Database from 'better-sqlite3';
 import type { LocalEventBus, AppEvent } from '../../lib/event-bus';
-import type { SchedulerGateway, ToolResult, ExecutionContext } from '@leadforge/agent-core';
+import type { SchedulerGateway, ToolResult, ExecutionContext } from '@huntara/agent-core';
 import { WorkspaceManager } from '../../lib/workspace-manager';
 
 export class SchedulerGatewayImpl implements SchedulerGateway {

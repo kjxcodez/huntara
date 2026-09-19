@@ -5,13 +5,13 @@ category: "Development"
 order: 3
 ---
 
-Contributing to LeadForge OS requires adhering to our development philosophy, coding standards, branching strategies, and testing requirements to help maintain a stable, clean, and secure local-first codebase.
+Contributing to HUNTARA requires adhering to our development philosophy, coding standards, branching strategies, and testing requirements to help maintain a stable, clean, and secure local-first codebase.
 
 ## Development Philosophy
 
 1. **Local-First & Offline Ready**: All features must remain functional without a active network connection. Cloud APIs serve as optional sync adapters, never blockers.
 2. **UI Responsiveness**: The Electron user interface must remain smooth (targeting 60fps). Heavy calculations, file system writes, and scraping operations are routed to sandboxed child worker processes rather than blocking the main React UI thread.
-3. **No Code Duplication**: Maintain modular package boundaries. Do not duplicate logic between the Hono REST API server (`apps/api/`) and the Electron application (`apps/desktop/`). Use shared workspace packages under `packages/` (e.g., `@leadforge/schema`).
+3. **No Code Duplication**: Maintain modular package boundaries. Do not duplicate logic between the Hono REST API server (`apps/api/`) and the Electron application (`apps/desktop/`). Use shared workspace packages under `packages/` (e.g., `@huntara/schema`).
 4. **Absolute Privacy**: Credentials, session cookies, and API keys must never be logged or exposed in plaintext. Sensitive strings are automatically masked during logging or Support Bundle generation.
 
 ## Coding Standards
@@ -19,7 +19,7 @@ Contributing to LeadForge OS requires adhering to our development philosophy, co
 - **TypeScript**: Strict type checking is required. Avoid the use of `any`. Explicitly type all function parameters and return signatures.
 - **Formatting**: Code formatting is handled automatically by Prettier. Run `pnpm format` before proposing changes.
 - **Linting**: We enforce strict linting rules using ESLint flat configurations. Run `pnpm lint` to check for violations.
-- **Directory Layout Rules**: Maintain package boundaries. `@leadforge/desktop` can import from packages, but packages cannot import from `apps/desktop` or each other in a circular fashion.
+- **Directory Layout Rules**: Maintain package boundaries. `@huntara/desktop` can import from packages, but packages cannot import from `apps/desktop` or each other in a circular fashion.
 
 ## Branching Strategy
 

@@ -7,7 +7,7 @@ import {
   type SoftDeleteDocument,
   type TimestampDocument
 } from '../plugins/index.js';
-import type { LeadConfidence } from '@leadforge/schema';
+import type { LeadConfidence } from '@huntara/schema';
 
 export interface CompanyIntelligenceDocument
   extends mongoose.Document,

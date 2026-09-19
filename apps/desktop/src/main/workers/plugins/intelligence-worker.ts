@@ -6,8 +6,8 @@ import {
   ScoringEngine,
   AIInsightGenerator
 } from '../../services/intelligence-engine';
-import { SdkClient } from '@leadforge/sdk';
-import { generateEntityId } from '@leadforge/schema';
+import { SdkClient } from '@huntara/sdk';
+import { generateEntityId } from '@huntara/schema';
 import { resolveWorkerApiUrl } from '../worker-env';
 
 /**
@@ -24,7 +24,7 @@ export async function executeIntelligenceEnrichment(ctx: JobContext): Promise<an
 
   // Initialize SdkClient for authoritative API/MongoDB persistence
   const apiUrl = resolveWorkerApiUrl(ctx);
-  const authToken = ctx.payload._secrets?.sessionToken || process.env.LEADFORGE_API_TOKEN || '';
+  const authToken = ctx.payload._secrets?.sessionToken || process.env.HUNTARA_API_TOKEN || process.env.LEADFORGE_API_TOKEN || '';
   const sdk = new SdkClient({
     baseUrl: apiUrl,
     token: authToken,

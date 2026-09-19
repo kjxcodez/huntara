@@ -28,10 +28,10 @@ export default function OpenSourcePage() {
   }
 
   const corePackages = [
-    { name: "@leadforge/core", desc: "Local SQLite connections with WAL (Write-Ahead Logging) write buffers." },
-    { name: "@leadforge/workflow-engine", desc: "Headless task scheduler for async crawling and SMTP relayer loops." },
-    { name: "@leadforge/agent-runtime", desc: "Chromium crawler routines parsing local directories and Google Maps." },
-    { name: "@leadforge/ai", desc: "Local Ollama Llama3 integration engines qualifying leads offline." }
+    { name: "@huntara/core", desc: "Local SQLite connections with WAL (Write-Ahead Logging) write buffers." },
+    { name: "@huntara/workflow-engine", desc: "Headless task scheduler for async crawling and SMTP relayer loops." },
+    { name: "@huntara/agent-runtime", desc: "Chromium crawler routines parsing local directories and Google Maps." },
+    { name: "@huntara/ai", desc: "Local Ollama Llama3 integration engines qualifying leads offline." }
   ]
 
   return (
@@ -64,7 +64,7 @@ export default function OpenSourcePage() {
               <div className="p-2 rounded bg-[var(--background)] border border-[var(--border-subtle)] inline-block text-[var(--primary)]">
                 <GithubIcon className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-semibold text-[var(--foreground)]">leadforge-os Monorepo</h3>
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">HUNTARA Monorepo</h3>
               <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
                 Contains the Electron shell interface, the main React workflow builder dashboard, and background circular log daemons.
               </p>

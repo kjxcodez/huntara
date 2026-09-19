@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { LoginForm } from '../components/auth/login-form';
-import type { LoginDto } from '@leadforge/schema';
+import type { LoginDto } from '@huntara/schema';
 
 /**
  * LoginScreen handles user authentication.

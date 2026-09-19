@@ -2,7 +2,7 @@ import type {
   ExecutionContext,
   ToolCatalogEntry,
   ProviderCapabilities
-} from '@leadforge/agent-core';
+} from '@huntara/agent-core';
 
 export interface CompiledAgentContext {
   readonly executionContext: ExecutionContext;

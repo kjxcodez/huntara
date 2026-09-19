@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CampaignService } from '../../services/campaign/campaign.service.js';
 import { EmailDeliveryRepository } from '../../repositories/email-delivery/email-delivery.repository.js';
-import { CampaignStatus, ContactStatus, ContactEmailStatus, EmailFailureCategory } from '@leadforge/schema';
+import { CampaignStatus, ContactStatus, ContactEmailStatus, EmailFailureCategory } from '@huntara/schema';
 
 // Mock MongoDB Models
 vi.mock('../../db/models/index.js', () => {

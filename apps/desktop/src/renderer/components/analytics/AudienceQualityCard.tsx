@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShieldCheck, ShieldAlert, AlertCircle, CheckCircle } from 'lucide-react';
-import type { AudienceQualityBreakdown } from '@leadforge/schema';
+import type { AudienceQualityBreakdown } from '@huntara/schema';
 import {
   Table,
   TableBody,

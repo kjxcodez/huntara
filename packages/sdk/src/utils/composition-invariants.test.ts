@@ -14,7 +14,7 @@ import {
   injectOpenTrackingPixel,
   rewriteLinksForClickTracking,
   sanitizeHtmlForPreview
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import {
   renderCanonicalVariables,
   captureVariablesSnapshot,

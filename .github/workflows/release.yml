@@ -14,7 +14,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        include:
+          - os: windows-latest
+            target: win
+          - os: macos-latest
+            target: mac
+          - os: ubuntu-latest
+            target: linux
 
     steps:
       - name: Checkout Repository
@@ -59,14 +65,14 @@ jobs:
 
       - name: Build Application
         run: |
-          pnpm --filter=!@leadforge/desktop build
-          pnpm --filter=@leadforge/desktop run build --publish never
+          pnpm --filter=!@huntara/desktop build
+          pnpm --filter=@huntara/desktop run build --publish never
 
       - name: Generate Checksum Assets
         shell: bash
         run: |
           cd apps/desktop/dist
-          for f in *.exe; do
+          for f in *.exe *.dmg *.zip *.AppImage; do
             if [ -f "$f" ]; then
               sha256sum "$f" > "$f.sha256"
               echo "Generated SHA-256 checksum for $f"
@@ -79,7 +85,10 @@ jobs:
           name: build-artifacts-${{ matrix.os }}
           path: |
             apps/desktop/dist/*.exe
-            apps/desktop/dist/latest.yml
+            apps/desktop/dist/*.dmg
+            apps/desktop/dist/*.zip
+            apps/desktop/dist/*.AppImage
+            apps/desktop/dist/latest*.yml
             apps/desktop/dist/*.blockmap
             apps/desktop/dist/*.sha256
           if-no-files-found: warn
@@ -100,12 +109,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: LeadForge OS ${{ github.ref_name }}
+          name: HUNTARA ${{ github.ref_name }}
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             release-artifacts/**/*.exe
-            release-artifacts/**/latest.yml
+            release-artifacts/**/*.dmg
+            release-artifacts/**/*.zip
+            release-artifacts/**/*.AppImage
+            release-artifacts/**/latest*.yml
             release-artifacts/**/*.blockmap
             release-artifacts/**/*.sha256
         env:

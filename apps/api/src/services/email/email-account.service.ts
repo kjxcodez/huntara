@@ -1,5 +1,5 @@
 import { randomUUID, randomBytes, createHash } from 'crypto';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 import { EmailAccountModel } from '../../db/models/email-account.model.js';
 import { GoogleConnectionModel } from '../../db/models/google-connection.model.js';
 import { OAuthTransactionModel } from '../../db/models/oauth-transaction.model.js';
@@ -10,7 +10,7 @@ import { env, logger } from '../../config/index.js';
 import { EmailDomainError, type SafeEmailAccount } from './types.js';
 import { GoogleAuthService, GMAIL_DEFAULT_SCOPES, DRIVE_FILE_SCOPE } from '../google/auth.service.js';
 import { GmailProvider } from '../google/gmail.provider.js';
-import { normalizeEmailSignature } from '@leadforge/sdk';
+import { normalizeEmailSignature } from '@huntara/sdk';
 import { EmailAccountRepository } from '../../repositories/email-account/email-account.repository.js';
 import type { EmailProvider } from './providers/types.js';
 

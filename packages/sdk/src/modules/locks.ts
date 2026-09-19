@@ -3,7 +3,7 @@ import type {
   AcquireLockDto,
   ReleaseLockDto,
   LockResponse
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class LocksModule {
   constructor(private client: HttpClient) {}

@@ -5,7 +5,7 @@ export {
   getPaginationParams,
   buildPaginatedMeta,
   isValidObjectId
-} from '@leadforge/core';
+} from '@huntara/core';
 
 export type {
   ApiResponse,
@@ -13,4 +13,4 @@ export type {
   PaginatedResponse,
   PaginationParams,
   PaginationMeta as PaginatedMeta
-} from '@leadforge/schema';
+} from '@huntara/schema';

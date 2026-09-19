@@ -36,11 +36,11 @@ export default defineConfig({
     ],
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@leadforge/schema': path.resolve(__dirname, '../../packages/schema/src/index.ts'),
-      '@leadforge/sdk': path.resolve(__dirname, '../../packages/sdk/src/index.ts'),
-      '@leadforge/core': path.resolve(__dirname, '../../packages/core/src/index.ts'),
-      '@leadforge/logger': path.resolve(__dirname, '../../packages/logger/src/index.ts'),
-      '@leadforge/auth': path.resolve(__dirname, '../../packages/auth/src/index.ts')
+      '@huntara/schema': path.resolve(__dirname, '../../packages/schema/src/index.ts'),
+      '@huntara/sdk': path.resolve(__dirname, '../../packages/sdk/src/index.ts'),
+      '@huntara/core': path.resolve(__dirname, '../../packages/core/src/index.ts'),
+      '@huntara/logger': path.resolve(__dirname, '../../packages/logger/src/index.ts'),
+      '@huntara/auth': path.resolve(__dirname, '../../packages/auth/src/index.ts')
     }
   }
 });

@@ -53,8 +53,6 @@ export function Footer() {
               <li><Link href="/about" id="footer-link-about" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">About</Link></li>
               <li><Link href="/blog" id="footer-link-blog" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Blog</Link></li>
               <li><Link href="/contact" id="footer-link-contact" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Contact</Link></li>
-              <li><Link href="/community" id="footer-link-community" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Community</Link></li>
-              <li><Link href="/beta" id="footer-link-beta" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Beta Program</Link></li>
             </ul>
           </div>
 
@@ -65,7 +63,6 @@ export function Footer() {
               <li><Link href="/privacy" id="footer-link-privacy" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Privacy</Link></li>
               <li><Link href="/terms" id="footer-link-terms" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Terms</Link></li>
               <li><Link href="/security" id="footer-link-security" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Security</Link></li>
-              <li><Link href="/press" id="footer-link-press" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Press Kit</Link></li>
               <li><Link href="/brand" id="footer-link-brand" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Brand Assets</Link></li>
             </ul>
           </div>
@@ -83,9 +80,8 @@ export function Footer() {
             </Link>
           </div>
           <div className="flex gap-6 items-center">
-            <Link href="/open-source" className="hover:text-[var(--foreground)] transition-colors duration-150">Open Source</Link>
-            <Link href="/contributors" className="hover:text-[var(--foreground)] transition-colors duration-150">Contributors</Link>
-            <Link href="/api-docs" className="hover:text-[var(--foreground)] transition-colors duration-150">API Reference</Link>
+            <Link href="/docs" className="hover:text-[var(--foreground)] transition-colors duration-150">Documentation</Link>
+            <Link href="/releases" className="hover:text-[var(--foreground)] transition-colors duration-150">Releases</Link>
             <a href="https://github.com/kjxcodez/leadforge-os" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors duration-150 font-mono">
               GitHub
             </a>

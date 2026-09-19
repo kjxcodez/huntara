@@ -9,7 +9,7 @@ import { Mail, Check, X, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import logoLight from '../assets/app-icon-light.png';
 
-import type { Workspace, WorkspaceMember } from '@leadforge/schema';
+import type { Workspace, WorkspaceMember } from '@huntara/schema';
 
 /**
  * WorkspaceInvitesScreen — displays pending workspace invitations.

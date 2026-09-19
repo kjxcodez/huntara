@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '../ui/badge';
 import { ShieldCheck, ShieldAlert, ShieldX, AlertTriangle, Mail, Ban, CheckCircle2 } from 'lucide-react';
-import { EmailQualityStatus } from '@leadforge/schema';
+import { EmailQualityStatus } from '@huntara/schema';
 
 export interface EmailQualityBadgeProps {
   status?: string | null | undefined;

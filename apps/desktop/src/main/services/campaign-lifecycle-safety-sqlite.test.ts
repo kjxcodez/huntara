@@ -1,7 +1,7 @@
 import assert from 'assert';
 import Database from 'better-sqlite3';
 import { initCacheSchema } from '../database/cache-schema.js';
-import { CampaignPauseReason } from '@leadforge/schema';
+import { CampaignPauseReason } from '@huntara/schema';
 
 /**
  * LeadForge OS — Phase 15 Adversarial Integration Test Suite

@@ -98,7 +98,7 @@ class AppLoggerClass {
     if (this.logDir) {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const logFilename = `leadforge_${workspaceId}_${today}.jsonl`;
+        const logFilename = `huntara_${workspaceId}_${today}.jsonl`;
         const filePath = join(this.logDir, logFilename);
         fs.appendFileSync(filePath, JSON.stringify(record) + '\n', 'utf8');
       } catch (err) {

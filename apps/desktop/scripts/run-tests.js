@@ -49,12 +49,16 @@ for (const p of candidateElectronPaths) {
 }
 
 if (!electronPath) {
-  console.error('[Integration Runner] ERROR: Electron binary not found. Cannot run native SQLite tests without Electron.');
+  console.error(
+    '[Integration Runner] ERROR: Electron binary not found. Cannot run native SQLite tests without Electron.'
+  );
   process.exit(1);
 }
 
 console.log(`[Integration Runner] Using Electron binary: ${electronPath}`);
-console.log(`[Integration Runner] Running ${integrationTests.length} native SQLite integration test suites...\n`);
+console.log(
+  `[Integration Runner] Running ${integrationTests.length} native SQLite integration test suites...\n`
+);
 
 let failedCount = 0;
 
@@ -77,6 +81,8 @@ if (failedCount > 0) {
   console.error(`\n[Integration Runner] ${failedCount} integration suite(s) failed.`);
   process.exit(1);
 } else {
-  console.log(`\n[Integration Runner] ✅ All ${integrationTests.length} native SQLite integration suites passed cleanly.`);
+  console.log(
+    `\n[Integration Runner] ✅ All ${integrationTests.length} native SQLite integration suites passed cleanly.`
+  );
   process.exit(0);
 }

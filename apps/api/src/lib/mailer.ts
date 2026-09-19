@@ -1,4 +1,4 @@
-import { logger } from '@leadforge/logger';
+import { logger } from '@huntara/logger';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design System Tokens (from DESIGN.md)

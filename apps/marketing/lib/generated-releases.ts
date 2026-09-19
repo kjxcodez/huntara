@@ -23,31 +23,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/latest.yml",
-        "sizeBytes": 372,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.2.0-beta-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/LeadForge.OS-1.2.0-beta-win-x64.exe",
         "sizeBytes": 100336820,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.2.0-beta-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/LeadForge.OS-1.2.0-beta-win-x64.exe.blockmap",
-        "sizeBytes": 104324,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.2.0-beta-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/LeadForge.OS-1.2.0-beta-win-x64.exe.sha256",
-        "sizeBytes": 102,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -59,31 +38,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.5/latest.yml",
-        "sizeBytes": 378,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.1.1-beta.5-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.5/LeadForge.OS-1.1.1-beta.5-win-x64.exe",
         "sizeBytes": 100312108,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.5-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.5/LeadForge.OS-1.1.1-beta.5-win-x64.exe.blockmap",
-        "sizeBytes": 104203,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.5-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.5/LeadForge.OS-1.1.1-beta.5-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -95,31 +53,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.2/latest.yml",
-        "sizeBytes": 383,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.1.1-beta.4.2-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.2/LeadForge.OS-1.1.1-beta.4.2-win-x64.exe",
         "sizeBytes": 99874466,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.4.2-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.2/LeadForge.OS-1.1.1-beta.4.2-win-x64.exe.blockmap",
-        "sizeBytes": 103759,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.4.2-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.2/LeadForge.OS-1.1.1-beta.4.2-win-x64.exe.sha256",
-        "sizeBytes": 106,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -131,31 +68,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.1/latest.yml",
-        "sizeBytes": 383,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.1.1-beta.4.1-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.1/LeadForge.OS-1.1.1-beta.4.1-win-x64.exe",
         "sizeBytes": 99870937,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.4.1-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.1/LeadForge.OS-1.1.1-beta.4.1-win-x64.exe.blockmap",
-        "sizeBytes": 103376,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.4.1-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.4.1/LeadForge.OS-1.1.1-beta.4.1-win-x64.exe.sha256",
-        "sizeBytes": 106,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -167,31 +83,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.3/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.1.1-beta.3-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.3/LeadForge.OS-1.1.1-beta.3-win-x64.exe",
         "sizeBytes": 99871395,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.3-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.3/LeadForge.OS-1.1.1-beta.3-win-x64.exe.blockmap",
-        "sizeBytes": 104008,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.3-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.3/LeadForge.OS-1.1.1-beta.3-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -203,31 +98,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.2/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.1.1-beta.2-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.2/LeadForge.OS-1.1.1-beta.2-win-x64.exe",
         "sizeBytes": 99907618,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.2-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.2/LeadForge.OS-1.1.1-beta.2-win-x64.exe.blockmap",
-        "sizeBytes": 104321,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.2-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.2/LeadForge.OS-1.1.1-beta.2-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -239,31 +113,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.1/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.1.1-beta.1-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.1/LeadForge.OS-1.1.1-beta.1-win-x64.exe",
         "sizeBytes": 99874639,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.1-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.1/LeadForge.OS-1.1.1-beta.1-win-x64.exe.blockmap",
-        "sizeBytes": 103514,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.1.1-beta.1-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.1-beta.1/LeadForge.OS-1.1.1-beta.1-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -275,31 +128,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.6/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.0.0-beta.6-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.6/LeadForge.OS-1.0.0-beta.6-win-x64.exe",
         "sizeBytes": 99874712,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.6-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.6/LeadForge.OS-1.0.0-beta.6-win-x64.exe.blockmap",
-        "sizeBytes": 103474,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.6-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.6/LeadForge.OS-1.0.0-beta.6-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -311,31 +143,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.5/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.0.0-beta.5-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.5/LeadForge.OS-1.0.0-beta.5-win-x64.exe",
         "sizeBytes": 99547638,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.5-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.5/LeadForge.OS-1.0.0-beta.5-win-x64.exe.blockmap",
-        "sizeBytes": 103425,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.5-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.5/LeadForge.OS-1.0.0-beta.5-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -347,31 +158,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.4/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.0.0-beta.4-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.4/LeadForge.OS-1.0.0-beta.4-win-x64.exe",
         "sizeBytes": 99546828,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.4-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.4/LeadForge.OS-1.0.0-beta.4-win-x64.exe.blockmap",
-        "sizeBytes": 103471,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.4-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.4/LeadForge.OS-1.0.0-beta.4-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -383,31 +173,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.3/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-1.0.0-beta.3-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.3/LeadForge.OS-1.0.0-beta.3-win-x64.exe",
         "sizeBytes": 99546859,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.3-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.3/LeadForge.OS-1.0.0-beta.3-win-x64.exe.blockmap",
-        "sizeBytes": 103578,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-1.0.0-beta.3-win-x64.exe.sha256",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.3/LeadForge.OS-1.0.0-beta.3-win-x64.exe.sha256",
-        "sizeBytes": 104,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -426,24 +195,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.1/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-0.1.2-beta.1-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.1/LeadForge.OS-0.1.2-beta.1-win-x64.exe",
         "sizeBytes": 99520493,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-0.1.2-beta.1-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0-beta.1/LeadForge.OS-0.1.2-beta.1-win-x64.exe.blockmap",
-        "sizeBytes": 103163,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -455,24 +210,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.2-beta.1/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-0.1.1-beta.1-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.2-beta.1/LeadForge.OS-0.1.1-beta.1-win-x64.exe",
         "sizeBytes": 98456697,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-0.1.1-beta.1-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.2-beta.1/LeadForge.OS-0.1.1-beta.1-win-x64.exe.blockmap",
-        "sizeBytes": 103832,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -484,24 +225,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.1-beta.1/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-0.1.0-beta.1-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.1-beta.1/LeadForge.OS-0.1.0-beta.1-win-x64.exe",
         "sizeBytes": 98454876,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-0.1.0-beta.1-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.1-beta.1/LeadForge.OS-0.1.0-beta.1-win-x64.exe.blockmap",
-        "sizeBytes": 104017,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]
@@ -513,24 +240,10 @@ export const GENERATED_RELEASES: Release[] = [
     "releaseNotes": "",
     "assets": [
       {
-        "name": "latest.yml",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.0-beta.2/latest.yml",
-        "sizeBytes": 377,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
         "name": "LeadForge.OS-0.1.0-beta.1-win-x64.exe",
-        "platform": "Windows (x64)",
+        "platform": "Windows",
         "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.0-beta.2/LeadForge.OS-0.1.0-beta.1-win-x64.exe",
         "sizeBytes": 98454858,
-        "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-      },
-      {
-        "name": "LeadForge.OS-0.1.0-beta.1-win-x64.exe.blockmap",
-        "platform": "Other",
-        "downloadUrl": "https://github.com/kjxcodez/leadforge-os/releases/download/v0.1.0-beta.2/LeadForge.OS-0.1.0-beta.1-win-x64.exe.blockmap",
-        "sizeBytes": 103974,
         "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       }
     ]

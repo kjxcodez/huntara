@@ -5,7 +5,7 @@ import type {
   UpdateSequenceDto,
   SequenceExecution,
   SequenceLog
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class SequencesModule {
   constructor(private client: HttpClient) {}

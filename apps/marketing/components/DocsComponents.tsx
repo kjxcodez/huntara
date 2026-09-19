@@ -180,27 +180,8 @@ export function CardGrid({ children }: { children: React.ReactNode }) {
 }
 
 export function Card({ title, description, href }: { title: string; description: string; href?: string }) {
-  const CardWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (href) {
-      return (
-        <a 
-          href={href} 
-          className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] hover:border-[var(--primary)] hover:bg-[rgba(232,98,44,0.015)] hover:shadow-[0_4px_16px_rgba(232,98,44,0.03)] transition-all duration-200 block text-left group relative overflow-hidden"
-        >
-          <div className="absolute top-0 right-0 w-[40px] h-[40px] bg-gradient-to-bl from-[rgba(232,98,44,0.04)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-          {children}
-        </a>
-      )
-    }
-    return (
-      <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] text-left shadow-[0_1px_4px_rgba(0,0,0,0.1)]">
-        {children}
-      </div>
-    )
-  }
-
-  return (
-    <CardWrapper>
+  const content = (
+    <>
       <div className="flex items-center justify-between gap-2 mb-1.5">
         <h4 className="text-[12.5px] font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors duration-150 m-0">
           {title}
@@ -210,7 +191,25 @@ export function Card({ title, description, href }: { title: string; description:
         )}
       </div>
       <p className="text-[11px] text-[var(--muted-foreground)] leading-relaxed m-0">{description}</p>
-    </CardWrapper>
+    </>
+  )
+
+  if (href) {
+    return (
+      <a 
+        href={href} 
+        className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] hover:border-[var(--primary)] hover:bg-[rgba(232,98,44,0.015)] hover:shadow-[0_4px_16px_rgba(232,98,44,0.03)] transition-all duration-200 block text-left group relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-[40px] h-[40px] bg-gradient-to-bl from-[rgba(232,98,44,0.04)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+        {content}
+      </a>
+    )
+  }
+
+  return (
+    <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] text-left shadow-[0_1px_4px_rgba(0,0,0,0.1)]">
+      {content}
+    </div>
   )
 }
 

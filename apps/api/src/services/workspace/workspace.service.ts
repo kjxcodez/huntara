@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { WorkspaceRepository } from '../../repositories/workspace/workspace.repository.js';
 import { UserRepository } from '../../repositories/user/user.repository.js';
 import type { WorkspaceDocument, WorkspaceMember } from '../../db/models/workspace.model.js';
-import { slugify } from '@leadforge/core';
+import { slugify } from '@huntara/core';
 import {
   createWorkspaceDtoSchema,
   updateWorkspaceDtoSchema,
@@ -16,7 +16,7 @@ import {
   type UpdateSchedulerPolicyDto,
   type SchedulerPolicy,
   type InviteMemberDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import {
   NotFoundError,
   ForbiddenError,

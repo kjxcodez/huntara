@@ -1,6 +1,6 @@
-import type { ToolRegistry, BaseAgent, ExecutionContext } from '@leadforge/agent-core';
-import type { AIConfig, WorkflowResult } from '@leadforge/workflow-engine';
-import { WorkflowRunner, ToolDispatcher } from '@leadforge/workflow-engine';
+import type { ToolRegistry, BaseAgent, ExecutionContext } from '@huntara/agent-core';
+import type { AIConfig, WorkflowResult } from '@huntara/workflow-engine';
+import { WorkflowRunner, ToolDispatcher } from '@huntara/workflow-engine';
 import { AgentSession } from './agent-session';
 import { ContextBuilder } from './context-builder';
 import { ResponseAssembler } from './response-assembler';
@@ -11,7 +11,7 @@ import { ResearchSummaryPrompt } from './research-agent-prompt';
 // ─── Workflow Registry ────────────────────────────────────────────────────────
 // Maps workflowId → Workflow definition. Extend this map as new workflows are added.
 
-import type { Workflow } from '@leadforge/workflow-engine';
+import type { Workflow } from '@huntara/workflow-engine';
 
 const WORKFLOW_REGISTRY: Record<string, Workflow> = {
   research_workflow: ResearchWorkflow

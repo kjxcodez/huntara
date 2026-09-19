@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { SchedulerGatewayImpl } from './scheduler-gateway';
-import type { ExecutionContext } from '@leadforge/agent-core';
+import type { ExecutionContext } from '@huntara/agent-core';
 import { WorkspaceManager } from '../../lib/workspace-manager';
 
 const mockSdk = {

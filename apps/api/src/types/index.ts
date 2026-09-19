@@ -1,1 +1,1 @@
-export * from '@leadforge/schema';
+export * from '@huntara/schema';

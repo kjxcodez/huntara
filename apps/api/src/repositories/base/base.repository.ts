@@ -1,5 +1,5 @@
 import { type Model, type Document, type ClientSession } from 'mongoose';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 import {
   NotFoundError,
   ConflictError,

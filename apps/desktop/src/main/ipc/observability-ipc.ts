@@ -438,7 +438,7 @@ export function registerObservabilityIpc() {
     const { dialog } = require('electron');
     const result = await dialog.showSaveDialog({
       title: 'Export Support Bundle',
-      defaultPath: join(app.getPath('downloads'), `leadforge-support-bundle-${Date.now()}.zip`),
+      defaultPath: join(app.getPath('downloads'), `huntara-support-bundle-${Date.now()}.zip`),
       filters: [{ name: 'ZIP Archives', extensions: ['zip'] }]
     });
 
@@ -447,7 +447,7 @@ export function registerObservabilityIpc() {
     }
 
     const destZipPath = result.filePath;
-    const tempDir = join(app.getPath('temp'), `leadforge-support-temp-${Date.now()}`);
+    const tempDir = join(app.getPath('temp'), `huntara-support-temp-${Date.now()}`);
 
     try {
       if (!fs.existsSync(tempDir)) {

@@ -1,6 +1,6 @@
 import { BaseRepository } from '../base/base.repository.js';
 import { JobModel, type JobDocument } from '../../db/models/job.model.js';
-import type { JobStatus } from '@leadforge/schema';
+import type { JobStatus } from '@huntara/schema';
 import { ValidationError, NotFoundError } from '../../errors/index.js';
 
 export const VALID_JOB_TRANSITIONS: Record<JobStatus, JobStatus[]> = {

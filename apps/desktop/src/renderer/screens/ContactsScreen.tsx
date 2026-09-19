@@ -19,7 +19,7 @@ import { Label } from '../components/ui/label';
 import { Users, X, Mail, Phone, Briefcase, Linkedin } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
-import { ContactStatus } from '@leadforge/schema';
+import { ContactStatus } from '@huntara/schema';
 import { useContactSelection } from '../hooks/useContactSelection';
 import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { areQueriesEqual, type CanonicalContactQuery, type BulkContactSelection } from '../utils/contact-selection';

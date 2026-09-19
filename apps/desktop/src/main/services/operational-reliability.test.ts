@@ -4,7 +4,7 @@ import { initCacheSchema } from '../database/cache-schema.js';
 import {
   isMailboxEligibleForDispatch,
   EmailFailureCategory
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 /**
  * LeadForge OS — Phase 18 Operational Reliability, Mailbox Health & Architecture Hardening Integration Test Suite

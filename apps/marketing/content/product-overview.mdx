@@ -1,25 +1,25 @@
-# LeadForge OS Product Overview
+# HUNTARA Product Overview
 
-LeadForge OS is a local-first lead generation and cold outreach application designed to run directly on your own hardware. By performing business discovery, website crawling, and lead qualification locally, the platform eliminates recurring cloud subscription fees and secures your outreach intelligence.
+HUNTARA is a local-first lead discovery, CRM, and outreach application designed to run directly on your own hardware. By performing business discovery, website crawling, and lead qualification locally, HUNTARA gives you total control over your prospecting data and eliminates recurring cloud data markups.
 
-## Local Execution for Outbound Ops
+## Local Execution for Outbound Intelligence
 
-Conventional lead generation tools rely on remote servers to fetch listings, scrap websites, and enrich leads. This model exposes you to API markups, data-sharing risks, and usage throttling. 
+Conventional lead generation tools rely on remote multi-tenant servers to fetch listings, scrape websites, and enrich leads. This model exposes businesses to API markups, data-sharing risks, and usage throttling. 
 
-LeadForge OS shifts these workflows onto your local machine:
-- **Zero Data Markup**: Run search queries and scrape business details using local resources, paying only for raw AI tokens if utilizing cloud APIs.
-- **Strict Privacy**: Outbound intelligence, SMTP configurations, and prospect contact details stay in secure local storage.
-- **Resource Efficiency**: Scraping and email campaigns run in dedicated background processes, preserving workstation speed.
+HUNTARA shifts these workflows onto your local machine:
+- **Zero Data Markup**: Run search queries and scrape business details using local resources, paying only for raw AI tokens if utilizing external models.
+- **Strict Privacy**: Outbound intelligence, SMTP credentials, and prospect contact details stay in secure local storage.
+- **Resource Efficiency**: Scraping and email campaigns run in dedicated background worker processes, preserving workstation speed.
 
 ## Collaborative Cloud Syncing
 
-While LeadForge OS runs locally, it is not isolated. Workspaces sync changes to a secure cloud layer, allowing you to access campaigns from other machines:
-- **Local-First Mutations**: Updates are saved immediately to your local database, ensuring full offline functionality.
+While HUNTARA runs locally, it is not isolated. Workspaces can optionally synchronize changes to a secure cloud layer, allowing you to access campaigns across multiple machines:
+- **Local-First Mutations**: Updates are saved immediately to your local SQLite database, ensuring full offline functionality.
 - **Automatic Syncing**: The sync engine handles uploads whenever an active internet connection is detected.
 - **Conflict Resolution**: Timestamps ensure that data remains consistent and up to date across all connected instances.
 
 ## Model Independence
 
-Qualify prospects using your preferred model configuration:
-- **Local AI Qualification**: Connect to local models (e.g., Llama via Ollama) to qualify leads offline without sending data to external APIs.
-- **Cloud AI Integration**: Integrate with cloud providers (e.g., OpenRouter) to leverage advanced models.
+Qualify prospects using your preferred intelligence configuration:
+- **Local AI Qualification**: Connect to local models (e.g., via Ollama) to qualify leads offline without sending data to external APIs.
+- **Cloud AI Integration**: Integrate with cloud providers to leverage advanced models for account scoring and personalized messaging.

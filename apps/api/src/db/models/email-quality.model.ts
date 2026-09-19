@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { workspacePlugin, type WorkspaceScopedDocument } from '../plugins/index.js';
-import { EmailQualityStatus } from '@leadforge/schema';
+import { EmailQualityStatus } from '@huntara/schema';
 
 export interface EmailQualityDocument extends mongoose.Document, WorkspaceScopedDocument {
   email: string;

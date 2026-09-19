@@ -2,7 +2,12 @@ import { app, BrowserWindow, shell, Menu, ipcMain } from 'electron';
 import { join, resolve } from 'path';
 import fs from 'fs';
 import { is } from '@electron-toolkit/utils';
-import { SdkClient } from '@leadforge/sdk';
+import { initializeStorageAndMigrate } from './lib/storage-migration';
+
+// Ensure canonical HUNTARA application data directory and one-time migration runs immediately
+initializeStorageAndMigrate();
+
+import { SdkClient } from '@huntara/sdk';
 import { initCacheSchema, ensureCleanCache } from './database/cache-schema';
 import { getDatabase, closeDatabase } from './database/connection';
 import { registerAllIpc } from './ipc/register';

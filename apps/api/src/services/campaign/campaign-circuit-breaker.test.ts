@@ -8,7 +8,7 @@ import {
   CampaignPauseReason,
   EmailFailureCategory,
   isCircuitBreakerRejectionCategory
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 // Mocks
 vi.mock('../../db/models/campaign.model.js', () => ({

@@ -1,5 +1,5 @@
 {
-  "name": "@leadforge/schema",
+  "name": "@huntara/schema",
   "version": "1.2.0-beta",
   "private": true,
   "type": "module",

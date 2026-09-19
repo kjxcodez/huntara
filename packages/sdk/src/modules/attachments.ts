@@ -1,5 +1,5 @@
 import { HttpClient } from '../http/client.js';
-import type { Attachment } from '@leadforge/schema';
+import type { Attachment } from '@huntara/schema';
 
 export interface UploadAttachmentPayload {
   googleConnectionId: string;

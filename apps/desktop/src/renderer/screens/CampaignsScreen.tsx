@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CampaignStatus } from '@leadforge/schema';
+import { CampaignStatus } from '@huntara/schema';
 import { useWorkspace } from '../hooks/useWorkspace';
 import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { motion } from 'framer-motion';

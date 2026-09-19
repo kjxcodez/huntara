@@ -1,4 +1,5 @@
 import { join } from 'path';
+import { existsSync } from 'fs';
 import type { MainToWorkerMsg, WorkerToMainMsg } from '../../shared/types/ipc';
 import type { JobContext } from '../../shared/types/job';
 import { WorkerPluginRegistry } from './plugin-registry';
@@ -196,7 +197,9 @@ async function handleStart(msg: Extract<MainToWorkerMsg, { command: 'start' }>):
   // Resolve the workspace SQLite path from the environment variable injected
   // by JobScheduler at fork time. Workers must NOT import 'electron'.
   const dbDir = process.env.WORKSPACES_DB_DIR ?? '';
-  const dbPath = join(dbDir, `leadforge_${workspaceId}.db`);
+  const canonicalDbPath = join(dbDir, `huntara_${workspaceId}.db`);
+  const legacyDbPath = join(dbDir, `leadforge_${workspaceId}.db`);
+  const dbPath = existsSync(canonicalDbPath) ? canonicalDbPath : (existsSync(legacyDbPath) ? legacyDbPath : canonicalDbPath);
 
   const context: JobContext = {
     jobId,

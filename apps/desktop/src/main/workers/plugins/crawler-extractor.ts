@@ -20,7 +20,7 @@ import {
   type EmailCandidate,
   type EmailSourceType,
   type ContactEmailMeta
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export interface DiscoveredContactCandidate {
   email: string;

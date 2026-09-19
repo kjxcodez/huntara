@@ -1,4 +1,4 @@
-import type { ToolRegistry, ToolResult, ExecutionContext } from '@leadforge/agent-core';
+import type { ToolRegistry, ToolResult, ExecutionContext } from '@huntara/agent-core';
 
 export class ToolExecutor {
   private readonly registry: ToolRegistry;

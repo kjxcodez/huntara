@@ -36,8 +36,8 @@ export function Navbar() {
             <Link href="/docs" id="nav-link-docs" className="hover:text-[var(--foreground)] transition-colors duration-150">Docs</Link>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/beta" id="nav-link-beta" className="hidden sm:inline-flex h-9 items-center justify-center px-4 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">
-              Beta
+            <Link href="/releases" id="nav-link-releases" className="hidden sm:inline-flex h-9 items-center justify-center px-4 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">
+              Releases
             </Link>
             <Link 
               href="/download" 
@@ -75,11 +75,11 @@ export function Navbar() {
               <Link href="/faq" onClick={() => setMobileOpen(false)} className="hover:text-[var(--foreground)] transition-colors py-1.5">FAQ</Link>
               <Link href="/docs" onClick={() => setMobileOpen(false)} className="hover:text-[var(--foreground)] transition-colors py-1.5">Docs</Link>
               <div className="h-px bg-[var(--border-subtle)] my-2" />
-              <Link href="/beta" onClick={() => setMobileOpen(false)} className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--border)] text-xs font-semibold hover:text-[var(--foreground)] transition-colors">
-                Beta Program
+              <Link href="/releases" onClick={() => setMobileOpen(false)} className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--border)] text-xs font-semibold hover:text-[var(--foreground)] transition-colors">
+                Releases
               </Link>
               <Link href="/download" onClick={() => setMobileOpen(false)} className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors">
-                Download Windows OS
+                Download HUNTARA
               </Link>
             </div>
           </motion.div>

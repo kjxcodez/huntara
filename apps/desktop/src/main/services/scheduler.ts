@@ -2,7 +2,7 @@ import { type ChildProcess, fork } from 'child_process';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 import { app } from 'electron';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 import {
   type Job,
   DEFAULT_SCHEDULER_POLICY,
@@ -11,7 +11,7 @@ import {
   OUTREACH_JOB_TYPES,
   DISCOVERY_JOB_TYPES,
   resolveSchedulerCapacityAllocation
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 const isDev =
   process.env.NODE_ENV === 'development' ||

@@ -8,7 +8,7 @@ import {
   EmailFailureCategory,
   isCircuitBreakerRejectionCategory,
   type ReserveEmailDeliveryDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { EmailDomainError } from './types.js';
 
 const createBaseReserveDto = (overrides?: Partial<ReserveEmailDeliveryDto>): ReserveEmailDeliveryDto => ({

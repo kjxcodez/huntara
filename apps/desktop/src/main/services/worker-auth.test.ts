@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SdkClient } from '@leadforge/sdk';
+import { SdkClient } from '@huntara/sdk';
 
 describe('Worker Authentication Boundary Contract Tests', () => {
   const originalFetch = global.fetch;

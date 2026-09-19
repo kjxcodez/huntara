@@ -24,7 +24,7 @@ import {
   type BulkOperationResult,
   type DeleteCompanyMode,
   type DeleteCompanyResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class CompanyService {
   private companyRepository: CompanyRepository;

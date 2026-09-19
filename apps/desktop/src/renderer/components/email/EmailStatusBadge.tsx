@@ -14,7 +14,7 @@ import {
   ArrowDownLeft
 } from 'lucide-react';
 import { Badge } from '../ui/badge';
-import type { EmailDeliveryStatus } from '@leadforge/schema';
+import type { EmailDeliveryStatus } from '@huntara/schema';
 
 export interface EmailStatusBadgeProps {
   status?: EmailDeliveryStatus | string;

@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { AIRuntime, PromptsLibrary } from '@leadforge/ai';
+import { AIRuntime, PromptsLibrary } from '@huntara/ai';
 
 export interface IntelligenceSource {
   id: string;

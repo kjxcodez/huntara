@@ -41,13 +41,7 @@ export const LEADFORGE_COLLECTIONS = [
   'emaildeliveries'
 ];
 
-export const EXCLUDED_AUTH_COLLECTIONS = [
-  'user',
-  'users',
-  'session',
-  'account',
-  'verification'
-];
+export const EXCLUDED_AUTH_COLLECTIONS = ['user', 'users', 'session', 'account', 'verification'];
 
 export interface ReferenceDefinition {
   collection: string;
@@ -123,19 +117,13 @@ export const TARGET_REFERENCES: Record<string, ReferenceDefinition[]> = {
     { collection: 'sequencelogs', field: 'executionId' },
     { collection: 'emaildeliveries', field: 'executionId' }
   ],
-  discoveryruns: [
-    { collection: 'companydiscoveryruns', field: 'discoveryRunId' }
-  ],
+  discoveryruns: [{ collection: 'companydiscoveryruns', field: 'discoveryRunId' }],
   emailaccounts: [
     { collection: 'campaigns', field: 'sendingAccountId' },
     { collection: 'emaildeliveries', field: 'accountId' }
   ],
-  jobs: [
-    { collection: 'sequenceexecutions', field: 'parentJobId' }
-  ],
-  intelligencesources: [
-    { collection: 'intelligenceevidences', field: 'sourceId' }
-  ],
+  jobs: [{ collection: 'sequenceexecutions', field: 'parentJobId' }],
+  intelligencesources: [{ collection: 'intelligenceevidences', field: 'sourceId' }],
   intelligenceevidences: [
     { collection: 'intelligenceclaims', field: 'evidenceIds', isArray: true }
   ],
@@ -175,7 +163,9 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
   console.log(`\n===============================================================`);
   console.log(`LEADFORGE OS — MONGODB OBJECTID TO STRING IDENTITY MIGRATION`);
   console.log(`===============================================================`);
-  console.log(`  Mode:               ${isExecute ? 'EXECUTE (MUTATING)' : 'DRY RUN (SAFE / NO MUTATIONS)'}`);
+  console.log(
+    `  Mode:               ${isExecute ? 'EXECUTE (MUTATING)' : 'DRY RUN (SAFE / NO MUTATIONS)'}`
+  );
   console.log(`  Target Host:        ${maskedHost}`);
   console.log(`  Database Name:      ${dbName}`);
   console.log(`  Environment:        ${process.env.NODE_ENV || 'development'}`);
@@ -186,11 +176,13 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
   console.log(`---------------------------------------------------------------\n`);
 
   if (isExecute && !options.backupConfirmed) {
-    throw new Error('CRITICAL SAFETY STOP: Execution mode requires explicit --backup-confirmed flag.');
+    throw new Error(
+      'CRITICAL SAFETY STOP: Execution mode requires explicit --backup-confirmed flag.'
+    );
   }
 
-  const existingCollections = (await db.listCollections().toArray()).map(c => c.name);
-  const targetCollections = LEADFORGE_COLLECTIONS.filter(c => {
+  const existingCollections = (await db.listCollections().toArray()).map((c) => c.name);
+  const targetCollections = LEADFORGE_COLLECTIONS.filter((c) => {
     if (options.collectionFilter && c !== options.collectionFilter) return false;
     return existingCollections.includes(c);
   });
@@ -219,7 +211,7 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
 
     const objIdCount = await coll.countDocuments(query);
     const strIdCount = await coll.countDocuments({ _id: { $type: 'string' } });
-    report.documentsInspected += (objIdCount + strIdCount);
+    report.documentsInspected += objIdCount + strIdCount;
     report.objectIdDocumentsFound += objIdCount;
     report.stringDocumentsFound += strIdCount;
 
@@ -238,7 +230,7 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
     // Check collisions
     if (objIdCount > 0) {
       const objDocs = await coll.find(query, { projection: { _id: 1 } }).toArray();
-      const stringHexes = objDocs.map(d => d._id.toHexString());
+      const stringHexes = objDocs.map((d) => d._id.toHexString());
       const collisions = await coll.find({ _id: { $in: stringHexes } }).toArray();
       for (const col of collisions) {
         report.details[collName].collisions.push(String(col._id));
@@ -268,7 +260,9 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
     }
 
     const docsToMigrate = await cursor.toArray();
-    console.log(`Processing collection [${collName}]: ${docsToMigrate.length} documents requiring conversion...`);
+    console.log(
+      `Processing collection [${collName}]: ${docsToMigrate.length} documents requiring conversion...`
+    );
 
     for (const oldDoc of docsToMigrate) {
       const oldId: ObjectId = oldDoc._id;
@@ -276,7 +270,9 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
 
       if (isDryRun) {
         if (options.verbose) {
-          console.log(`  [DRY RUN] Would clone-and-swap [${collName}] ObjectId("${oldId}") -> String("${newId}")`);
+          console.log(
+            `  [DRY RUN] Would clone-and-swap [${collName}] ObjectId("${oldId}") -> String("${newId}")`
+          );
         }
         report.details[collName].converted++;
         report.documentsConverted++;
@@ -300,10 +296,9 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
           const targetColl = db.collection(refDef.collection);
           if (refDef.isArray) {
             // Update array containing old ObjectId
-            const updateRes = await targetColl.updateMany(
-              { [refDef.field]: oldId },
-              { $set: { [`${refDef.field}.$`]: newId } } as any
-            );
+            const updateRes = await targetColl.updateMany({ [refDef.field]: oldId }, {
+              $set: { [`${refDef.field}.$`]: newId }
+            } as any);
             report.details[collName].referencesUpdated += updateRes.modifiedCount;
             report.referencesRewritten += updateRes.modifiedCount;
           } else {
@@ -338,7 +333,9 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
       const query: any = { [refDef.field]: { $type: 'objectId' } };
       const count = await childColl.countDocuments(query);
       if (count > 0) {
-        console.log(`Found ${count} ObjectId references in [${refDef.collection}.${refDef.field}] pointing to [${targetName}]`);
+        console.log(
+          `Found ${count} ObjectId references in [${refDef.collection}.${refDef.field}] pointing to [${targetName}]`
+        );
         if (isExecute) {
           const orphanDocs = await childColl.find(query).toArray();
           for (const oDoc of orphanDocs) {
@@ -351,7 +348,10 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
               const convertedArr = rawVal.map((item: any) =>
                 item instanceof ObjectId ? item.toHexString() : item
               );
-              await childColl.updateOne({ _id: oDoc._id }, { $set: { [refDef.field]: convertedArr } });
+              await childColl.updateOne(
+                { _id: oDoc._id },
+                { $set: { [refDef.field]: convertedArr } }
+              );
               report.referencesRewritten++;
             }
           }
@@ -394,7 +394,8 @@ export async function runMigration(customDb?: Db, options: MigrationOptions = {}
 // CLI entry point
 import { fileURLToPath } from 'url';
 
-const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+const isDirectRun =
+  process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
 if (isDirectRun) {
   const args = process.argv.slice(2);
   const options: MigrationOptions = {
@@ -418,7 +419,7 @@ if (isDirectRun) {
     options.limit = parseInt(args[limitIdx + 1], 10);
   }
 
-  runMigration(undefined, options).catch(err => {
+  runMigration(undefined, options).catch((err) => {
     console.error('Fatal Migration Error:', err);
     process.exit(1);
   });

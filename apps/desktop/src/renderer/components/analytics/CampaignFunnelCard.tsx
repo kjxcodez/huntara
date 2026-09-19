@@ -1,6 +1,6 @@
 import React from 'react';
 import { Filter, Users, Send, Eye, MousePointer, MessageSquare, ShieldCheck, HelpCircle } from 'lucide-react';
-import type { CampaignFunnelStage } from '@leadforge/schema';
+import type { CampaignFunnelStage } from '@huntara/schema';
 
 interface CampaignFunnelCardProps {
   stages: CampaignFunnelStage[];

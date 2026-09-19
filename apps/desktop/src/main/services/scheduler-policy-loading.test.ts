@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { JobScheduler } from './scheduler.js';
-import { DEFAULT_SCHEDULER_POLICY } from '@leadforge/schema';
+import { DEFAULT_SCHEDULER_POLICY } from '@huntara/schema';
 
 describe('JobScheduler Concurrency Policy Configuration Authority', () => {
   let mockSdk: any;

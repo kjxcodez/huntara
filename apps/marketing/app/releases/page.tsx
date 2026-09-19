@@ -2,7 +2,7 @@
 
 import React from "react"
 import { motion } from "motion/react"
-import { ArrowDownToLine, Monitor, Apple, Terminal, ShieldCheck, ChevronRight } from "lucide-react"
+import { ArrowDownToLine, Monitor, Apple, Terminal } from "lucide-react"
 import { GENERATED_RELEASES } from "../../lib/generated-releases"
 
 export default function ReleasesPage() {
@@ -17,10 +17,6 @@ export default function ReleasesPage() {
   const childVariants = {
     hidden: { opacity: 0, y: 12 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } }
-  }
-
-  const formatSize = (bytes: number) => {
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
   const formatDate = (dateString: string) => {
@@ -42,103 +38,138 @@ export default function ReleasesPage() {
         {/* Header Block */}
         <div className="space-y-4 max-w-2xl">
           <motion.div variants={childVariants} className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase tracking-wider font-mono">
-            Release Distribution
+            Release History
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            Releases Repository
+            HUNTARA Releases
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Archive of stable and previous builds of HUNTARA. Verify assets using checksum digests.
+            Download the official releases of HUNTARA for Windows, macOS, and Linux. Find the companies worth selling to.
           </motion.p>
         </div>
 
         {/* Releases Timeline */}
-        <motion.div variants={childVariants} className="space-y-8">
-          {GENERATED_RELEASES.map((rel) => (
-            <div key={rel.version} className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] space-y-6">
-              {/* Release Header */}
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-base font-semibold text-[var(--foreground)] font-mono">{rel.version}</h3>
-                  <span className={`text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border ${
-                    !rel.prerelease 
-                      ? "bg-[rgba(63,178,127,0.12)] text-[#3FB27F] border-[rgba(63,178,127,0.2)]" 
-                      : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                  }`}>
-                    {rel.prerelease ? "Pre-release" : "Stable"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-[10px] font-mono text-[var(--text-tertiary)]">
-                  <span>Released {formatDate(rel.releaseDate)}</span>
-                </div>
-              </div>
+        <motion.div variants={childVariants} className="space-y-10">
+          {GENERATED_RELEASES.map((rel) => {
+            const winAsset = rel.assets.find(a => a.platform === 'Windows' || a.name.endsWith('.exe'))
+            const macAsset = rel.assets.find(a => a.platform === 'macOS' || a.name.endsWith('.dmg') || a.name.endsWith('.zip'))
+            const linuxAsset = rel.assets.find(a => a.platform === 'Linux' || a.name.endsWith('.AppImage'))
 
-              {/* Release Notes */}
-              {rel.releaseNotes && (
-                <div className="space-y-2">
-                  <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] font-semibold">Changelog</div>
-                  <div className="text-xs text-[var(--text-secondary)] leading-relaxed space-y-2 prose max-w-none">
-                    <pre className="whitespace-pre-wrap font-sans text-xs bg-[rgba(10,10,11,0.2)] border border-[var(--border-subtle)] p-3 rounded-md text-[var(--text-secondary)] leading-relaxed">
-                      {rel.releaseNotes}
-                    </pre>
+            return (
+              <div key={rel.version} className="border border-[var(--border)] rounded-xl p-6 bg-[var(--card)] space-y-6">
+                {/* Release Header */}
+                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-bold text-[var(--foreground)] font-mono">
+                      HUNTARA {rel.version}
+                    </h2>
+                    <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${
+                      !rel.prerelease 
+                        ? "bg-[rgba(63,178,127,0.12)] text-[#3FB27F] border-[rgba(63,178,127,0.2)]" 
+                        : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                    }`}>
+                      {rel.prerelease ? "Pre-release" : "Stable"}
+                    </span>
+                  </div>
+                  <div className="text-xs font-mono text-[var(--text-tertiary)]">
+                    Released {formatDate(rel.releaseDate)}
                   </div>
                 </div>
-              )}
 
-              {/* Assets list */}
-              <div className="space-y-2">
-                <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] font-semibold">Downloadable Artifacts</div>
-                <div className="space-y-2">
-                  {rel.assets.length > 0 ? (
-                    rel.assets.map((asset) => {
-                      const IconComp = asset.platform.includes("Windows") 
-                        ? Monitor 
-                        : asset.platform.includes("macOS") 
-                        ? Apple 
-                        : Terminal
-                      
-                      return (
-                        <div key={asset.name} className="flex flex-col sm:flex-row sm:items-center justify-between text-xs bg-[var(--background)] border border-[var(--border-subtle)] rounded p-2.5 gap-3">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <IconComp className="h-4 w-4 text-[var(--text-secondary)] shrink-0" />
-                            <div className="min-w-0">
-                              <span className="font-mono text-[11px] text-[var(--foreground)] truncate block">
-                                {asset.name}
-                              </span>
-                              <div className="flex items-center gap-2 text-[9px] text-[var(--text-tertiary)] font-mono mt-0.5">
-                                <span>{formatSize(asset.sizeBytes)}</span>
-                                <span>•</span>
-                                <span>{asset.platform}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span 
-                              title={`SHA-256: ${asset.checksum}`} 
-                              className="inline-flex items-center gap-1 text-[9px] font-mono text-[var(--text-tertiary)] bg-[var(--card)] px-1.5 py-0.5 rounded border border-[var(--border-subtle)]"
-                            >
-                              <ShieldCheck className="h-3 w-3 text-[var(--success)]" />
-                              {asset.checksum.slice(0, 8)}...
-                            </span>
-                            <a 
-                              href={asset.downloadUrl}
-                              className="inline-flex h-7 items-center justify-center rounded bg-[var(--primary)] px-3 text-[10px] font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1 cursor-pointer"
-                            >
-                              <ArrowDownToLine className="h-3 w-3" />
-                              Download
-                            </a>
-                          </div>
+                {/* Release Notes */}
+                {rel.releaseNotes && (
+                  <div className="space-y-2">
+                    <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] font-semibold">
+                      Release Notes
+                    </div>
+                    <div className="text-xs text-[var(--text-secondary)] leading-relaxed bg-[rgba(10,10,11,0.25)] border border-[var(--border-subtle)] p-4 rounded-lg whitespace-pre-wrap font-sans">
+                      {rel.releaseNotes}
+                    </div>
+                  </div>
+                )}
+
+                {/* Platform Downloads Cards */}
+                <div className="space-y-3">
+                  <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] font-semibold">
+                    Downloads
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Windows */}
+                    <div className="border border-[var(--border-subtle)] rounded-lg p-4 bg-[var(--background)] flex flex-col justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <Monitor className="h-5 w-5 text-white shrink-0" />
+                        <div>
+                          <div className="text-xs font-semibold text-white">Windows</div>
+                          <div className="text-[10px] text-[var(--text-tertiary)]">HUNTARA for Windows</div>
                         </div>
-                      )
-                    })
-                  ) : (
-                    <div className="text-xs text-[var(--text-tertiary)] italic">No assets available for this release.</div>
-                  )}
+                      </div>
+                      {winAsset ? (
+                        <a
+                          href={winAsset.downloadUrl}
+                          className="inline-flex h-8 items-center justify-center rounded bg-[var(--primary)] px-3 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1.5 cursor-pointer"
+                        >
+                          <ArrowDownToLine className="h-3.5 w-3.5" />
+                          Download for Windows
+                        </a>
+                      ) : (
+                        <div className="inline-flex h-8 items-center justify-center rounded bg-zinc-800/60 px-3 text-[11px] font-medium text-zinc-500 cursor-not-allowed">
+                          Coming soon
+                        </div>
+                      )}
+                    </div>
+
+                    {/* macOS */}
+                    <div className="border border-[var(--border-subtle)] rounded-lg p-4 bg-[var(--background)] flex flex-col justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <Apple className="h-5 w-5 text-white shrink-0" />
+                        <div>
+                          <div className="text-xs font-semibold text-white">macOS</div>
+                          <div className="text-[10px] text-[var(--text-tertiary)]">HUNTARA for macOS</div>
+                        </div>
+                      </div>
+                      {macAsset ? (
+                        <a
+                          href={macAsset.downloadUrl}
+                          className="inline-flex h-8 items-center justify-center rounded bg-[var(--primary)] px-3 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1.5 cursor-pointer"
+                        >
+                          <ArrowDownToLine className="h-3.5 w-3.5" />
+                          Download for macOS
+                        </a>
+                      ) : (
+                        <div className="inline-flex h-8 items-center justify-center rounded bg-zinc-800/60 px-3 text-[11px] font-medium text-zinc-500 cursor-not-allowed">
+                          Coming soon
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Linux */}
+                    <div className="border border-[var(--border-subtle)] rounded-lg p-4 bg-[var(--background)] flex flex-col justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <Terminal className="h-5 w-5 text-white shrink-0" />
+                        <div>
+                          <div className="text-xs font-semibold text-white">Linux</div>
+                          <div className="text-[10px] text-[var(--text-tertiary)]">HUNTARA for Linux</div>
+                        </div>
+                      </div>
+                      {linuxAsset ? (
+                        <a
+                          href={linuxAsset.downloadUrl}
+                          className="inline-flex h-8 items-center justify-center rounded bg-[var(--primary)] px-3 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1.5 cursor-pointer"
+                        >
+                          <ArrowDownToLine className="h-3.5 w-3.5" />
+                          Download for Linux
+                        </a>
+                      ) : (
+                        <div className="inline-flex h-8 items-center justify-center rounded bg-zinc-800/60 px-3 text-[11px] font-medium text-zinc-500 cursor-not-allowed">
+                          Coming soon
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </motion.div>
       </motion.div>
     </div>

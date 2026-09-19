@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { sanitizeHtmlForPreview } from '@leadforge/schema';
+import { sanitizeHtmlForPreview } from '@huntara/schema';
 import { ShieldCheck, Image as ImageIcon, FileText, Code2, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';

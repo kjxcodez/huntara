@@ -45,6 +45,7 @@ nsis:
 mac:
   target:
     - dmg
+    - zip
   icon: resources/HUNTARA.icns
 
 linux:

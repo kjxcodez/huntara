@@ -53,19 +53,19 @@ importers:
       '@hono/zod-validator':
         specifier: ^0.8.0
         version: 0.8.0(hono@4.13.5)(zod@3.25.76)
-      '@leadforge/auth':
+      '@huntara/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@leadforge/core':
+      '@huntara/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@leadforge/logger':
+      '@huntara/logger':
         specifier: workspace:*
         version: link:../../packages/logger
-      '@leadforge/schema':
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@leadforge/sdk':
+      '@huntara/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
       '@scalar/hono-api-reference':
@@ -147,25 +147,28 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.87.0(react@19.2.4))
-      '@leadforge/agent-core':
+      '@huntara/agent-core':
         specifier: workspace:*
         version: link:../../packages/agent-core
-      '@leadforge/agent-runtime':
+      '@huntara/agent-runtime':
         specifier: workspace:*
         version: link:../../packages/agent-runtime
-      '@leadforge/ai':
+      '@huntara/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@leadforge/core':
+      '@huntara/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@leadforge/schema':
+      '@huntara/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../../packages/schema
-      '@leadforge/sdk':
+      '@huntara/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@leadforge/workflow-engine':
+      '@huntara/workflow-engine':
         specifier: workspace:*
         version: link:../../packages/workflow-engine
       '@shadcn/react':
@@ -467,7 +470,7 @@ importers:
 
   packages/agent-core:
     dependencies:
-      '@leadforge/schema':
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../schema
       zod:
@@ -476,16 +479,16 @@ importers:
 
   packages/agent-runtime:
     dependencies:
-      '@leadforge/agent-core':
+      '@huntara/agent-core':
         specifier: workspace:*
         version: link:../agent-core
-      '@leadforge/ai':
+      '@huntara/ai':
         specifier: workspace:*
         version: link:../ai
-      '@leadforge/schema':
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../schema
-      '@leadforge/workflow-engine':
+      '@huntara/workflow-engine':
         specifier: workspace:*
         version: link:../workflow-engine
       zod:
@@ -500,10 +503,10 @@ importers:
 
   packages/auth:
     dependencies:
-      '@leadforge/core':
+      '@huntara/core':
         specifier: workspace:*
         version: link:../core
-      '@leadforge/schema':
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../schema
       '@types/bcryptjs':
@@ -524,7 +527,7 @@ importers:
 
   packages/core:
     dependencies:
-      '@leadforge/schema':
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../schema
       dotenv:
@@ -554,19 +557,19 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@leadforge/core':
+      '@huntara/core':
         specifier: workspace:*
         version: link:../core
-      '@leadforge/schema':
+      '@huntara/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/workflow-engine:
     dependencies:
-      '@leadforge/agent-core':
+      '@huntara/agent-core':
         specifier: workspace:*
         version: link:../agent-core
-      '@leadforge/ai':
+      '@huntara/ai':
         specifier: workspace:*
         version: link:../ai
       zod:

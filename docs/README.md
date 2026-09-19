@@ -1,6 +1,6 @@
-# LeadForge OS Documentation
+# HUNTARA Documentation
 
-LeadForge OS is a local-first lead generation and cold outreach platform built as an Electron desktop application. By running crawlers, browser scrapers, and AI enrichments directly on local developer or user machines, it avoids high cloud infrastructure costs and secures sensitive outbound prospecting data.
+HUNTARA is a local-first lead discovery and intelligence platform built as an Electron desktop application. By running crawlers, browser scrapers, and AI enrichments directly on local developer or user machines, it avoids high cloud infrastructure costs and secures sensitive outbound prospecting data.
 
 This documentation serves as the technical reference for developers, contributors, and maintainers.
 
@@ -8,7 +8,7 @@ This documentation serves as the technical reference for developers, contributor
 
 ### Getting Started
 
-- **[Setup & Installation](./getting-started/installation.mdx)**: Learn how to configure your local workspace, compile package dependencies, and run LeadForge OS in development mode.
+- **[Setup & Installation](./getting-started/installation.mdx)**: Learn how to configure your local workspace, compile package dependencies, and run HUNTARA in development mode.
 - **[Deployment & Production Hosting](./deployment/README.mdx)**: Learn how to deploy the central Hono REST API server and compile distribution installers.
 - **[Project Roadmap](./roadmap/README.mdx)**: Check completed milestones, active integrations, and future explorations.
 

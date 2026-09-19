@@ -3,8 +3,8 @@ import type {
   ApiErrorResponse,
   PaginatedResponse,
   PaginationMeta
-} from '@leadforge/schema';
-import { ErrorCode } from '@leadforge/schema';
+} from '@huntara/schema';
+import { ErrorCode } from '@huntara/schema';
 
 export function successResponse<T>(data: T, meta?: Record<string, unknown>): SuccessResponse<T> {
   const result: SuccessResponse<T> = {

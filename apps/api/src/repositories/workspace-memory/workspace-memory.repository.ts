@@ -1,6 +1,6 @@
 import { BaseRepository } from '../base/base.repository.js';
 import { WorkspaceMemoryModel, type WorkspaceMemoryDocument } from '../../db/models/workspace-memory.model.js';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 
 export class WorkspaceMemoryRepository extends BaseRepository<WorkspaceMemoryDocument> {
   constructor(workspaceId?: string) {

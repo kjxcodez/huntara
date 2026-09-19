@@ -1,6 +1,6 @@
 /**
  * LeadForge OS — Email Verification Provider
- * Re-exported from @leadforge/core
+ * Re-exported from @huntara/core
  */
 
 export {
@@ -8,4 +8,4 @@ export {
   type DnsResolverOptions,
   DnsEmailVerificationProvider,
   MockEmailVerificationProvider
-} from '@leadforge/core';
+} from '@huntara/core';

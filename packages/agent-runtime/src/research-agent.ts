@@ -1,4 +1,4 @@
-import type { BaseAgent } from '@leadforge/agent-core';
+import type { BaseAgent } from '@huntara/agent-core';
 
 export const ResearchAgent: BaseAgent = {
   id: 'research_agent',

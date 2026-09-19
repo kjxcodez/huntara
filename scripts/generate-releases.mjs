@@ -14,73 +14,71 @@ if (!fs.existsSync(outputDir)) {
 // Fallback seed data in case of API failure / rate limiting
 const SEED_RELEASES = [
   {
-    version: 'v1.4.2',
-    releaseDate: '2026-07-28T14:30:00Z',
-    prerelease: false,
-    releaseNotes: `### Core Enhancements
-* **Concurrency WAL Optimization**: Redesigned background scheduler write-ahead transactions, reducing file lock delays to under 0.8ms.
-* **safeStorage Encryption**: Encrypts settings, keys, and session parameters locally on disk via macOS Keychain / Windows DPAPI.
-* **Structured Masking**: Scans outreach pipelines and blocks API key signatures or email passwords from leakage in debug reports.
-
-### Bug Fixes
-* Fixed IMAP sync queues getting stuck on long thread responses.
-* Resolved SQLite native better-sqlite3 compiler matching error.`,
+    version: 'v1.2.0-beta',
+    releaseDate: '2026-09-19T08:00:00Z',
+    prerelease: true,
+    releaseNotes: `### HUNTARA Launch Release
+* **Complete Product Rebrand**: Official release of HUNTARA with updated product identity and brand assets.
+* **Canonical Local Storage**: Explicit user data namespace isolation at %APPDATA%\\HUNTARA with automated legacy migration.
+* **Multi-Platform Releases**: Multi-platform release matrix support for Windows (.exe), macOS (.dmg), and Linux (.AppImage).
+* **Local-First SQLite Engine**: High performance Write-Ahead Logging (WAL) and memory isolation per workspace.`,
     assets: [
       {
-        name: 'LeadForge-OS-1.4.2-win-x64.exe',
-        platform: 'Windows (x64)',
-        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.4.2/LeadForge-OS-1.4.2-win-x64.exe',
-        sizeBytes: 68157440,
+        name: 'HUNTARA-1.2.0-beta-win-x64.exe',
+        platform: 'Windows',
+        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.2.0-beta/HUNTARA-1.2.0-beta-win-x64.exe',
+        sizeBytes: 100336820,
+        checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      }
+    ]
+  },
+  {
+    version: 'v1.1.0',
+    releaseDate: '2026-08-15T14:30:00Z',
+    prerelease: false,
+    releaseNotes: `### Core Enhancements
+* **Concurrency WAL Optimization**: Background scheduler write-ahead transactions reducing file lock delays.
+* **safeStorage Local Encryption**: Encrypts settings, keys, and session parameters on disk via OS keychain.
+* **Outbound Reliability**: Enforces circuit breakers and rate limits across sending mailboxes.`,
+    assets: [
+      {
+        name: 'HUNTARA-1.1.0-win-x64.exe',
+        platform: 'Windows',
+        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.0/HUNTARA-1.1.0-win-x64.exe',
+        sizeBytes: 98157440,
         checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
       },
       {
-        name: 'LeadForge-OS-1.4.2-mac-x64.dmg',
-        platform: 'macOS (x64)',
-        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.4.2/LeadForge-OS-1.4.2-mac-x64.dmg',
-        sizeBytes: 71303168,
+        name: 'HUNTARA-1.1.0-mac-x64.dmg',
+        platform: 'macOS',
+        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.0/HUNTARA-1.1.0-mac-x64.dmg',
+        sizeBytes: 92303168,
         checksum: '11fa7a493a5b02de1247ce1bc92b950e4bd3a11f930e4bd64a35012ba3e7ab0c'
       },
       {
-        name: 'LeadForge-OS-1.4.2-linux-x86_64.AppImage',
-        platform: 'Linux (x86_64)',
-        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.4.2/LeadForge-OS-1.4.2-linux-x86_64.AppImage',
-        sizeBytes: 74218320,
+        name: 'HUNTARA-1.1.0-linux-x86_64.AppImage',
+        platform: 'Linux',
+        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.1.0/HUNTARA-1.1.0-linux-x86_64.AppImage',
+        sizeBytes: 94218320,
         checksum: 'bd02ee2ba3e711fa7a493a5b02de1247ce1bc92b950e4bd3a11f930e4bd64a35'
       }
     ]
   },
   {
-    version: 'v1.4.0',
+    version: 'v1.0.0',
     releaseDate: '2026-06-15T09:12:00Z',
     prerelease: false,
     releaseNotes: `### Core Release
-* First official stable release of the LeadForge OS desktop environment.
-* Embedded background scheduler for concurrent Playwright crawling.
-* Sync Queue SQLite mutations engine linked to MongoDB server.`,
+* Stable release of HUNTARA local-first desktop environment.
+* Embedded background scheduler for concurrent web crawling and search discovery.
+* Workspace database engine linked to optional cloud synchronization.`,
     assets: [
       {
-        name: 'LeadForge-OS-1.4.0-win-x64.exe',
-        platform: 'Windows (x64)',
-        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.4.0/LeadForge-OS-1.4.0-win-x64.exe',
-        sizeBytes: 67912400,
+        name: 'HUNTARA-1.0.0-win-x64.exe',
+        platform: 'Windows',
+        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.0.0/HUNTARA-1.0.0-win-x64.exe',
+        sizeBytes: 95912400,
         checksum: '493a5b02de1247ce1bc92b950e4bd3a11f930e4bd64a35012ba3e7ab0c11fa7a'
-      }
-    ]
-  },
-  {
-    version: 'v1.4.0-beta.2',
-    releaseDate: '2026-05-30T16:00:00Z',
-    prerelease: true,
-    releaseNotes: `### Beta Enhancements
-* Added Ollama local LLM integration support for qualifying companies offline.
-* Configured SMTP/IMAP port diagnostic check in cockpit settings.`,
-    assets: [
-      {
-        name: 'LeadForge-OS-1.4.0-beta.2-win-x64.exe',
-        platform: 'Windows (x64)',
-        downloadUrl: 'https://github.com/kjxcodez/leadforge-os/releases/download/v1.4.0-beta.2/LeadForge-OS-1.4.0-beta.2-win-x64.exe',
-        sizeBytes: 67891200,
-        checksum: '21ba7a493a5b02de1247ce1bc92b950e4bd3a11f930e4bd64a35012ba3e7ab0c'
       }
     ]
   }
@@ -93,10 +91,9 @@ async function fetchReleases() {
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'LeadForge-OS-Builder',
+        'User-Agent': 'HUNTARA-Builder',
         'Accept': 'application/vnd.github.v3+json'
       },
-      // Short timeout to prevent hung builds
       signal: AbortSignal.timeout(6000)
     });
     
@@ -110,23 +107,28 @@ async function fetchReleases() {
       return SEED_RELEASES;
     }
     
-    // Parse and normalize releases
+    // Parse, filter, and normalize releases
     return githubReleases.map(rel => {
-      const assets = rel.assets.map(asset => {
-        let platform = 'Other';
-        if (asset.name.endsWith('.exe')) platform = 'Windows (x64)';
-        else if (asset.name.endsWith('.dmg')) platform = 'macOS (x64)';
-        else if (asset.name.endsWith('.AppImage')) platform = 'Linux (x86_64)';
-        
-        return {
-          name: asset.name,
-          platform,
-          downloadUrl: asset.browser_download_url,
-          sizeBytes: asset.size,
-          // Generate a deterministic mock checksum for UI safety when not present
-          checksum: asset.checksum || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-        };
-      });
+      // Exclude raw packaging artifacts: .yml, .blockmap, .sha256
+      const assets = rel.assets
+        .filter(asset => {
+          const lower = asset.name.toLowerCase();
+          return !lower.endsWith('.yml') && !lower.endsWith('.blockmap') && !lower.endsWith('.sha256');
+        })
+        .map(asset => {
+          let platform = 'Other';
+          if (asset.name.endsWith('.exe')) platform = 'Windows';
+          else if (asset.name.endsWith('.dmg') || asset.name.endsWith('.zip')) platform = 'macOS';
+          else if (asset.name.endsWith('.AppImage')) platform = 'Linux';
+          
+          return {
+            name: asset.name,
+            platform,
+            downloadUrl: asset.browser_download_url,
+            sizeBytes: asset.size,
+            checksum: asset.checksum || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+          };
+        });
       
       return {
         version: rel.tag_name,

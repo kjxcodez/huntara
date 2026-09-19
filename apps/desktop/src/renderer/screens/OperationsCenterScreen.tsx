@@ -39,7 +39,7 @@ import type {
   OperationTimelineEvent,
   SubsystemHealthStatus,
   FailureClass
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export function OperationsCenterScreen() {
   const { activeWorkspace } = useWorkspace();

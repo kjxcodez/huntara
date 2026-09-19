@@ -31,7 +31,7 @@ export function getDefaultWorkspacesDirs(): string[] {
 
   // OS standard Electron userData path
   const platform = os.platform();
-  const appNames = ['HUNTARA', 'Huntara', 'LeadForge'];
+  const appNames = ['HUNTARA', 'Huntara', 'LeadForge', path.join('@leadforge', 'desktop')];
   for (const appName of appNames) {
     let appDataDir = '';
     if (platform === 'win32') {
@@ -64,7 +64,7 @@ export function getDefaultWorkspacesDirs(): string[] {
 }
 
 export function extractWorkspaceIdFromFilename(fileName: string): string | null {
-  const match = fileName.match(/^leadforge_([a-zA-Z0-9_-]+)\.db$/i);
+  const match = fileName.match(/^(?:leadforge|huntara)_([a-zA-Z0-9_-]+)\.db$/i);
   return match && match[1] ? match[1] : null;
 }
 
@@ -87,7 +87,7 @@ export function inspectSQLiteDatabase(dbPath: string): SQLiteDatabaseInfo {
     // 1. Integrity check
     try {
       const integrityRow: any = db.prepare('PRAGMA integrity_check').get();
-      integrityCheckResult = integrityRow ? Object.values(integrityRow)[0] as string : 'UNKNOWN';
+      integrityCheckResult = integrityRow ? (Object.values(integrityRow)[0] as string) : 'UNKNOWN';
       if (integrityCheckResult !== 'ok' && integrityCheckResult !== 'OK') {
         isCorrupt = true;
       }
@@ -105,7 +105,9 @@ export function inspectSQLiteDatabase(dbPath: string): SQLiteDatabaseInfo {
     }
 
     // 3. Table inventory & row counts
-    const tableRows = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").all() as Array<{ name: string }>;
+    const tableRows = db
+      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+      .all() as Array<{ name: string }>;
 
     for (const table of tableRows) {
       try {
@@ -133,14 +135,15 @@ export function inspectSQLiteDatabase(dbPath: string): SQLiteDatabaseInfo {
 
     // 5. Inspect pending sync queue
     try {
-      const pendingRow: any = db.prepare("SELECT COUNT(*) as count FROM sync_queue WHERE status = 'pending'").get();
+      const pendingRow: any = db
+        .prepare("SELECT COUNT(*) as count FROM sync_queue WHERE status = 'pending'")
+        .get();
       if (pendingRow && pendingRow.count !== undefined) {
         pendingSyncCount = Number(pendingRow.count);
       }
     } catch {
       pendingSyncCount = 0;
     }
-
   } catch (err: any) {
     isAccessible = false;
     isCorrupt = true;
@@ -178,7 +181,12 @@ export function discoverAllSQLiteDatabases(searchDirs?: string[]): SQLiteDatabas
 
     const files = fs.readdirSync(dir);
     for (const file of files) {
-      if (file.endsWith('.db') && !file.includes('-shm') && !file.includes('-wal') && !file.endsWith('.bak')) {
+      if (
+        file.endsWith('.db') &&
+        !file.includes('-shm') &&
+        !file.includes('-wal') &&
+        !file.endsWith('.bak')
+      ) {
         const fullPath = path.resolve(dir, file);
         if (!visitedPaths.has(fullPath)) {
           visitedPaths.add(fullPath);

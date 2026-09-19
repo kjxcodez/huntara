@@ -37,7 +37,7 @@ import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { ProjectionService } from './projection-service';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { registerCrmIpc } from '../ipc/crm';
-import type { DeleteCompanyMode, DeleteCompanyResult } from '@leadforge/schema';
+import type { DeleteCompanyMode, DeleteCompanyResult } from '@huntara/schema';
 
 /**
  * LeadForge OS — Phase 8: Safe Company Deletion Semantics Test Matrix

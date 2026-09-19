@@ -17,7 +17,7 @@ import {
   LeaveWorkspaceDialog,
   TransferOwnershipDialog
 } from '../components/ui/MemberDialogs';
-import { WorkspaceRole, WorkspaceMemberStatus, type WorkspaceMember } from '@leadforge/schema';
+import { WorkspaceRole, WorkspaceMemberStatus, type WorkspaceMember } from '@huntara/schema';
 import {
   ShieldAlert,
   Trash2,

@@ -8,7 +8,7 @@ import {
   composeOutboundMessage,
   captureVariablesSnapshot,
   renderCanonicalVariables
-} from '@leadforge/sdk';
+} from '@huntara/sdk';
 
 /**
  * LeadForge OS — Phase 16 Adversarial Integration Test Suite

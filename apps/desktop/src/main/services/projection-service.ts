@@ -1,4 +1,4 @@
-import { SdkClient } from '@leadforge/sdk';
+import { SdkClient } from '@huntara/sdk';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { getDatabase } from '../database/connection';
 import { initCacheSchema } from '../database/cache-schema';

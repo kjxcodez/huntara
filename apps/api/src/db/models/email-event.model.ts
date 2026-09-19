@@ -5,7 +5,7 @@ import {
   type WorkspaceScopedDocument,
   type TimestampDocument
 } from '../plugins/index.js';
-import { EmailEventType } from '@leadforge/schema';
+import { EmailEventType } from '@huntara/schema';
 
 export interface EmailEventDocument
   extends mongoose.Document,

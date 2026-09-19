@@ -97,13 +97,17 @@ export class SQLiteToMongoMigrator {
     console.log(`\n===============================================================`);
     console.log(`LEADFORGE OS — SQLITE TO MONGODB DATA MIGRATION`);
     console.log(`===============================================================`);
-    console.log(`  Mode:               ${isExecute ? 'EXECUTE (MUTATING)' : 'DRY RUN (READ-ONLY)'}`);
+    console.log(
+      `  Mode:               ${isExecute ? 'EXECUTE (MUTATING)' : 'DRY RUN (READ-ONLY)'}`
+    );
     console.log(`  Target Database:    ${maskUri(rawUri)}`);
     console.log(`  Timestamp:          ${new Date().toISOString()}`);
     console.log(`---------------------------------------------------------------\n`);
 
     if (isExecute && !this.options.backupConfirmed) {
-      throw new Error('Migration execution requires explicit confirmation flag: --backup-confirmed');
+      throw new Error(
+        'Migration execution requires explicit confirmation flag: --backup-confirmed'
+      );
     }
 
     // Connect to MongoDB
@@ -125,7 +129,7 @@ export class SQLiteToMongoMigrator {
     }
 
     if (this.options.workspaceId) {
-      databases = databases.filter(d => d.workspaceId === this.options.workspaceId);
+      databases = databases.filter((d) => d.workspaceId === this.options.workspaceId);
     }
 
     if (databases.length === 0) {
@@ -135,7 +139,9 @@ export class SQLiteToMongoMigrator {
 
     console.log(`Found ${databases.length} SQLite database(s) for migration:`);
     for (const d of databases) {
-      console.log(`  • [${d.workspaceId}] at ${d.filePath} (${(d.fileSizeBytes / 1024).toFixed(1)} KB, ${d.tables.length} tables, ${d.pendingSyncCount} pending syncs)`);
+      console.log(
+        `  • [${d.workspaceId}] at ${d.filePath} (${(d.fileSizeBytes / 1024).toFixed(1)} KB, ${d.tables.length} tables, ${d.pendingSyncCount} pending syncs)`
+      );
     }
     console.log('');
 
@@ -144,7 +150,9 @@ export class SQLiteToMongoMigrator {
     // 2. Process each workspace database
     for (const dbInfo of databases) {
       if (dbInfo.isCorrupt) {
-        console.error(`❌ Skipping corrupt database at ${dbInfo.filePath} (${dbInfo.integrityCheckResult})`);
+        console.error(
+          `❌ Skipping corrupt database at ${dbInfo.filePath} (${dbInfo.integrityCheckResult})`
+        );
         this.quarantined.push({
           workspaceId: dbInfo.workspaceId,
           sourceTable: '*',
@@ -207,7 +215,7 @@ export class SQLiteToMongoMigrator {
     console.log(`  Records Updated:      ${totalUpdated}`);
     console.log(`  Records Preserved:    ${totalPreserved}`);
     console.log(`  Records Quarantined:  ${totalQuarantined}`);
-    console.log(`  Duration:             ${(Date.now() - startTime)}ms`);
+    console.log(`  Duration:             ${Date.now() - startTime}ms`);
     console.log(`===============================================================\n`);
 
     return {
@@ -236,14 +244,19 @@ export class SQLiteToMongoMigrator {
     // Open read-only SQLite connection
     const sqlite = new Database(dbInfo.filePath, { readonly: true });
     const existingSqliteTables = new Set(
-      sqlite.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((r: any) => r.name)
+      sqlite
+        .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+        .all()
+        .map((r: any) => r.name)
     );
 
     // Read pending sync queue item IDs
     const pendingSyncIds = new Set<string>();
     if (existingSqliteTables.has('sync_queue')) {
       try {
-        const pendingRows = sqlite.prepare("SELECT entityId FROM sync_queue WHERE status = 'pending'").all() as any[];
+        const pendingRows = sqlite
+          .prepare("SELECT entityId FROM sync_queue WHERE status = 'pending'")
+          .all() as any[];
         for (const row of pendingRows) {
           if (row.entityId) pendingSyncIds.add(String(row.entityId));
         }
@@ -305,9 +318,11 @@ export class SQLiteToMongoMigrator {
 
       while (offset < limit) {
         const currentBatchLimit = Math.min(chunkSize, limit - offset);
-        const rows = sqlite.prepare(
-          `SELECT * FROM "${config.sqliteTable}" LIMIT ${currentBatchLimit} OFFSET ${offset}`
-        ).all() as Array<Record<string, any>>;
+        const rows = sqlite
+          .prepare(
+            `SELECT * FROM "${config.sqliteTable}" LIMIT ${currentBatchLimit} OFFSET ${offset}`
+          )
+          .all() as Array<Record<string, any>>;
 
         for (const row of rows) {
           totalExtracted++;
@@ -421,7 +436,9 @@ export class SQLiteToMongoMigrator {
             // Scenario C: Both exist with same ID -> Reconcile
             const isPendingSync = pendingSyncIds.has(sourceId);
             const sqliteUpdatedAt = doc.updatedAt ? new Date(doc.updatedAt).getTime() : 0;
-            const mongoUpdatedAt = existingDoc.updatedAt ? new Date(existingDoc.updatedAt).getTime() : 0;
+            const mongoUpdatedAt = existingDoc.updatedAt
+              ? new Date(existingDoc.updatedAt).getTime()
+              : 0;
 
             if (isPendingSync || sqliteUpdatedAt > mongoUpdatedAt) {
               // Local edit is newer or pending sync -> Update Mongo
@@ -445,8 +462,15 @@ export class SQLiteToMongoMigrator {
       }
 
       tableStats[config.sqliteTable] = stats;
-      if (this.options.verbose || stats.inserted > 0 || stats.updated > 0 || stats.quarantined > 0) {
-        console.log(`  • ${config.sqliteTable.padEnd(24)} -> ${collectionName.padEnd(24)} | Extracted: ${sourceCount} | Inserted: ${stats.inserted} | Updated: ${stats.updated} | Preserved: ${stats.preservedMongo} | Quarantined: ${stats.quarantined}`);
+      if (
+        this.options.verbose ||
+        stats.inserted > 0 ||
+        stats.updated > 0 ||
+        stats.quarantined > 0
+      ) {
+        console.log(
+          `  • ${config.sqliteTable.padEnd(24)} -> ${collectionName.padEnd(24)} | Extracted: ${sourceCount} | Inserted: ${stats.inserted} | Updated: ${stats.updated} | Preserved: ${stats.preservedMongo} | Quarantined: ${stats.quarantined}`
+        );
       }
     }
 

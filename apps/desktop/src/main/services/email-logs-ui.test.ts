@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitizeHtmlForPreview } from '@leadforge/schema';
+import { sanitizeHtmlForPreview } from '@huntara/schema';
 
 describe('Email Logs UI & Safe Preview Suite', () => {
   describe('HTML Sanitization and Preview Security', () => {

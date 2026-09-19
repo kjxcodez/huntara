@@ -7,7 +7,7 @@ import type {
   JobCheckpointDto,
   JobStatusTransitionDto,
   BulkOperationResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class JobsModule {
   constructor(private client: HttpClient) {}

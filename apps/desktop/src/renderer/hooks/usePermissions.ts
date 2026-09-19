@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from './useAuth';
 import { useWorkspace } from './useWorkspace';
-import { WorkspaceRole, WorkspacePermission, WorkspaceMemberStatus } from '@leadforge/schema';
+import { WorkspaceRole, WorkspacePermission, WorkspaceMemberStatus } from '@huntara/schema';
 
 // ---------------------------------------------------------------------------
 // Role Permissions Mapping
