@@ -3,7 +3,7 @@
   "description": "HUNTARA — Find the companies worth selling to. Desktop lead discovery, CRM, and outreach platform",
   "author": "kjxcodez <https://github.com/kjxcodez>",
   "private": true,
-  "version": "1.2.1-beta",
+  "version": "1.2.1-beta.1",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

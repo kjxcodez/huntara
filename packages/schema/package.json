@@ -1,6 +1,6 @@
 {
   "name": "@huntara/schema",
-  "version": "1.2.1-beta",
+  "version": "1.2.1-beta.1",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
