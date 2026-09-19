@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="docs/assets/logo.png" alt="LeadForge OS Logo" width="250" />
+  <img src="docs/assets/logo.png" alt="HUNTARA Logo" width="280" />
 
-# LeadForge OS
+# HUNTARA
 
-### _Local-First, Privacy-Focused Outbound Workspace & AI Lead Qualification Engine_
+### _Find the companies worth selling to._
 
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](#)
 [![Electron](https://img.shields.io/badge/Electron-33.0-blue?logo=electron&logoColor=white)](#)
@@ -17,9 +17,9 @@
 
 ---
 
-## 🚀 Hero Section & Product Cockpit
+## 🚀 Product Positioning & Overview
 
-LeadForge OS is a desktop application designed for B2B lead generation, website crawling, contact enrichment, and automated cold email campaigns. Instead of relying on expensive seat-based cloud platforms that charge high infrastructure markups and upload your database to third parties, LeadForge OS executes scrapers, headless browsers, data-mining operations, and local LLMs **directly on your local hardware**.
+HUNTARA helps businesses find and understand their next customers. Instead of relying on expensive seat-based cloud platforms that charge high infrastructure markups and upload your database to third parties, HUNTARA executes scrapers, headless browsers, data-mining operations, and local LLMs **directly on your local hardware**.
 
 <div align="center">
   <img src="docs/assets/dashboard_mockup.png" alt="LeadForge OS Dashboard Cockpit" width="700" />
@@ -27,7 +27,7 @@ LeadForge OS is a desktop application designed for B2B lead generation, website 
 
 ---
 
-## 🎯 Why LeadForge OS Exists
+## 🎯 Why HUNTARA Exists
 
 Commercial outbound platforms (e.g. Apollo, Lemlist, Instantly) operate on centralized cloud environments. This model introduces three major drawbacks:
 
@@ -35,7 +35,7 @@ Commercial outbound platforms (e.g. Apollo, Lemlist, Instantly) operate on centr
 2. **Data Privacy Risks**: Uploading customer lists, prospect profiles, and private SMTP/IMAP credentials to third-party databases exposes your sales pipeline to security leaks.
 3. **Crawl & Send Throttling**: Centralized platforms limit crawling rates and email check frequencies to manage their own cloud costs.
 
-**LeadForge OS solves this** by executing high-concurrency scraping (via Playwright), crawler parsers (via Cheerio), local databases (via SQLite WAL-mode), local LLM inference (via Ollama), and local OS-native credentials encryption (via safeStorage) directly on the client machine. Networks are treated as synchronization transport layers rather than the primary application hosts.
+**HUNTARA solves this** by executing high-concurrency scraping (via Playwright), crawler parsers (via Cheerio), local databases (via SQLite WAL-mode), local LLM inference (via Ollama), and local OS-native credentials encryption (via safeStorage) directly on the client machine. Networks are treated as synchronization transport layers rather than the primary application hosts.
 
 ---
 
@@ -66,7 +66,7 @@ Commercial outbound platforms (e.g. Apollo, Lemlist, Instantly) operate on centr
 
 ## 🏗️ Architecture Overview
 
-LeadForge OS separates intensive automation workflows and scrapers from the React user interface. Long-running scrapers or workflows are spawned as isolated Node.js child processes to prevent blocking the UI thread or crashing the desktop application.
+HUNTARA separates intensive automation workflows and scrapers from the React user interface. Long-running scrapers or workflows are spawned as isolated Node.js child processes to prevent blocking the UI thread or crashing the desktop application.
 
 ```mermaid
 graph TD
@@ -149,7 +149,7 @@ pnpm dev
 pnpm dev --filter=api
 
 # Run only the Electron Desktop application
-pnpm dev --filter=@leadforge/desktop
+pnpm dev --filter=@huntara/desktop
 ```
 
 ### Key CLI Commands
@@ -194,7 +194,7 @@ We welcome contributions from the community! Please read the **[CONTRIBUTING.md]
 
 ## 📄 License
 
-LeadForge OS is licensed under the [MIT License](LICENSE).
+HUNTARA is licensed under the [MIT License](LICENSE).
 
 ---
 

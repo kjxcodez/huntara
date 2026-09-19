@@ -35,7 +35,7 @@ export default function ApiDocsPage() {
             API &amp; Integration Docs
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Integrate LeadForge database tables with external scripting tasks or export custom CSV mappings locally.
+            Integrate HUNTARA database tables with external scripting tasks or export custom CSV mappings locally.
           </motion.p>
         </div>
 
@@ -43,12 +43,12 @@ export default function ApiDocsPage() {
         <motion.div variants={childVariants} className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] space-y-4">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">Direct SQLite Queries (Node.js)</h2>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Because LeadForge OS saves CRM pipelines in simple SQLite databases, you can connect directly to your local file and run custom SQL scripts.
+            Because HUNTARA saves CRM pipelines in simple SQLite databases, you can connect directly to your local file and run custom SQL scripts.
           </p>
 
           <div className="bg-[var(--background)] border border-[var(--border-subtle)] p-4 rounded font-mono text-xs text-[var(--muted-foreground)] leading-relaxed select-all">
             import Database from 'better-sqlite3';<br />
-            const db = new Database('~/.config/leadforge/workspace.db');<br /><br />
+            const db = new Database('~/.config/huntara/workspace.db');<br /><br />
             // Fetch hot leads with verified emails<br />
             const hotLeads = db.prepare(<br />
             &nbsp;&nbsp;&quot;SELECT name, domain, emails FROM leads WHERE score &gt;= 75&quot;<br />

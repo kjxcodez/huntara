@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { extractCandidatesFromHtml } from './crawler-extractor.js';
-import { ContactEmailStatus } from '@leadforge/schema';
+import { ContactEmailStatus } from '@huntara/schema';
 
 describe('Crawler Email Extractor Integration Tests', () => {
   it('Fixture 1: Simple mailto extraction', () => {

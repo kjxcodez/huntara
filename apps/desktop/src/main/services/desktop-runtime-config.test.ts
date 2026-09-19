@@ -60,7 +60,7 @@ describe('Desktop Runtime Configuration Suite', () => {
       // 3. Fails loudly when missing
       delete process.env.API_URL;
       expect(() => resolveWorkerApiUrl(mockCtxWithoutConfig)).toThrow(
-        /LeadForge could not determine the API server URL for this environment/
+        /HUNTARA could not determine the API server URL for this environment/
       );
     } finally {
       process.env.API_URL = originalEnv;

@@ -1,5 +1,5 @@
 {
-  "name": "@leadforge/sdk",
+  "name": "@huntara/sdk",
   "version": "1.2.0-beta",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "test": "vitest run src"
   },
   "dependencies": {
-    "@leadforge/schema": "workspace:*",
-    "@leadforge/core": "workspace:*"
+    "@huntara/schema": "workspace:*",
+    "@huntara/core": "workspace:*"
   }
 }

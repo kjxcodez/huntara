@@ -22,7 +22,7 @@ import {
   canTransitionContactStatus,
   evaluateOutreachEligibility,
   sanitizeHtmlForPreview
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 describe('Email Reply Ingestion & Delivery Reconciliation Suite', () => {
   describe('Test 1: Ambiguous Send Reconciliation State Machine', () => {

@@ -1,6 +1,6 @@
 import type { JobContext } from '../../../shared/types/job';
-import { SdkClient, renderCanonicalVariables, formatEmailBody, captureVariablesSnapshot, type CanonicalVariableContext } from '@leadforge/sdk';
-import { generateEntityId, evaluateOutreachEligibility } from '@leadforge/schema';
+import { SdkClient, renderCanonicalVariables, formatEmailBody, captureVariablesSnapshot, type CanonicalVariableContext } from '@huntara/sdk';
+import { generateEntityId, evaluateOutreachEligibility } from '@huntara/schema';
 import { resolveWorkerApiUrl } from '../worker-env';
 
 interface ContactRecord {
@@ -37,7 +37,7 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
 
   // Initialize SDK client for API communication
   const apiUrl = resolveWorkerApiUrl(ctx);
-  const authToken = ctx.payload._secrets?.sessionToken || process.env.LEADFORGE_API_TOKEN || '';
+  const authToken = ctx.payload._secrets?.sessionToken || process.env.HUNTARA_API_TOKEN || process.env.LEADFORGE_API_TOKEN || '';
   const sdk = new SdkClient({
     baseUrl: apiUrl,
     token: authToken,
@@ -92,9 +92,9 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
     } catch {}
   }
 
-  if (!subject) subject = `Message from ${account.name || 'LeadForge'}`;
+  if (!subject) subject = `Message from ${account.name || 'HUNTARA'}`;
   if (!body) {
-    body = `Hello {{firstName}},\n\nThis message was sent via LeadForge OS.\n\nBest regards,\n${account.name || 'LeadForge'}`;
+    body = `Hello {{firstName}},\n\nThis message was sent via HUNTARA.\n\nBest regards,\n${account.name || 'HUNTARA'}`;
   }
 
   // Process attachments
@@ -307,7 +307,7 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
           }
         : null,
       sender: {
-        name: account.name || 'LeadForge',
+        name: account.name || 'HUNTARA',
         email: account.email
       },
       sequence: {
@@ -501,7 +501,7 @@ export async function dispatchOutreach(ctx: JobContext): Promise<any> {
           try {
             const { getDatabase } = await import('../../database/connection');
             const { DesktopSuppressionRepository } = await import('../../database/suppression-repository');
-            const { SuppressionReason } = await import('@leadforge/schema');
+            const { SuppressionReason } = await import('@huntara/schema');
             const suppRepo = new DesktopSuppressionRepository(getDatabase(campaign.workspaceId));
             suppRepo.suppress(
               campaign.workspaceId,

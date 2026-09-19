@@ -3,7 +3,7 @@ import { initCacheSchema } from '../database/cache-schema';
 import { DesktopAnalyticsRepository } from '../database/analytics-repository';
 import { randomUUID } from 'crypto';
 import assert from 'assert';
-import { EmailQualityStatus } from '@leadforge/schema';
+import { EmailQualityStatus } from '@huntara/schema';
 
 /**
  * LeadForge OS — Phase 11 Adversarial Campaign Analytics Integration Test Suite
@@ -229,7 +229,7 @@ export async function runCampaignAnalyticsTests() {
   console.log('[Test] Running Invariant 7 (RFC 4180 CSV Export)...');
   const csvExport = repo.export(workspaceId, campaignId, 'csv');
   assert.ok(csvExport.csvContent, 'CSV content must be generated');
-  assert.ok(csvExport.csvContent.includes('# LeadForge OS Campaign Performance Export'), 'CSV must contain header banner');
+  assert.ok(csvExport.csvContent.includes('# HUNTARA Campaign Performance Export'), 'CSV must contain header banner');
   assert.ok(csvExport.csvContent.includes('Unique Open Rate'), 'CSV must contain Unique Open Rate');
   assert.ok(csvExport.csvContent.includes('Contact Reply Rate'), 'CSV must contain Contact Reply Rate');
   assert.ok(csvExport.csvContent.includes('replyingContacts / contactsEligible'), 'CSV must expose explicit formula');

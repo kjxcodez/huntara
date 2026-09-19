@@ -47,10 +47,10 @@ export default function StatusPage() {
             System Operational
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Service Status
+            HUNTARA Service Status
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Real-time status updates of LeadForge website delivery networks, static assets documentation portals, and release endpoints.
+            Real-time status updates of HUNTARA website delivery networks, static assets documentation portals, and release endpoints.
           </motion.p>
         </div>
 

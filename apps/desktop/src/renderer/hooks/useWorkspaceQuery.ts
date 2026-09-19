@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceService } from '../services/workspace-service';
 import { toast } from 'sonner';
-import type { InviteMemberDto, WorkspaceRole } from '@leadforge/schema';
+import type { InviteMemberDto, WorkspaceRole } from '@huntara/schema';
 
 // ---------------------------------------------------------------------------
 // Query Keys

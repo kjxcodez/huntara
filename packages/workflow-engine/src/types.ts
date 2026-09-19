@@ -1,4 +1,4 @@
-import type { ToolResult } from '@leadforge/agent-core';
+import type { ToolResult } from '@huntara/agent-core';
 
 // ─── Step Status ────────────────────────────────────────────────────────────
 

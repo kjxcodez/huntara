@@ -1,4 +1,4 @@
-import type { CanonicalContactQuery } from '@leadforge/schema';
+import type { CanonicalContactQuery } from '@huntara/schema';
 
 /**
  * Resolves contact IDs matching a canonical query snapshot minus exclusions.

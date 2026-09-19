@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import assert from 'node:assert';
 import { randomUUID } from 'node:crypto';
 import { initCacheSchema, CACHE_SCHEMA_VERSION } from '../database/cache-schema';
-import { renderCanonicalVariables, type CanonicalVariableContext } from '@leadforge/sdk';
+import { renderCanonicalVariables, type CanonicalVariableContext } from '@huntara/sdk';
 
 export async function runReleaseQualificationTests() {
   console.log('\n============================================================');

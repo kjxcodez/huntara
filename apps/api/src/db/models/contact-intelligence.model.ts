@@ -5,7 +5,7 @@ import {
   type WorkspaceScopedDocument,
   type TimestampDocument
 } from '../plugins/index.js';
-import type { ContactSeniority } from '@leadforge/schema';
+import type { ContactSeniority } from '@huntara/schema';
 
 export interface ContactIntelligenceDocument
   extends mongoose.Document,

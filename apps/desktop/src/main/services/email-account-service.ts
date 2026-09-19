@@ -1,5 +1,5 @@
 import { getDatabase } from '../database/connection';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 
 export interface EmailAccountRow {
   id: string;

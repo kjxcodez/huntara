@@ -1,4 +1,4 @@
-import { ToolRegistry } from '@leadforge/agent-core';
+import { ToolRegistry } from '@huntara/agent-core';
 import { SchedulerGatewayImpl } from './scheduler-gateway';
 import { SearchLocalBusinessesTool } from './maps-tool';
 import { CrawlWebsiteTool } from './crawler-tool';

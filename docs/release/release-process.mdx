@@ -19,7 +19,7 @@ Whenever you make a user-facing change that requires a version increment, run:
 npx changeset
 ```
 
-1. Select the packages that have changed (e.g. `@leadforge/desktop`).
+1. Select the packages that have changed (e.g. `@huntara/desktop`).
 2. Select the version bump type: `major`, `minor`, or `patch`.
 3. Provide a summary of the changes. This will be automatically added to `CHANGELOG.md` files upon release.
 
@@ -45,7 +45,7 @@ To build the setup installer for Windows:
 pnpm package
 ```
 
-This runs `electron-builder --win` under the hood. The resulting installer will be located under `apps/desktop/dist/leadforge-setup-<version>.exe`.
+This runs `electron-builder --win` under the hood. The resulting installer will be located under `apps/desktop/dist/HUNTARA-<version>-win-x64.exe`.
 
 ## Code Signing Roadmap
 
@@ -98,7 +98,7 @@ flowchart TD
 In case of user issues, we collect local logs without violating privacy:
 
 1. The user exports a **Support Bundle** from the Diagnostics cockpit.
-2. The application compresses the daily log files (`leadforge.log`) and configuration states into a single ZIP file.
+2. The application compresses the daily log files (`huntara_*.jsonl`) and configuration states into a single ZIP file.
 3. All sensitive parameters (`openRouterKey`, `smtpPassword`, `imapPassword`) are replaced with `[MASKED]` during collection.
 4. The user attaches the ZIP file to a GitHub issue.
 

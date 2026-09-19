@@ -35,10 +35,40 @@ function getWorkspacesDir(): string {
 function getGlobalDbPath(): string {
   try {
     if (typeof app !== 'undefined' && app?.getPath) {
-      return join(app.getPath('userData'), 'leadforge.db');
+      const canonicalPath = join(app.getPath('userData'), 'huntara.db');
+      if (fs.existsSync(canonicalPath)) return canonicalPath;
+      const legacyPath = join(app.getPath('userData'), 'leadforge.db');
+      if (fs.existsSync(legacyPath)) {
+        try {
+          fs.copyFileSync(legacyPath, canonicalPath);
+          if (fs.existsSync(`${legacyPath}-wal`)) fs.copyFileSync(`${legacyPath}-wal`, `${canonicalPath}-wal`);
+          if (fs.existsSync(`${legacyPath}-shm`)) fs.copyFileSync(`${legacyPath}-shm`, `${canonicalPath}-shm`);
+        } catch {}
+      }
+      return canonicalPath;
     }
   } catch {}
-  return join(process.cwd(), 'report/temp-workspaces/leadforge.db');
+  return join(process.cwd(), 'report/temp-workspaces/huntara.db');
+}
+
+function resolveWorkspaceDbPath(workspacesPath: string, workspaceId: string): string {
+  const canonicalPath = join(workspacesPath, `huntara_${workspaceId}.db`);
+  if (fs.existsSync(canonicalPath)) {
+    return canonicalPath;
+  }
+  const legacyPath = join(workspacesPath, `leadforge_${workspaceId}.db`);
+  if (fs.existsSync(legacyPath)) {
+    try {
+      fs.copyFileSync(legacyPath, canonicalPath);
+      if (fs.existsSync(`${legacyPath}-wal`)) fs.copyFileSync(`${legacyPath}-wal`, `${canonicalPath}-wal`);
+      if (fs.existsSync(`${legacyPath}-shm`)) fs.copyFileSync(`${legacyPath}-shm`, `${canonicalPath}-shm`);
+      logSQLite(`Migrated legacy database ${legacyPath} -> ${canonicalPath}`, workspaceId);
+    } catch (e) {
+      console.warn('[SQLite] Failed to copy legacy database, falling back to legacy file:', e);
+      return legacyPath;
+    }
+  }
+  return canonicalPath;
 }
 
 /**
@@ -57,7 +87,7 @@ export function getDatabase(workspaceId?: string): Database.Database {
       fs.mkdirSync(workspacesPath, { recursive: true });
     }
 
-    const dbPath = join(workspacesPath, `leadforge_${workspaceId}.db`);
+    const dbPath = resolveWorkspaceDbPath(workspacesPath, workspaceId);
     try {
       db = new Database(dbPath);
 
@@ -523,7 +553,7 @@ export function resetWorkspaceCache(
   } else {
     // Fallback: compute path without opening a DB (avoids re-entry)
     const workspacesPath = process.env.WORKSPACES_DB_DIR || getWorkspacesDir();
-    dbPath = join(workspacesPath, `leadforge_${workspaceId}.db`);
+    dbPath = join(workspacesPath, `huntara_${workspaceId}.db`);
   }
 
   // Archive the stale file and clean up WAL/SHM lockfiles.

@@ -1,4 +1,4 @@
-import { logger } from '@leadforge/logger';
+import { logger } from '@huntara/logger';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Design System Tokens (from DESIGN.md)
@@ -9,8 +9,8 @@ const DS = {
   bgSurface2: '#1B1B1F',
   borderSubtle: '#232327',
   borderDefault: '#2E2E33',
-  accent: '#E8622C',
-  accentHover: '#F17441',
+  accent: '#FA7125',
+  accentHover: '#FB8846',
   textPrimary: '#F4F4F5',
   textSecondary: '#A3A3AB',
   textTertiary: '#6E6E76',
@@ -81,7 +81,7 @@ function emailShell(content: string): string {
             <td align="center" style="padding-bottom: 32px;">
               <span style="font-family: ${DS.fontStack}; font-size: 13px; font-weight: 600;
                            letter-spacing: 0.12em; color: ${DS.textTertiary}; text-transform: uppercase;">
-                LEADFORGE OS
+                HUNTARA
               </span>
             </td>
           </tr>
@@ -99,8 +99,8 @@ function emailShell(content: string): string {
             <td align="center" style="padding-top: 32px;">
               <p style="font-family: ${DS.fontStack}; font-size: 12px; line-height: 18px;
                          color: ${DS.textTertiary}; margin: 0;">
-                &copy; ${new Date().getFullYear()} LeadForge OS &nbsp;&middot;&nbsp;
-                <span style="color: ${DS.textTertiary};">You received this because you have an account on LeadForge OS.</span>
+                &copy; ${new Date().getFullYear()} HUNTARA &nbsp;&middot;&nbsp;
+                <span style="color: ${DS.textTertiary};">You received this because you have an account on HUNTARA.</span>
               </p>
               <p style="font-family: ${DS.fontStack}; font-size: 11px; line-height: 16px;
                          color: ${DS.textTertiary}; margin: 8px 0 0 0; opacity: 0.6;">
@@ -162,7 +162,7 @@ function divider(): string {
 // ─────────────────────────────────────────────────────────────────────────────
 export class MailerService {
   private static instance: MailerService;
-  private fromAddress: string = 'LeadForge OS <noreply.leadforgeos@gmail.com>';
+  private fromAddress: string = 'HUNTARA <noreply@huntara.com>';
 
   private constructor() {
     logger.info('Mailer: Initialized transactional system mailer.');
@@ -185,8 +185,8 @@ export class MailerService {
   // Template: Verify Email (Text-only for beta)
   // ──────────────────────────────────────────────────────────────────────────
   public async sendVerificationEmail(to: string, verificationUrl: string): Promise<void> {
-    const subject = 'Verify your email — LeadForge OS';
-    const text = `Welcome to LeadForge OS.\n\nVerify your email address by opening this link:\n${verificationUrl}\n\nIf you did not create an account, ignore this email.`;
+    const subject = 'Verify your email — HUNTARA';
+    const text = `Welcome to HUNTARA.\n\nVerify your email address by opening this link:\n${verificationUrl}\n\nIf you did not create an account, ignore this email.`;
 
     await this.sendTextMail(to, subject, text);
   }
@@ -195,8 +195,8 @@ export class MailerService {
   // Template: Reset Password (Text-only for beta)
   // ──────────────────────────────────────────────────────────────────────────
   public async sendResetPasswordEmail(to: string, resetUrl: string): Promise<void> {
-    const subject = 'Reset your password — LeadForge OS';
-    const text = `You requested a password reset for your LeadForge OS account.\n\nReset your password here:\n${resetUrl}\n\nThis link expires in 1 hour. If you did not request this, ignore this email — your password has not been changed.`;
+    const subject = 'Reset your password — HUNTARA';
+    const text = `You requested a password reset for your HUNTARA account.\n\nReset your password here:\n${resetUrl}\n\nThis link expires in 1 hour. If you did not request this, ignore this email — your password has not been changed.`;
 
     await this.sendTextMail(to, subject, text);
   }
@@ -205,8 +205,8 @@ export class MailerService {
   // Template: Welcome (post-verification, Text-only for beta)
   // ──────────────────────────────────────────────────────────────────────────
   public async sendWelcomeEmail(to: string, name: string): Promise<void> {
-    const subject = 'Welcome to LeadForge OS';
-    const text = `Hi ${name},\n\nYour email has been verified. Your LeadForge OS account is active.\n\nOpen the desktop app and sign in to get started.`;
+    const subject = 'Welcome to HUNTARA';
+    const text = `Hi ${name},\n\nYour email has been verified. Your HUNTARA account is active.\n\nOpen the desktop app and sign in to get started.`;
 
     await this.sendTextMail(to, subject, text);
   }

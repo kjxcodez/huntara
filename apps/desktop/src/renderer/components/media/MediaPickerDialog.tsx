@@ -150,7 +150,7 @@ export function MediaPickerDialog({
     }
   };
 
-  // Fetch LeadForge Media Library (MongoDB attachments)
+  // Fetch HUNTARA Media Library (MongoDB attachments)
   const fetchLibraryFiles = async () => {
     setLoading(true);
     try {
@@ -215,7 +215,7 @@ export function MediaPickerDialog({
     });
   };
 
-  // Handle linking Google Drive live file into LeadForge media & selecting it
+  // Handle linking Google Drive live file into HUNTARA media & selecting it
   const handleSelectDriveFile = async (f: any) => {
     try {
       let attachmentItem: MediaAttachmentItem;

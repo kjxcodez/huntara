@@ -5,7 +5,7 @@ import type {
   CreateSystemLogDto,
   BulkSystemLogDto,
   BulkOperationResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class SystemLogsModule {
   constructor(private client: HttpClient) {}

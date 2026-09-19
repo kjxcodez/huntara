@@ -89,14 +89,18 @@ async function migrateMongoContacts(): Promise<MigrationStats> {
           needsUpdate = true;
         }
         stats.quarantined++;
-        console.log(`[MongoDB Quarantined] "${rawEmail}" -> QUARANTINED (${result.reason}) (id: ${doc._id})`);
+        console.log(
+          `[MongoDB Quarantined] "${rawEmail}" -> QUARANTINED (${result.reason}) (id: ${doc._id})`
+        );
       } else {
         targetStatus = ContactEmailStatus.INVALID;
         if (currentStatus !== ContactEmailStatus.INVALID) {
           needsUpdate = true;
         }
         stats.invalid++;
-        console.log(`[MongoDB Invalid] "${rawEmail}" -> INVALID (${result.reason}) (id: ${doc._id})`);
+        console.log(
+          `[MongoDB Invalid] "${rawEmail}" -> INVALID (${result.reason}) (id: ${doc._id})`
+        );
       }
 
       if (needsUpdate) {
@@ -114,7 +118,9 @@ async function migrateMongoContacts(): Promise<MigrationStats> {
             );
           } catch (updateErr: any) {
             if (updateErr.code === 11000) {
-              console.warn(`[Duplicate on recovery] "${targetEmail}" already exists in workspace. Setting doc ${doc._id} to QUARANTINED.`);
+              console.warn(
+                `[Duplicate on recovery] "${targetEmail}" already exists in workspace. Setting doc ${doc._id} to QUARANTINED.`
+              );
               await collection.updateOne(
                 { _id: doc._id },
                 {
@@ -174,7 +180,9 @@ function migrateSQLiteContacts(): MigrationStats {
       db.pragma('journal_mode = WAL');
 
       // Check if contacts table exists
-      const tableCheck = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='contacts'`).get();
+      const tableCheck = db
+        .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='contacts'`)
+        .get();
       if (!tableCheck) continue;
 
       // Ensure emailStatus column exists
@@ -184,7 +192,11 @@ function migrateSQLiteContacts(): MigrationStats {
         db.prepare(`ALTER TABLE contacts ADD COLUMN emailStatus TEXT DEFAULT 'UNVERIFIED'`).run();
       }
 
-      const rows = db.prepare(`SELECT id, email, emailStatus FROM contacts WHERE email IS NOT NULL AND email != ''`).all() as any[];
+      const rows = db
+        .prepare(
+          `SELECT id, email, emailStatus FROM contacts WHERE email IS NOT NULL AND email != ''`
+        )
+        .all() as any[];
 
       for (const row of rows) {
         stats.scanned++;
@@ -207,29 +219,33 @@ function migrateSQLiteContacts(): MigrationStats {
           targetEmail = result.email;
           needsUpdate = true;
           stats.recovered++;
-          console.log(`[SQLite Recovered] "${rawEmail}" -> "${targetEmail}" (db: ${path.basename(info.filePath)}, id: ${row.id})`);
+          console.log(
+            `[SQLite Recovered] "${rawEmail}" -> "${targetEmail}" (db: ${path.basename(info.filePath)}, id: ${row.id})`
+          );
         } else if (result.status === 'quarantine') {
           targetStatus = ContactEmailStatus.QUARANTINED;
           if (currentStatus !== ContactEmailStatus.QUARANTINED) {
             needsUpdate = true;
           }
           stats.quarantined++;
-          console.log(`[SQLite Quarantined] "${rawEmail}" -> QUARANTINED (${result.reason}) (db: ${path.basename(info.filePath)}, id: ${row.id})`);
+          console.log(
+            `[SQLite Quarantined] "${rawEmail}" -> QUARANTINED (${result.reason}) (db: ${path.basename(info.filePath)}, id: ${row.id})`
+          );
         } else {
           targetStatus = ContactEmailStatus.INVALID;
           if (currentStatus !== ContactEmailStatus.INVALID) {
             needsUpdate = true;
           }
           stats.invalid++;
-          console.log(`[SQLite Invalid] "${rawEmail}" -> INVALID (${result.reason}) (db: ${path.basename(info.filePath)}, id: ${row.id})`);
+          console.log(
+            `[SQLite Invalid] "${rawEmail}" -> INVALID (${result.reason}) (db: ${path.basename(info.filePath)}, id: ${row.id})`
+          );
         }
 
         if (needsUpdate && isExecute) {
-          db.prepare(`UPDATE contacts SET email = ?, emailStatus = ?, updatedAt = datetime('now') WHERE id = ?`).run(
-            targetEmail,
-            targetStatus,
-            row.id
-          );
+          db.prepare(
+            `UPDATE contacts SET email = ?, emailStatus = ?, updatedAt = datetime('now') WHERE id = ?`
+          ).run(targetEmail, targetStatus, row.id);
         } else if (!needsUpdate) {
           stats.unchanged++;
         }
@@ -256,8 +272,12 @@ async function main() {
   console.log(`\n=============================================================`);
   console.log(` MIGRATION SUMMARY (${mode})`);
   console.log(`=============================================================`);
-  console.log(`MongoDB: Scanned=${mongoStats.scanned}, Valid=${mongoStats.valid}, Recovered=${mongoStats.recovered}, Quarantined=${mongoStats.quarantined}, Invalid=${mongoStats.invalid}`);
-  console.log(`SQLite:  Scanned=${sqliteStats.scanned}, Valid=${sqliteStats.valid}, Recovered=${sqliteStats.recovered}, Quarantined=${sqliteStats.quarantined}, Invalid=${sqliteStats.invalid}`);
+  console.log(
+    `MongoDB: Scanned=${mongoStats.scanned}, Valid=${mongoStats.valid}, Recovered=${mongoStats.recovered}, Quarantined=${mongoStats.quarantined}, Invalid=${mongoStats.invalid}`
+  );
+  console.log(
+    `SQLite:  Scanned=${sqliteStats.scanned}, Valid=${sqliteStats.valid}, Recovered=${sqliteStats.recovered}, Quarantined=${sqliteStats.quarantined}, Invalid=${sqliteStats.invalid}`
+  );
   if (!isExecute) {
     console.log(`\nRun with --execute to commit changes to database.`);
   }

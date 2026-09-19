@@ -39,7 +39,7 @@ export default function PrivacyPage() {
 
         <motion.div variants={childVariants} className="space-y-6 text-xs text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border-subtle)] pt-8">
           <p>
-            This Privacy Policy explains how LeadForge OS manages information. Because LeadForge is a local-first application, the fundamental design principle is that **your data belongs on your own hardware**.
+            This Privacy Policy explains how HUNTARA manages information. Because HUNTARA is a local-first application, the fundamental design principle is that **your data belongs on your own hardware**.
           </p>
 
           <h2 className="text-sm font-semibold text-[var(--foreground)] font-mono uppercase tracking-wider text-[11px] mt-8">1. Information Gathered Locally</h2>

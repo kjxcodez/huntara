@@ -21,7 +21,7 @@ import {
   mapBounceCategoryToFailureCategory,
   sanitizeHtmlForPreview,
   isCircuitBreakerRejectionCategory
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { CampaignCircuitBreakerService } from '../campaign/campaign-circuit-breaker.service.js';
 import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';
 import { EmailDomainError } from './types.js';

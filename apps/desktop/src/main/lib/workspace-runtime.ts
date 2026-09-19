@@ -7,7 +7,7 @@ import { initCacheSchema } from '../database/cache-schema';
 import { JobScheduler } from '../services/scheduler';
 import { EventBridge } from './event-bridge';
 import { AutomationTriggerEvaluator } from '../services/automation-trigger';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 
 import { telemetry } from './telemetry';
 import { UpdateManager } from '../services/updater';

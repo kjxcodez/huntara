@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CloudOff, RefreshCw, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/button';
-import type { RuntimeConnectivityState } from '@leadforge/schema';
+import type { RuntimeConnectivityState } from '@huntara/schema';
 
 /**
  * ConnectivityBanner — Global runtime connectivity alert banner.

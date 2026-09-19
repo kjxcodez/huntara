@@ -53,7 +53,7 @@ export default function SecurityPage() {
             Security &amp; Data Ownership
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            LeadForge OS is designed with local-first parameters. Your data remains yours.
+            HUNTARA is designed with local-first parameters. Your data remains yours.
           </motion.p>
         </div>
 
@@ -80,7 +80,7 @@ export default function SecurityPage() {
             <li className="flex items-start gap-2">
               <Check className="h-4 w-4 text-[var(--primary)] shrink-0 mt-0.5" />
               <div>
-                <strong className="text-[var(--foreground)]">Does LeadForge OS have access to my SMTP credentials?</strong>
+                <strong className="text-[var(--foreground)]">Does HUNTARA have access to my SMTP credentials?</strong>
                 <p className="mt-0.5">No. SMTP keys are decrypted in memory only at the time of campaign execution, and the handshake certificates occur directly from your system.</p>
               </div>
             </li>

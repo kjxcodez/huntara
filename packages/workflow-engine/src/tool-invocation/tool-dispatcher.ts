@@ -1,4 +1,4 @@
-import type { ToolRegistry, ExecutionContext, ToolResult } from '@leadforge/agent-core';
+import type { ToolRegistry, ExecutionContext, ToolResult } from '@huntara/agent-core';
 import type { ToolRequest, ToolResponse, ToolInvocationLog } from './types';
 import type { InvocationLogger } from './invocation-logger';
 import { ConsoleInvocationLogger } from './invocation-logger';

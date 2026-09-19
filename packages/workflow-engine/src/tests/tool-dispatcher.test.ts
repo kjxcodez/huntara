@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { ToolDispatcher } from '../tool-invocation/tool-dispatcher';
 import { ConsoleInvocationLogger } from '../tool-invocation/invocation-logger';
 import type { ToolRequest } from '../tool-invocation/types';
-import { ToolRegistry } from '@leadforge/agent-core';
-import type { Tool, ToolResult, ExecutionContext } from '@leadforge/agent-core';
+import { ToolRegistry } from '@huntara/agent-core';
+import type { Tool, ToolResult, ExecutionContext } from '@huntara/agent-core';
 import { z } from 'zod';
 
 const EXEC_CTX: ExecutionContext = {

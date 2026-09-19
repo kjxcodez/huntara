@@ -13,7 +13,7 @@ import {
   htmlToPlainText,
   computeMessageFingerprint,
   computeAttachmentChecksums
-} from '@leadforge/sdk';
+} from '@huntara/sdk';
 import {
   ContactStatus,
   ContactEmailStatus,
@@ -30,7 +30,7 @@ import {
   validateTrackingBaseUrl,
   isCircuitBreakerRejectionCategory,
   generateEntityId
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import {
   EmailDomainError,
   type SendEmailInput,
@@ -431,7 +431,7 @@ export class EmailService {
     }
 
     // 0b. Pre-flight recipient validation: do not burn quota or reserve slots on malformed recipients!
-    const { validateEmailStrict } = await import('@leadforge/schema');
+    const { validateEmailStrict } = await import('@huntara/schema');
     if (!validateEmailStrict(input.to)) {
       throw new EmailDomainError(
         'INVALID_RECIPIENT',

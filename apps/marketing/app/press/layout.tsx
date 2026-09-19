@@ -2,11 +2,11 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Press Kit & Assets",
-  description: "Press assets, product description copies, and graphics packages for journalists covering LeadForge OS.",
+  description: "Press assets, product description copies, and graphics packages for journalists covering HUNTARA.",
   openGraph: {
-    title: "Press Kit & Assets | LeadForge OS",
-    description: "Press assets, product description copies, and graphics packages for journalists covering LeadForge OS.",
-    url: "https://github.com/kjxcodez/leadforge-os/press"
+    title: "Press Kit & Assets | HUNTARA",
+    description: "Press assets, product description copies, and graphics packages for journalists covering HUNTARA.",
+    url: "https://github.com/kjxcodez/huntara/press"
   }
 }
 

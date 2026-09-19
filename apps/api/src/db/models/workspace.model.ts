@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { generateEntityId, DEFAULT_SCHEDULER_POLICY } from '@leadforge/schema';
+import { generateEntityId, DEFAULT_SCHEDULER_POLICY } from '@huntara/schema';
 import {
   softDeletePlugin,
   auditPlugin,

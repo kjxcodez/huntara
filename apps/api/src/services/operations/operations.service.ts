@@ -15,7 +15,7 @@ import {
   type OperationType,
   type SubsystemHealthStatus,
   classifyOperationFailure
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { NotFoundError, ValidationError } from '../../errors/index.js';
 import { logger } from '../../config/index.js';
 

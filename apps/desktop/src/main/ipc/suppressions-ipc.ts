@@ -2,7 +2,7 @@ import { safeRegister } from './helper';
 import { getDatabase } from '../database/connection';
 import { DesktopSuppressionRepository } from '../database/suppression-repository';
 import { WorkspaceManager } from '../lib/workspace-manager';
-import { SuppressionReason } from '@leadforge/schema';
+import { SuppressionReason } from '@huntara/schema';
 
 export function registerSuppressionsIpc(): void {
   safeRegister('suppressions:list', async (_event, { workspaceId, limit, offset }) => {

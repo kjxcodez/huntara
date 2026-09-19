@@ -15,14 +15,11 @@ export function Footer() {
           {/* Brand Col */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight text-[var(--foreground)]">
-              <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none">
-                <path d="M4 4H20V13.5L13.5 20H4V4Z" fill="#F4F4F5" />
-                <path d="M13.5 20V13.5H20L13.5 20Z" fill="#E8622C" />
-              </svg>
-              LeadForge OS
+              <img src="/huntara-mark.png" alt="HUNTARA" className="h-[22px] w-[22px] object-contain" />
+              HUNTARA
             </Link>
             <p className="leading-relaxed max-w-[220px]">
-              A local-first desktop OS for discovering, enriching, and closing your next customer.
+              HUNTARA helps businesses find and understand their next customers.
             </p>
           </div>
 
@@ -56,8 +53,6 @@ export function Footer() {
               <li><Link href="/about" id="footer-link-about" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">About</Link></li>
               <li><Link href="/blog" id="footer-link-blog" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Blog</Link></li>
               <li><Link href="/contact" id="footer-link-contact" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Contact</Link></li>
-              <li><Link href="/community" id="footer-link-community" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Community</Link></li>
-              <li><Link href="/beta" id="footer-link-beta" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Beta Program</Link></li>
             </ul>
           </div>
 
@@ -68,7 +63,6 @@ export function Footer() {
               <li><Link href="/privacy" id="footer-link-privacy" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Privacy</Link></li>
               <li><Link href="/terms" id="footer-link-terms" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Terms</Link></li>
               <li><Link href="/security" id="footer-link-security" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Security</Link></li>
-              <li><Link href="/press" id="footer-link-press" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Press Kit</Link></li>
               <li><Link href="/brand" id="footer-link-brand" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">Brand Assets</Link></li>
             </ul>
           </div>
@@ -78,7 +72,7 @@ export function Footer() {
         {/* Footer Bottom */}
         <div className="border-t border-[var(--border-subtle)] pt-6 flex flex-col md:flex-row justify-between gap-4 select-none">
           <div className="flex gap-4 items-center">
-            <span>© 2026 LeadForge OS. All rights reserved.</span>
+            <span>© 2026 HUNTARA. All rights reserved.</span>
             <span className="h-3 w-px bg-[var(--border-subtle)]"></span>
             <Link href="/status" className="hover:text-[var(--foreground)] flex items-center gap-1.5 transition-colors duration-150">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)] animate-pulse"></span>
@@ -86,10 +80,9 @@ export function Footer() {
             </Link>
           </div>
           <div className="flex gap-6 items-center">
-            <Link href="/open-source" className="hover:text-[var(--foreground)] transition-colors duration-150">Open Source</Link>
-            <Link href="/contributors" className="hover:text-[var(--foreground)] transition-colors duration-150">Contributors</Link>
-            <Link href="/api-docs" className="hover:text-[var(--foreground)] transition-colors duration-150">API Reference</Link>
-            <a href="https://github.com/kjxcodez/leadforge-os" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors duration-150 font-mono">
+            <Link href="/docs" className="hover:text-[var(--foreground)] transition-colors duration-150">Documentation</Link>
+            <Link href="/releases" className="hover:text-[var(--foreground)] transition-colors duration-150">Releases</Link>
+            <a href="https://github.com/kjxcodez/huntara" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)] transition-colors duration-150 font-mono">
               GitHub
             </a>
           </div>
@@ -97,9 +90,9 @@ export function Footer() {
 
         {/* Big Background Outline Text */}
         <div className="w-full text-center select-none relative group flex items-center justify-center overflow-visible z-0 pointer-events-none">
-         
+
           <div className="h-[40dvh] w-screen flex items-center justify-center pointer-events-auto z-10">
-            <TextHoverEffect text="LEADFORGE" />
+            <TextHoverEffect text="HUNTARA" />
           </div>
         </div>
       </div>

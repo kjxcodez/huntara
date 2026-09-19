@@ -99,7 +99,7 @@ export const SendTestModal = ({ isOpen, onClose, account }: SendTestModalProps) 
     const newAttachments = [...attachments];
     for (const f of files) {
       if (f.size > 25 * 1024 * 1024) {
-        toast.error(`File "${f.name}" exceeds the 25 MB LeadForge size limit.`);
+        toast.error(`File "${f.name}" exceeds the 25 MB HUNTARA size limit.`);
         continue;
       }
       const ext = f.name.split('.').pop()?.toLowerCase();
@@ -153,7 +153,7 @@ export const SendTestModal = ({ isOpen, onClose, account }: SendTestModalProps) 
 
     if (!isKnownRecipient && uniqueCount >= 3) {
       setErrorMessage(
-        'You can use up to 3 different test recipients across your LeadForge account. Reuse one of your existing test addresses to continue.'
+        'You can use up to 3 different test recipients across your HUNTARA account. Reuse one of your existing test addresses to continue.'
       );
       return;
     }

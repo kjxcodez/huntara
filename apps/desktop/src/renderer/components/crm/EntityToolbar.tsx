@@ -27,7 +27,7 @@ interface EntityToolbarProps {
 
 /**
  * EntityToolbar renders a unified debounced search, collapsible filtering, and bulk actions toolbar
- * aligned strictly with the LeadForge design system.
+ * aligned strictly with the HUNTARA design system.
  */
 export function EntityToolbar({
   search,

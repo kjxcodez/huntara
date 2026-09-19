@@ -20,7 +20,7 @@ import {
   EmailFailureCategory,
   MailboxHealthState,
   isMailboxEligibleForDispatch
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import assert from 'assert';
 
 export async function runProductionQualificationE2ETests() {

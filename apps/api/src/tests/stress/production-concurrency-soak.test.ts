@@ -4,7 +4,7 @@ import {
   EmailFailureCategory,
   isMailboxEligibleForDispatch,
   evaluateOutreachEligibility
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 describe('Phase 19 Production Concurrency & Soak Qualification', () => {
   // ──────────────────────────────────────────────────────────────────────────

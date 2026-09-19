@@ -1,4 +1,4 @@
-import { createBetterAuth } from '@leadforge/auth';
+import { createBetterAuth } from '@huntara/auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { MongoClient } from 'mongodb';
 import { env } from './env.js';

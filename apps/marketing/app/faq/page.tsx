@@ -63,12 +63,12 @@ export default function FAQPage() {
 
   const faqs = [
     {
-      question: "Is LeadForge OS really local-first?",
+      question: "Is HUNTARA really local-first?",
       answer: "Yes. All code scrapers, contact enricher parser loops, and email TLS handshakes run directly on your own hardware using Electron worker threads. Your SQLite database is stored locally in your configuration folders. We cannot read your leads or credentials."
     },
     {
       question: "How do you avoid getting SMTP accounts flagged?",
-      answer: "Since LeadForge OS dispatches emails locally, it coordinates directly with your own SMTP configs. You are responsible for setting up proper DNS records (SPF, DKIM, DMARC) on your sending domains. The app schedules dispatch intervals with randomized pauses to prevent sending bursts."
+      answer: "Since HUNTARA dispatches emails locally, it coordinates directly with your own SMTP configs. You are responsible for setting up proper DNS records (SPF, DKIM, DMARC) on your sending domains. The app schedules dispatch intervals with randomized pauses to prevent sending bursts."
     },
     {
       question: "Does WAL mode prevent SQLite table locking?",
@@ -76,7 +76,7 @@ export default function FAQPage() {
     },
     {
       question: "Can I migrate my database to another machine?",
-      answer: "Yes. You can copy your `.db` SQLite files from the workspace directory and open them on any computer running the LeadForge OS client. There are no vendor locks."
+      answer: "Yes. You can copy your `.db` SQLite files from the workspace directory and open them on any computer running the HUNTARA client. There are no vendor locks."
     },
     {
       question: "How does the Chromium Discovery Scraper operate locally?",

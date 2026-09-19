@@ -3,7 +3,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { analyticsRouter } from '../../routes/analytics.js';
 import { CampaignAnalyticsService } from '../../services/analytics/campaign-analytics.service.js';
 import { errorHandler } from '../../middleware/error-handler.js';
-import { createMetricWithDenominator, EmailQualityStatus } from '@leadforge/schema';
+import { createMetricWithDenominator, EmailQualityStatus } from '@huntara/schema';
 
 vi.mock('../../services/analytics/campaign-analytics.service.js');
 

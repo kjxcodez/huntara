@@ -9,7 +9,7 @@ import {
   VALID_CAMPAIGN_TRANSITIONS,
   type CreateCampaignDto,
   type UpdateCampaignDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { ValidationError, ConflictError } from '../../errors/index.js';
 
 export class CampaignService {

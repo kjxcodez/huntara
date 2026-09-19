@@ -4,7 +4,7 @@ import {
   type EmailQualityEvidence,
   type EmailVerificationResult,
   SuppressionReason
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { EmailQualityModel } from '../../db/models/email-quality.model.js';
 import { EmailDeliveryModel } from '../../db/models/email-delivery.model.js';
 import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';

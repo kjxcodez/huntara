@@ -166,7 +166,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
             id: `upd_${updaterStatus.availableVersion || 'latest'}`,
             type: 'update_available',
             title: 'Update Available',
-            message: `LeadForge OS v${updaterStatus.availableVersion || '1.0.1'} is ready to install.`,
+            message: `HUNTARA v${updaterStatus.availableVersion || '1.0.1'} is ready to install.`,
             timestamp: new Date().toISOString(),
             read: false,
             actionRoute: '/settings?section=updates'

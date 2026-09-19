@@ -19,7 +19,7 @@ import {
   createMetricWithDenominator,
   EmailQualityStatus,
   EmailEventType
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { NotFoundError, ValidationError } from '../../errors/index.js';
 
 export class CampaignAnalyticsService {

@@ -5,7 +5,7 @@ import type {
   Sequence,
   SequenceExecution,
   SequenceLog
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export interface LeadRepository {
   getById(id: string, workspaceId: string): Promise<Contact | null>;

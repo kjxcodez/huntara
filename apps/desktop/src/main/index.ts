@@ -2,7 +2,12 @@ import { app, BrowserWindow, shell, Menu, ipcMain } from 'electron';
 import { join, resolve } from 'path';
 import fs from 'fs';
 import { is } from '@electron-toolkit/utils';
-import { SdkClient } from '@leadforge/sdk';
+import { initializeStorageAndMigrate } from './lib/storage-migration';
+
+// Ensure canonical HUNTARA application data directory and one-time migration runs immediately
+initializeStorageAndMigrate();
+
+import { SdkClient } from '@huntara/sdk';
 import { initCacheSchema, ensureCleanCache } from './database/cache-schema';
 import { getDatabase, closeDatabase } from './database/connection';
 import { registerAllIpc } from './ipc/register';
@@ -17,6 +22,7 @@ import { loadConfig } from './lib/config';
 import { ensurePlaywrightBrowsers } from './lib/playwright-setup';
 import { WorkspaceManager } from './lib/workspace-manager';
 import { ConnectivityService } from './services/connectivity-service';
+import { setupTray, destroyTray } from './lib/tray';
 
 // Load .env for main process (electron-vite only loads it for renderer)
 try {
@@ -102,10 +108,11 @@ function createWindow() {
       webSecurity: true,
       disableBlinkFeatures: 'Auxclick'
     },
+    title: 'HUNTARA',
     titleBarStyle: 'default',
     frame: true,
     trafficLightPosition: { x: 10, y: 10 },
-    icon: join(__dirname, '../../resources/icon.png')
+    icon: join(__dirname, '../../resources/HUNTARA-master-app-icon-1024.png')
   };
 
   if (windowState.x !== undefined && windowState.y !== undefined) {
@@ -173,7 +180,7 @@ app.whenReady().then(async () => {
   createSplashWindow();
 
   // Set as app user model ID (Windows)
-  app.setAppUserModelId('com.leadforge.desktop');
+  app.setAppUserModelId('com.huntara.desktop');
 
   // Restore session from disk
   const sessionStart = Date.now();
@@ -324,6 +331,9 @@ app.whenReady().then(async () => {
 
   createWindow();
 
+  // Setup system tray
+  setupTray(() => mainWindow);
+
   // Initialise UpdateManager
   try {
     UpdateManager.getInstance();
@@ -340,6 +350,7 @@ app.whenReady().then(async () => {
 
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
+  destroyTray();
   closeDatabase();
   if (process.platform !== 'darwin') {
     app.quit();
@@ -348,6 +359,7 @@ app.on('window-all-closed', () => {
 
 // Graceful exit handler
 app.on('will-quit', () => {
+  destroyTray();
   closeDatabase();
 });
 

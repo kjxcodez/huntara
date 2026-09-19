@@ -2,11 +2,11 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "System Changelog",
-  description: "Chronological updates, feature additions, fixes, and release timeline for LeadForge OS desktop.",
+  description: "Chronological updates, feature additions, fixes, and release timeline for HUNTARA desktop.",
   openGraph: {
-    title: "System Changelog | LeadForge OS",
-    description: "Chronological updates, feature additions, fixes, and release timeline for LeadForge OS desktop.",
-    url: "https://github.com/kjxcodez/leadforge-os/changelog"
+    title: "System Changelog | HUNTARA",
+    description: "Chronological updates, feature additions, fixes, and release timeline for HUNTARA desktop.",
+    url: "https://github.com/kjxcodez/huntara/changelog"
   }
 }
 

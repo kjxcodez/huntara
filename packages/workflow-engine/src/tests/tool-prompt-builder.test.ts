@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ToolPromptBuilder } from '../tool-invocation/tool-prompt-builder';
-import type { Tool } from '@leadforge/agent-core';
+import type { Tool } from '@huntara/agent-core';
 import { z } from 'zod';
 
 const mockTool: Tool = {

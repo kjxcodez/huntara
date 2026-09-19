@@ -1,5 +1,5 @@
-import { AIRuntime } from '@leadforge/ai';
-import type { ExecutionContext, ToolResult } from '@leadforge/agent-core';
+import { AIRuntime } from '@huntara/ai';
+import type { ExecutionContext, ToolResult } from '@huntara/agent-core';
 import type { Workflow, ToolStep, LLMStep, TransformStep, ValidationStep } from './workflow';
 import { WorkflowContext } from './workflow-context';
 import { WorkflowEvents } from './workflow-events';
@@ -8,7 +8,7 @@ import { ToolDispatcher } from './tool-invocation/tool-dispatcher';
 import type { ToolRequest } from './tool-invocation/types';
 import crypto from 'crypto';
 
-// ─── AIConfig shape (mirrors @leadforge/ai usage) ────────────────────────────
+// ─── AIConfig shape (mirrors @huntara/ai usage) ────────────────────────────
 
 export interface AIConfig {
   readonly openRouterKey?: string | undefined;

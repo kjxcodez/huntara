@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { classifyEmailFailure } from './email.service.js';
-import { EmailFailureCategory, BounceCategory } from '@leadforge/schema';
+import { EmailFailureCategory, BounceCategory } from '@huntara/schema';
 import { GmailProvider } from '../google/gmail.provider.js';
 import { VALID_DELIVERY_TRANSITIONS } from '../../repositories/email-delivery/email-delivery.repository.js';
 import { EmailDomainError } from './types.js';

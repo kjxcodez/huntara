@@ -1,8 +1,8 @@
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright';
 import type { JobContext } from '../../../shared/types/job';
 import { normalizeStateName, normalizeCountryName } from '../../../shared/utils/locations';
-import { SdkClient } from '@leadforge/sdk';
-import { generateEntityId, CompanyStatus, ContactStatus } from '@leadforge/schema';
+import { SdkClient } from '@huntara/sdk';
+import { generateEntityId, CompanyStatus, ContactStatus } from '@huntara/schema';
 import { resolveWorkerApiUrl } from '../worker-env';
 
 /**
@@ -153,7 +153,7 @@ export async function scrapeMaps(ctx: JobContext): Promise<any> {
 
   // Initialize SdkClient for authoritative API/MongoDB persistence
   const apiUrl = resolveWorkerApiUrl(ctx);
-  const authToken = ctx.payload._secrets?.sessionToken || process.env.LEADFORGE_API_TOKEN || '';
+  const authToken = ctx.payload._secrets?.sessionToken || process.env.HUNTARA_API_TOKEN || process.env.LEADFORGE_API_TOKEN || '';
   const sdk = new SdkClient({
     baseUrl: apiUrl,
     token: authToken,
@@ -182,7 +182,7 @@ export async function scrapeMaps(ctx: JobContext): Promise<any> {
     } catch (launchErr: any) {
       if (launchErr?.message?.includes("Executable doesn't exist")) {
         throw new Error(
-          `Playwright Chromium browser engine is not installed on this system (Path: ${process.env.PLAYWRIGHT_BROWSERS_PATH || 'default'}). Please check internet connectivity and restart LeadForge OS to download required browser components.`
+          `Playwright Chromium browser engine is not installed on this system (Path: ${process.env.PLAYWRIGHT_BROWSERS_PATH || 'default'}). Please check internet connectivity and restart HUNTARA to download required browser components.`
         );
       }
       throw launchErr;

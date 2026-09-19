@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import type { AgentMemoryRepository } from '@leadforge/agent-core';
+import type { AgentMemoryRepository } from '@huntara/agent-core';
 import { getDatabase } from '../connection';
 
 export class AgentMemoryRepositoryImpl implements AgentMemoryRepository {

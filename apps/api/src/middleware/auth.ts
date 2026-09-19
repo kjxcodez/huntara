@@ -1,9 +1,9 @@
 import type { Context, Next } from 'hono';
-import { createAuthMiddleware } from '@leadforge/auth';
+import { createAuthMiddleware } from '@huntara/auth';
 import { auth } from '../config/auth.js';
 
 /**
- * Session-verifying Authentication Middleware from @leadforge/auth.
+ * Session-verifying Authentication Middleware from @huntara/auth.
  * Decodes session cookies and injects current user/session context.
  */
 export const authMiddleware = createAuthMiddleware(auth);

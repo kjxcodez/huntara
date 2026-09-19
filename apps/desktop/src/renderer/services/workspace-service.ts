@@ -5,7 +5,7 @@ import type {
   CreateWorkspaceDto,
   UpdateWorkspaceDto,
   InviteMemberDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 /**
  * WorkspaceService isolates the IPC channel invocation logic from the presenter/hooks layer.

@@ -20,10 +20,10 @@ import {
   parseDsnReport,
   isDisposableEmailDomain,
   type EmailQualityEvidence
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { initCacheSchema } from '../database/cache-schema';
 import { DesktopSuppressionRepository } from '../database/suppression-repository';
-import { DnsEmailVerificationProvider } from '@leadforge/core';
+import { DnsEmailVerificationProvider } from '@huntara/core';
 
 export async function runEmailQualityIntelligenceTests() {
   console.log('--- STARTING PHASE 10 EMAIL QUALITY & SUPPRESSION INTEGRATION TESTS ---');

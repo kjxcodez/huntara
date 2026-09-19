@@ -109,7 +109,7 @@ async function main() {
     await runGate(
       7,
       'Desktop Bundling Dry-Run (electron-vite build)',
-      'pnpm -F @leadforge/desktop exec electron-vite build',
+      'pnpm -F @huntara/desktop exec electron-vite build',
       rootDir
     )
   );

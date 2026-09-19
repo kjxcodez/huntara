@@ -123,7 +123,7 @@ export const FailureDiagnosticsCard: React.FC<FailureDiagnosticsCardProps> = ({
               <p className="text-xs text-foreground/80 mt-0.5">
                 {safeHumanMessage ||
                   (isAmbiguous
-                    ? 'Provider response was inconclusive. LeadForge did not record false success or trigger duplicate sends.'
+                    ? 'Provider response was inconclusive. HUNTARA did not record false success or trigger duplicate sends.'
                     : error || 'An error occurred while sending this message.')}
               </p>
             </div>

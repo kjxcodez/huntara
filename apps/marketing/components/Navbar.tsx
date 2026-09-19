@@ -23,9 +23,9 @@ export function Navbar() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
               className="relative flex h-[26px] w-[26px] items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--card)] shadow-[0_1px_4px_rgba(0,0,0,0.2)]"
             >
-              <img src="/app-icon-dark.png" className="h-[18px] w-[18px] object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(232,98,44,0.5)]" alt="LeadForge OS Logo" />
+              <img src="/app-icon-dark.png" className="h-[18px] w-[18px] object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_6px_rgba(250,113,37,0.5)]" alt="HUNTARA Logo" />
             </motion.div>
-            LeadForge OS
+            HUNTARA
           </Link>
           <div className="hidden gap-8 text-xs font-medium text-[var(--muted-foreground)] md:flex">
             <Link href="/features" id="nav-link-features" className="hover:text-[var(--foreground)] transition-colors duration-150">Features</Link>
@@ -36,8 +36,8 @@ export function Navbar() {
             <Link href="/docs" id="nav-link-docs" className="hover:text-[var(--foreground)] transition-colors duration-150">Docs</Link>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/beta" id="nav-link-beta" className="hidden sm:inline-flex h-9 items-center justify-center px-4 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">
-              Beta
+            <Link href="/releases" id="nav-link-releases" className="hidden sm:inline-flex h-9 items-center justify-center px-4 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors duration-150">
+              Releases
             </Link>
             <Link 
               href="/download" 
@@ -75,11 +75,11 @@ export function Navbar() {
               <Link href="/faq" onClick={() => setMobileOpen(false)} className="hover:text-[var(--foreground)] transition-colors py-1.5">FAQ</Link>
               <Link href="/docs" onClick={() => setMobileOpen(false)} className="hover:text-[var(--foreground)] transition-colors py-1.5">Docs</Link>
               <div className="h-px bg-[var(--border-subtle)] my-2" />
-              <Link href="/beta" onClick={() => setMobileOpen(false)} className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--border)] text-xs font-semibold hover:text-[var(--foreground)] transition-colors">
-                Beta Program
+              <Link href="/releases" onClick={() => setMobileOpen(false)} className="inline-flex h-9 items-center justify-center rounded-md border border-[var(--border)] text-xs font-semibold hover:text-[var(--foreground)] transition-colors">
+                Releases
               </Link>
               <Link href="/download" onClick={() => setMobileOpen(false)} className="inline-flex h-9 items-center justify-center rounded-md bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-colors">
-                Download Windows OS
+                Download HUNTARA
               </Link>
             </div>
           </motion.div>

@@ -1,5 +1,5 @@
 {
-  "name": "@leadforge/agent-core",
+  "name": "@huntara/agent-core",
   "version": "1.2.0-beta",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "test": "vitest run src"
   },
   "dependencies": {
-    "@leadforge/schema": "workspace:*",
+    "@huntara/schema": "workspace:*",
     "zod": "^3.24.1"
   }
 }

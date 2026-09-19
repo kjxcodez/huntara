@@ -5,7 +5,7 @@ import type {
   CreateCampaignDto,
   UpdateCampaignDto,
   CampaignFilters
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class CampaignsModule {
   constructor(private client: HttpClient) {}

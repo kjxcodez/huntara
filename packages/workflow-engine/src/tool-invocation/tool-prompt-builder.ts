@@ -1,4 +1,4 @@
-import type { Tool } from '@leadforge/agent-core';
+import type { Tool } from '@huntara/agent-core';
 
 export class ToolPromptBuilder {
   /**

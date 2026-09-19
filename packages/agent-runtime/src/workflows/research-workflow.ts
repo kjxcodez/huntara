@@ -1,4 +1,4 @@
-import type { Workflow } from '@leadforge/workflow-engine';
+import type { Workflow } from '@huntara/workflow-engine';
 import { ResearchSummaryPrompt } from '../research-agent-prompt';
 
 /**

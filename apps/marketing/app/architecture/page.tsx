@@ -36,7 +36,7 @@ export default function ArchitecturePage() {
       
       {/* Subtle Background Drifting Field */}
       {!prefersReducedMotion && (
-        <div className="absolute inset-0 -z-10 pointer-events-none opacity-[0.02] bg-[radial-gradient(#E8622C_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute inset-0 -z-10 pointer-events-none opacity-[0.02] bg-[radial-gradient(#FA7125_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] animate-pulse" style={{ animationDuration: '8s' }} />
       )}
 
       <motion.div
@@ -54,7 +54,7 @@ export default function ArchitecturePage() {
             Local-First Architecture
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            LeadForge OS runs on your hardware, stores data locally in SQLite, and communicates directly with SMTP relays, using cloud synchronizers only for backups and remote tasks.
+            HUNTARA runs on your hardware, stores data locally in SQLite, and communicates directly with SMTP relays, using cloud synchronizers only for backups and remote tasks.
           </motion.p>
         </div>
 
@@ -114,7 +114,7 @@ export default function ArchitecturePage() {
               </div>
 
               {/* SQLite WAL Storage */}
-              <div className="flex flex-col items-center space-y-3 z-10 w-32 bg-[var(--card)] p-3 border border-[var(--primary)] rounded-lg shadow-[0_4px_24px_rgba(232,98,44,0.04)]">
+              <div className="flex flex-col items-center space-y-3 z-10 w-32 bg-[var(--card)] p-3 border border-[var(--primary)] rounded-lg shadow-[0_4px_24px_rgba(250,113,37,0.04)]">
                 <div className="p-3 bg-[var(--background)] rounded-full border border-[var(--primary)]">
                   <HardDrive className="h-6 w-6 text-[var(--primary)]" />
                 </div>
@@ -170,7 +170,7 @@ export default function ArchitecturePage() {
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Hybrid Synchronizer</h2>
             </div>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              When online, the LeadForge Sync Engine handles remote outbound dispatch queue synchronizations. If you go offline, jobs pause locally and resume seamlessly without data losses.
+              When online, the HUNTARA Sync Engine handles remote outbound dispatch queue synchronizations. If you go offline, jobs pause locally and resume seamlessly without data losses.
             </p>
           </div>
         </motion.div>

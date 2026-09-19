@@ -9,7 +9,7 @@ import {
   type TimestampDocument,
   type WorkspaceScopedDocument
 } from '../plugins/index.js';
-import { ContactStatus, ContactEmailStatus, type ContactEmailMeta } from '@leadforge/schema';
+import { ContactStatus, ContactEmailStatus, type ContactEmailMeta } from '@huntara/schema';
 
 export interface ContactDocument
   extends

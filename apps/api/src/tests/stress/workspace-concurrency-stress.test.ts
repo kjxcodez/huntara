@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { evaluateOutreachEligibility } from '@leadforge/schema';
+import { evaluateOutreachEligibility } from '@huntara/schema';
 
 describe('Workspace Concurrency & Exclusivity Stress (Phase 17)', () => {
   it('executes 50+ concurrent execution enrollments across multiple isolated workspaces without leakage', async () => {

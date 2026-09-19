@@ -8,7 +8,7 @@ import {
   type UpdateContactDto,
   type BulkContactDto,
   type BulkOperationResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class ContactService {
   private contactRepository: ContactRepository;

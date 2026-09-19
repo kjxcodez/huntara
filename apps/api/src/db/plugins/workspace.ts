@@ -1,4 +1,4 @@
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 import type { Schema } from 'mongoose';
 
 export interface WorkspaceScopedDocument {

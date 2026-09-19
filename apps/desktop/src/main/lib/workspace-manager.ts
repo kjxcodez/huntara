@@ -1,5 +1,5 @@
 import { WorkspaceRuntime } from './workspace-runtime';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 import { telemetry } from './telemetry';
 
 /**

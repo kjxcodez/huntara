@@ -1,6 +1,6 @@
 import React from 'react';
 import { Mail, Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import type { MailboxSenderAnalytics } from '@leadforge/schema';
+import type { MailboxSenderAnalytics } from '@huntara/schema';
 import {
   Table,
   TableBody,

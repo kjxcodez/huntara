@@ -9,11 +9,11 @@ import type {
   CampaignAnalyticsExport,
   CampaignAnalyticsQuery,
   CampaignFunnelStage
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import {
   createMetricWithDenominator,
   EmailQualityStatus
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class DesktopAnalyticsRepository {
   constructor(private readonly db: Database.Database) {}
@@ -1005,7 +1005,7 @@ export class DesktopAnalyticsRepository {
 
     if (format === 'csv') {
       const lines = [
-        '# LeadForge OS Campaign Performance Export',
+        '# HUNTARA Campaign Performance Export',
         `# Campaign: ${overview.campaignName} (${campaignId})`,
         `# Exported At: ${overview.computedAt}`,
         `# Timezone: ${overview.timezone}`,

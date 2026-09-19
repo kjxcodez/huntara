@@ -1,5 +1,5 @@
 import { safeRegister } from './helper';
-import { SdkClient } from '@leadforge/sdk';
+import { SdkClient } from '@huntara/sdk';
 import { LocalWorkspaceRepository } from '../database/repositories/local-workspace';
 import { WorkspaceManager } from '../lib/workspace-manager';
 

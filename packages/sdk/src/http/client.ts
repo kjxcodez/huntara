@@ -1,5 +1,5 @@
 import { SdkError } from '../errors/index.js';
-import type { ApiResponse } from '@leadforge/schema';
+import type { ApiResponse } from '@huntara/schema';
 
 export interface HttpClientConfig {
   baseUrl: string;

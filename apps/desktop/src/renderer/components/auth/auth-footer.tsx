@@ -26,14 +26,14 @@ export function AuthFooter({ message, linkText, onLinkClick, className = '' }: A
       <p className="text-[11px] leading-relaxed text-text-tertiary">
         By continuing, you agree to our{' '}
         <a
-          href="https://leadforge.kapiljangid.pro/terms"
+          href="https://huntara.com/terms"
           className="underline underline-offset-2 hover:text-muted-foreground transition-colors duration-[--duration-instant]"
         >
           Terms of Service
         </a>{' '}
         and{' '}
         <a
-          href="https://leadforge.kapiljangid.pro/privacy"
+          href="https://huntara.com/privacy"
           className="underline underline-offset-2 hover:text-muted-foreground transition-colors duration-[--duration-instant]"
         >
           Privacy Policy

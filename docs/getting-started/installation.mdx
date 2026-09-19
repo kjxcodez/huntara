@@ -5,7 +5,7 @@ category: "Getting Started"
 order: 1
 ---
 
-By the end of this guide, you will have a fully configured local workspace running LeadForge OS in development mode.
+By the end of this guide, you will have a fully configured local workspace running HUNTARA in development mode.
 
 ## Prerequisites
 
@@ -18,8 +18,8 @@ By the end of this guide, you will have a fully configured local workspace runni
 
 1. Clone the repository and navigate to the project root:
    ```bash
-   git clone https://github.com/kjxcodez/leadforge-os.git
-   cd leadforge-os
+   git clone https://github.com/kjxcodez/huntara.git
+   cd huntara
    ```
 
 2. Install all dependencies across the monorepo workspace:
@@ -43,13 +43,13 @@ By the end of this guide, you will have a fully configured local workspace runni
    pnpm dev --filter=api
 
    # Start Electron Desktop UI only
-   pnpm dev --filter=@leadforge/desktop
+   pnpm dev --filter=@huntara/desktop
    ```
 
 ## Verification
 
 Upon first launch, the desktop application should open a React-based Chromium window and automatically:
-1. Initialize the workspace database in the local directory (`userData/workspaces` under AppData/Roaming/leadforge on Windows).
+1. Initialize the workspace database in the canonical local directory (`%APPDATA%/HUNTARA/workspaces` on Windows, `~/Library/Application Support/HUNTARA/workspaces` on macOS).
 2. Execute SQL migrations to initialize the CRM database schemas.
 3. Seed mock data representing company, contact, and email outreach records.
 
@@ -59,7 +59,7 @@ Confirm that the application starts successfully and visualizes the dashboard.
 
 If you encounter native binary compilation errors (e.g. `better-sqlite3.node was compiled against a different Node.js version`), run:
 ```bash
-pnpm -F @leadforge/desktop exec electron-builder install-app-deps
+pnpm -F @huntara/desktop exec electron-builder install-app-deps
 ```
 
 For other issues, see the [Troubleshooting Guide](../troubleshooting/troubleshooting.mdx).

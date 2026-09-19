@@ -18,7 +18,7 @@ This guide covers common errors, recovery actions, and diagnostic steps for reso
 - **Cause**: The native SQLite binary was compiled for the global Node version instead of Electron's internal Node ABI.
 - **Solution**: Force rebuild native modules for Electron:
   ```bash
-  pnpm -F @leadforge/desktop exec electron-builder install-app-deps
+  pnpm -F @huntara/desktop exec electron-builder install-app-deps
   ```
 
 ## Database & Migration Failures
@@ -27,7 +27,7 @@ This guide covers common errors, recovery actions, and diagnostic steps for reso
 
 - **Symptom**: Application displays database connection errors on startup, or loops during migrations.
 - **Self-Healing Mechanism**:
-  - The migration runner (`runner.ts`) copies the SQLite database file to `leadforge_${workspaceId}.db.migration.bak` before applying migrations.
+  - The migration runner (`runner.ts`) copies the SQLite database file to `huntara_${workspaceId}.db.migration.bak` before applying migrations.
   - If a migration statement fails, the transaction is rolled back, the connection is closed, and the database is restored from the backup file.
 - **Manual Restoration**:
   - Open the **Operations Center** diagnostics tab and select the **Restore Backup** recovery action.

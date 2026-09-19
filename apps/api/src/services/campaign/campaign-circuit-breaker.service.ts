@@ -19,7 +19,7 @@ import {
   isCircuitBreakerRejectionCategory,
   type CampaignCircuitBreakerConfig,
   type CircuitBreakerEvaluation
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { logger } from '../../config/index.js';
 
 export interface BreakerEvaluationResult {

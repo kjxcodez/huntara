@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { PromptDefinition } from '@leadforge/ai';
+import type { PromptDefinition } from '@huntara/ai';
 
 export const ResearchSummaryInputSchema = z.object({
   query: z.string(),

@@ -10,7 +10,7 @@ import type {
   CampaignAnalyticsExport,
   CampaignAnalyticsQuery,
   CampaignCompareQuery
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class AnalyticsModule {
   constructor(private client: HttpClient) {}

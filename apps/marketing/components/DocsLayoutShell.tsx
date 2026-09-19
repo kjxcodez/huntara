@@ -45,10 +45,10 @@ export function DocsLayoutShell({
   // Scroll spy to highlight active TOC heading
   useEffect(() => {
     const headingElements = headings.map(h => document.getElementById(h.id)).filter(Boolean) as HTMLElement[]
-    
+
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 120
-      
+
       let currentActive = ""
       for (let i = 0; i < headingElements.length; i++) {
         const el = headingElements[i]
@@ -87,7 +87,7 @@ export function DocsLayoutShell({
     <div className="container mx-auto px-6 py-12 min-h-[85vh] text-left">
       {/* Mobile Header Bar */}
       <div className="md:hidden flex items-center justify-between border-b border-[var(--border-subtle)] pb-4 mb-6 select-none">
-        <button 
+        <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="flex items-center gap-2 text-xs font-semibold text-[var(--foreground)] border border-[var(--border-subtle)] px-3 py-1.5 rounded bg-[var(--card)] hover:bg-[var(--accent)]"
         >
@@ -100,7 +100,7 @@ export function DocsLayoutShell({
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[220px_1fr] lg:grid-cols-[220px_1fr_200px] gap-8">
-        
+
         {/* Left Sidebar - Desktop */}
         <div className="hidden md:block space-y-6 select-none border-r border-[var(--border-subtle)] pr-6 sticky top-20 self-start">
           <div className="w-full">
@@ -121,11 +121,10 @@ export function DocsLayoutShell({
                       <a
                         key={item.id}
                         href={item.url}
-                        className={`flex w-full items-center gap-2 px-2.5 py-1.5 rounded text-[11.5px] font-medium transition-colors duration-150 ${
-                          isActive 
-                            ? "bg-[rgba(232,98,44,0.06)] text-[var(--primary)] border-l-2 border-[var(--primary)] pl-[8px]" 
+                        className={`flex w-full items-center gap-2 px-2.5 py-1.5 rounded text-[11.5px] font-medium transition-colors duration-150 ${isActive
+                            ? "bg-[rgba(232,98,44,0.06)] text-[var(--primary)] border-l-2 border-[var(--primary)] pl-[8px]"
                             : "text-[var(--text-secondary)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"
-                        }`}
+                          }`}
                       >
                         <IconComp className="h-3.5 w-3.5 shrink-0" />
                         <span className="truncate">{item.title}</span>
@@ -149,7 +148,7 @@ export function DocsLayoutShell({
                     <X className="h-4.5 w-4.5 text-[var(--foreground)]" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-5">
                   {navigation.map((group) => (
                     <div key={group.category} className="space-y-1.5">
@@ -164,11 +163,10 @@ export function DocsLayoutShell({
                               key={item.id}
                               href={item.url}
                               onClick={() => setMobileMenuOpen(false)}
-                              className={`flex w-full items-center gap-2 px-2.5 py-1.5 rounded text-[11.5px] font-medium transition-colors duration-150 ${
-                                isActive 
-                                  ? "bg-[rgba(232,98,44,0.06)] text-[var(--primary)] border-l-2 border-[var(--primary)] pl-[8px]" 
+                              className={`flex w-full items-center gap-2 px-2.5 py-1.5 rounded text-[11.5px] font-medium transition-colors duration-150 ${isActive
+                                  ? "bg-[rgba(232,98,44,0.06)] text-[var(--primary)] border-l-2 border-[var(--primary)] pl-[8px]"
                                   : "text-[var(--text-secondary)] hover:bg-[var(--card)] hover:text-[var(--foreground)]"
-                              }`}
+                                }`}
                             >
                               <span className="truncate">{item.title}</span>
                             </a>
@@ -209,8 +207,8 @@ export function DocsLayoutShell({
                 {readingTime} min read
               </span>
               <span>•</span>
-              <a 
-                href={`https://github.com/kjxcodez/leadforge-os/edit/main/docs/${slugStr}`}
+              <a
+                href={`https://github.com/kjxcodez/huntara/edit/main/docs/${slugStr}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 hover:text-[var(--foreground)]"
@@ -222,7 +220,7 @@ export function DocsLayoutShell({
           </div>
 
           {/* Compiled MDX Content */}
-          <div 
+          <div
             ref={contentRef}
             className="doc-content prose prose-invert max-w-none"
           >
@@ -232,7 +230,7 @@ export function DocsLayoutShell({
           {/* Previous/Next Navigation */}
           <div className="grid grid-cols-2 gap-4 border-t border-[var(--border-subtle)] pt-6 mt-12 select-none">
             {prevArticle ? (
-              <a 
+              <a
                 href={prevArticle.url}
                 className="flex flex-col items-start gap-1 p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] hover:border-[var(--border-strong)] text-left cursor-pointer transition-all"
               >
@@ -246,7 +244,7 @@ export function DocsLayoutShell({
             ) : <div />}
 
             {nextArticle ? (
-              <a 
+              <a
                 href={nextArticle.url}
                 className="flex flex-col items-end gap-1 p-4 rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] hover:border-[var(--border-strong)] text-right cursor-pointer transition-all"
               >
@@ -272,16 +270,15 @@ export function DocsLayoutShell({
                 {headings.map((heading) => {
                   const isActive = activeHeadingId === heading.id
                   const indentClass = heading.level === 3 ? "pl-3 text-[10.5px] opacity-80" : ""
-                  
+
                   return (
                     <button
                       key={heading.id}
                       onClick={() => scrollToHeading(heading.id)}
-                      className={`block w-full text-left truncate transition-colors duration-150 cursor-pointer ${indentClass} ${
-                        isActive 
-                          ? "text-[var(--primary)] font-semibold" 
+                      className={`block w-full text-left truncate transition-colors duration-150 cursor-pointer ${indentClass} ${isActive
+                          ? "text-[var(--primary)] font-semibold"
                           : "text-[var(--text-secondary)] hover:text-[var(--foreground)]"
-                      }`}
+                        }`}
                     >
                       {heading.text}
                     </button>

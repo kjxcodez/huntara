@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 import { workspacePlugin, type WorkspaceScopedDocument } from '../plugins/index.js';
 
 export interface AttachmentDocument extends mongoose.Document, WorkspaceScopedDocument {

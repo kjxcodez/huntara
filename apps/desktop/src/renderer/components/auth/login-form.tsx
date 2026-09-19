@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { loginDtoSchema } from '@leadforge/schema';
-import type { LoginDto } from '@leadforge/schema';
+import { loginDtoSchema } from '@huntara/schema';
+import type { LoginDto } from '@huntara/schema';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
@@ -26,7 +26,7 @@ interface LoginFormProps {
 
 /**
  * Standard credentials login form.
- * Uses React Hook Form with shared Zod validation from @leadforge/schema.
+ * Uses React Hook Form with shared Zod validation from @huntara/schema.
  * All interactive elements use shadcn/ui components and design-system tokens.
  */
 export function LoginForm({
@@ -56,7 +56,7 @@ export function LoginForm({
   return (
     <FormCard>
       <AuthHeader
-        title="Welcome to LeadForge OS"
+        title="Welcome to HUNTARA"
         subtitle="Sign in with your professional credentials"
       />
 

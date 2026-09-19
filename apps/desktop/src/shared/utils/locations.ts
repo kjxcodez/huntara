@@ -1,5 +1,5 @@
 /**
- * Location Adapter for LeadForge OS
+ * Location Adapter for HUNTARA
  * Backwards-compatible adapter delegating to the comprehensive, version-pinned
  * local geographic engine in `../locations`.
  */

@@ -20,7 +20,7 @@ import {
   injectOpenTrackingPixel,
   rewriteLinksForClickTracking,
   sanitizeHtmlForPreview
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 describe('Email Delivery Ledger, Message History & Engagement Suite', () => {
   describe('Test 1: Message & Delivery Lifecycle State Transitions', () => {

@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createContactDtoSchema, ContactStatus, type Company } from '@leadforge/schema';
+import { createContactDtoSchema, ContactStatus, type Company } from '@huntara/schema';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';

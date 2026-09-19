@@ -10,7 +10,8 @@ export default defineConfig({
     include: [
       'packages/*/src/**/*.test.ts',
       'apps/api/src/**/*.test.ts',
-      'apps/desktop/src/**/*.test.ts'
+      'apps/desktop/src/**/*.test.ts',
+      'apps/marketing/**/*.test.ts'
     ],
     exclude: [
       '**/node_modules/**',

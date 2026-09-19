@@ -60,7 +60,7 @@ export class GitHubUpdateProvider implements UpdateProvider {
       const url = `https://api.github.com/repos/${this.owner}/${this.repo}/releases`;
       AppLogger.info('Updater', `Querying GitHub API: ${url}`, undefined);
 
-      const res = await fetch(url, { headers: { 'User-Agent': 'LeadForge-OS' } });
+      const res = await fetch(url, { headers: { 'User-Agent': 'HUNTARA-Desktop' } });
       if (res.status === 404) {
         AppLogger.info('Updater', 'No releases found on GitHub for this repository.', undefined);
         return { updateAvailable: false, version: currentVersion };
@@ -222,7 +222,7 @@ export class UpdateManager {
 
   private constructor() {
     // Initialise with GitHub Releases provider
-    this.provider = new GitHubUpdateProvider('kjxcodez', 'leadforge-os');
+    this.provider = new GitHubUpdateProvider('kjxcodez', 'huntara');
     this.registerIpcHandlers();
   }
 
@@ -316,12 +316,12 @@ export class UpdateManager {
     this.progress = 0;
     this.notifyRenderer();
 
-    const tempDir = join(app.getPath('temp'), 'leadforge-updates');
+    const tempDir = join(app.getPath('temp'), 'huntara-updates');
     if (!existsSync(tempDir)) {
       mkdirSync(tempDir, { recursive: true });
     }
 
-    const fileName = `leadforge-update-${this.availableVersion}${process.platform === 'win32' ? '.exe' : '.dmg'}`;
+    const fileName = `huntara-update-${this.availableVersion}${process.platform === 'win32' ? '.exe' : '.dmg'}`;
     const targetPath = join(tempDir, fileName);
     this.downloadedFilePath = targetPath;
 

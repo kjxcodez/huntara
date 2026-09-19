@@ -34,7 +34,7 @@ import {
 import { Badge } from '../components/ui/badge';
 import { CreateAudienceModal, type PreloadedContact } from '../components/crm/CreateAudienceModal';
 import { DeleteCompanyModal } from '../components/crm/DeleteCompanyModal';
-import { CompanyStatus, ContactStatus, type DeleteCompanyMode } from '@leadforge/schema';
+import { CompanyStatus, ContactStatus, type DeleteCompanyMode } from '@huntara/schema';
 import { useWorkspace } from '../hooks/useWorkspace';
 import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { motion } from 'framer-motion';

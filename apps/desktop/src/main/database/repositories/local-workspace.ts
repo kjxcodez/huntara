@@ -1,5 +1,5 @@
 import { getDatabase } from '../connection';
-import { type Workspace, workspaceSettingsSchema } from '@leadforge/schema';
+import { type Workspace, workspaceSettingsSchema } from '@huntara/schema';
 
 /**
  * LocalWorkspaceRepository handles local SQLite caching of workspace records.

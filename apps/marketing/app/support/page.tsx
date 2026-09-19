@@ -41,7 +41,7 @@ export default function SupportPage() {
 
         {/* Support Grid */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
+
           {/* GitHub Issues */}
           <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--card)] space-y-4 hover:border-[var(--border-strong)] transition-all">
             <div className="p-2 rounded bg-[var(--background)] border border-[var(--border-subtle)] inline-block text-[var(--primary)]">
@@ -51,9 +51,9 @@ export default function SupportPage() {
             <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
               Report code bugs, scraper failures, or suggest new SMTP parameters directly in our repo.
             </p>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os/issues" 
-              target="_blank" 
+            <a
+              href="https://github.com/kjxcodez/huntara/issues"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-[var(--primary)] font-semibold hover:underline"
             >
@@ -82,9 +82,9 @@ export default function SupportPage() {
             <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
               Ask setup questions, propose new scraping strategies, or share outbound configurations with the community.
             </p>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os/discussions" 
-              target="_blank" 
+            <a
+              href="https://github.com/kjxcodez/huntara/discussions"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-[var(--primary)] font-semibold hover:underline"
             >
@@ -101,7 +101,7 @@ export default function SupportPage() {
             Generating a Support Debug Bundle
           </div>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            If you are running into scraping loop failures or database checkpoint crashes, you can export a secure debug bundle directly from the diagnostics panel in the desktop application. 
+            If you are running into scraping loop failures or database checkpoint crashes, you can export a secure debug bundle directly from the diagnostics panel in the desktop application.
             This bundle strips out SMTP credentials and API keys, packaging only system logs and thread queue dumps.
           </p>
           <div className="bg-[var(--background)] border border-[var(--border-subtle)] p-3 rounded font-mono text-[10px] text-[var(--text-secondary)] leading-relaxed">

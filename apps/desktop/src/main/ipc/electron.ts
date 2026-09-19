@@ -61,8 +61,13 @@ export function registerElectronIpc(
     // 1. Storage Usage
     try {
       const userDataPath = app.getPath('userData');
-      const globalDbPath = join(userDataPath, 'leadforge.db');
-      const workspaceDbPath = join(userDataPath, 'workspaces', `leadforge_${workspaceId}.db`);
+      const canonicalGlobalDb = join(userDataPath, 'huntara.db');
+      const legacyGlobalDb = join(userDataPath, 'leadforge.db');
+      const globalDbPath = fs.existsSync(canonicalGlobalDb) ? canonicalGlobalDb : legacyGlobalDb;
+
+      const canonicalWsDb = join(userDataPath, 'workspaces', `huntara_${workspaceId}.db`);
+      const legacyWsDb = join(userDataPath, 'workspaces', `leadforge_${workspaceId}.db`);
+      const workspaceDbPath = fs.existsSync(canonicalWsDb) ? canonicalWsDb : legacyWsDb;
 
       result.storage = {
         globalDbSize: fs.existsSync(globalDbPath) ? fs.statSync(globalDbPath).size : 0,

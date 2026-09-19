@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { HelpCircle, AlertTriangle, Info } from 'lucide-react';
-import type { MetricWithDenominator } from '@leadforge/schema';
+import type { MetricWithDenominator } from '@huntara/schema';
 
 interface MetricExplainableCardProps {
   title: string;

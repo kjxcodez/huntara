@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useReducer } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Workspace } from '@leadforge/schema';
+import type { Workspace } from '@huntara/schema';
 import { WorkspaceService } from '../services/workspace-service';
 
 // ---------------------------------------------------------------------------

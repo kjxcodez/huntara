@@ -131,7 +131,7 @@ export function WhatsNewDialog({ isOpen: forceOpen, onClose: forceClose }: Whats
                 </span>
               </div>
               <h2 className="text-base font-bold text-foreground tracking-tight">
-                What's New in LeadForge OS
+                What's New in HUNTARA
               </h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Here is a summary of the latest capabilities and UX enhancements in your lead generation OS.
@@ -170,7 +170,7 @@ export function WhatsNewDialog({ isOpen: forceOpen, onClose: forceClose }: Whats
             {/* Footer */}
             <div className="pt-2 flex items-center justify-between border-t border-border-subtle/50">
               <span className="text-[10px] text-muted-foreground font-mono">
-                LeadForge OS Baseline
+                HUNTARA Baseline
               </span>
               <Button
                 onClick={handleDismiss}

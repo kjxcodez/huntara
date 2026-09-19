@@ -1,6 +1,6 @@
 import { createMiddleware } from 'hono/factory';
-import { errorResponse } from '@leadforge/core';
-import { ErrorCode, HttpStatus } from '@leadforge/schema';
+import { errorResponse } from '@huntara/core';
+import { ErrorCode, HttpStatus } from '@huntara/schema';
 
 export function createAuthMiddleware(authInstance: any) {
   return createMiddleware(async (c, next) => {

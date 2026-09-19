@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=HUNTARA
+Comment=Find the companies worth selling to.
+Exec=huntara
+Icon=huntara
+Terminal=false
+Type=Application
+Categories=Office;Network;
+StartupWMClass=HUNTARA

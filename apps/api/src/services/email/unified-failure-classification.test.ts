@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { classifyEmailFailure, EmailService } from './email.service.js';
-import { EmailFailureCategory, BounceCategory, SuppressionReason, ContactStatus } from '@leadforge/schema';
+import { EmailFailureCategory, BounceCategory, SuppressionReason, ContactStatus } from '@huntara/schema';
 import { EmailDomainError } from './types.js';
 
 describe('fix(email): unified provider failure classification with canonical bounce categories', () => {

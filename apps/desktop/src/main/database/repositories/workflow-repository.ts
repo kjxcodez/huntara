@@ -1,5 +1,5 @@
-import type { WorkflowRepository } from '@leadforge/agent-core';
-import type { SequenceExecution, SequenceLog, Sequence } from '@leadforge/schema';
+import type { WorkflowRepository } from '@huntara/agent-core';
+import type { SequenceExecution, SequenceLog, Sequence } from '@huntara/schema';
 import { LocalCRMRepository } from './local-crm';
 
 export class WorkflowRepositoryImpl implements WorkflowRepository {

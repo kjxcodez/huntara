@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { workspacePlugin, type WorkspaceScopedDocument } from '../plugins/index.js';
-import { SuppressionReason, SuppressionTargetType } from '@leadforge/schema';
+import { SuppressionReason, SuppressionTargetType } from '@huntara/schema';
 
 export interface SuppressionDocument extends mongoose.Document, WorkspaceScopedDocument {
   targetType: SuppressionTargetType;

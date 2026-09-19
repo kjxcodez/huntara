@@ -22,7 +22,7 @@ import {
   isCampaignSendAuthorized,
   evaluateOutreachEligibility,
   canTransitionContactStatus
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 describe('Campaign Lifecycle, Contact Eligibility & Send Safety Suite', () => {
   describe('Test 1: Campaign State Machine Invariants', () => {

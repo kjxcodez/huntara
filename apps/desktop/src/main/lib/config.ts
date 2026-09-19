@@ -90,11 +90,11 @@ export function loadConfig(): AppConfig {
 
   const pkgVersion = getAppVersion();
   const buildConfig = {
-    appName: 'LeadForge OS',
+    appName: 'HUNTARA',
     version: pkgVersion,
-    packageIdentifier: 'com.leadforge.os',
+    packageIdentifier: 'com.huntara.app',
     releaseChannel: 'beta',
-    updaterUrl: 'https://api.github.com/repos/kjxcodez/leadforge-os/releases/latest'
+    updaterUrl: 'https://api.github.com/repos/kjxcodez/huntara/releases/latest'
   };
 
   let localData: any = {};
@@ -115,7 +115,7 @@ export function loadConfig(): AppConfig {
   const apiUrl = normalizeApiUrl(rawApiUrl);
 
   if (!apiUrl) {
-    throw new Error('LeadForge could not determine the API server URL for this environment.');
+    throw new Error('HUNTARA could not determine the API server URL for this environment.');
   }
 
   cachedConfig = {

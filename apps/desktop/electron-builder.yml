@@ -1,6 +1,6 @@
-appId: com.leadforge.os
+appId: com.huntara.app
 
-productName: "LeadForge OS"
+productName: "HUNTARA"
 
 npmRebuild: true
 
@@ -28,7 +28,7 @@ extraMetadata:
 win:
   target:
     - nsis
-  icon: resources/icon.png
+  icon: resources/HUNTARA.ico
   forceCodeSigning: false
   sign: null
 
@@ -39,20 +39,21 @@ nsis:
   deleteAppDataOnUninstall: false
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: "LeadForge OS"
+  shortcutName: "HUNTARA"
   runAfterFinish: true
 
 mac:
   target:
     - dmg
-  icon: resources/icon.png
+    - zip
+  icon: resources/HUNTARA.icns
 
 linux:
   target:
     - AppImage
-  icon: resources/icon.png
+  icon: resources/icons
 
 publish:
   provider: github
   owner: kjxcodez
-  repo: leadforge-os
+  repo: huntara

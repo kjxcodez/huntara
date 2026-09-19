@@ -6,7 +6,7 @@ import {
   evaluateOutreachEligibility,
   canRestoreContactStatus,
   SuppressionReason
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 /**
  * LeadForge OS — Phase 17 Inbound Reconciliation & Suppression Consistency Integration Test Suite

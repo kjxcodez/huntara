@@ -244,7 +244,7 @@ export async function runCampaignTests() {
   assert.strictEqual(parsedSteps[3].type, 'ADD_TAG');
   assert.strictEqual(parsedSteps[4].type, 'UPDATE_STAGE');
   // 10. Test Phase 10B-R SDK ExecutionsModule CRUD methods & Worker SQL Parameter Binding Contract
-  const { ExecutionsModule } = require('@leadforge/sdk');
+  const { ExecutionsModule } = require('@huntara/sdk');
   const executionsMod = new ExecutionsModule({ get: () => {}, post: () => {}, patch: () => {}, delete: () => {} });
   assert.strictEqual(typeof executionsMod.create, 'function', 'ExecutionsModule.create must exist');
   assert.strictEqual(typeof executionsMod.update, 'function', 'ExecutionsModule.update must exist');
@@ -274,7 +274,7 @@ export async function runCampaignTests() {
   console.log('✅ campaigns:schedule preload authorization contract verified.');
 
   // 11. Test Phase 10C Canonical Variable Resolver Parity
-  const { renderCanonicalVariables } = require('@leadforge/sdk');
+  const { renderCanonicalVariables } = require('@huntara/sdk');
   const sampleContext = {
     contact: { firstName: 'Subrota', lastName: 'Sarker', email: 'subrota@ecoray.com' },
     company: { name: 'Ecoray Group', domain: 'ecoray.com' }

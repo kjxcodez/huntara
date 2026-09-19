@@ -3,7 +3,7 @@ import {
   MailboxHealthState,
   EmailFailureCategory,
   isMailboxEligibleForDispatch
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 describe('Operational Reliability & Concurrency Stress (Phase 18)', () => {
   // ──────────────────────────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ const KONAMI_CODE = [
 export function KonamiTerminal() {
   const [isOpen, setIsOpen] = useState(false)
   const [history, setHistory] = useState<string[]>([
-    "LeadForge OS v1.0.0 (Local-First SQL Terminal Shell)",
+    "HUNTARA v1.0.0 (Local-First SQL Terminal Shell)",
     "Type 'help' to list available system operations.",
     ""
   ])

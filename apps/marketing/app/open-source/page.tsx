@@ -28,10 +28,10 @@ export default function OpenSourcePage() {
   }
 
   const corePackages = [
-    { name: "@leadforge/core", desc: "Local SQLite connections with WAL (Write-Ahead Logging) write buffers." },
-    { name: "@leadforge/workflow-engine", desc: "Headless task scheduler for async crawling and SMTP relayer loops." },
-    { name: "@leadforge/agent-runtime", desc: "Chromium crawler routines parsing local directories and Google Maps." },
-    { name: "@leadforge/ai", desc: "Local Ollama Llama3 integration engines qualifying leads offline." }
+    { name: "@huntara/core", desc: "Local SQLite connections with WAL (Write-Ahead Logging) write buffers." },
+    { name: "@huntara/workflow-engine", desc: "Headless task scheduler for async crawling and SMTP relayer loops." },
+    { name: "@huntara/agent-runtime", desc: "Chromium crawler routines parsing local directories and Google Maps." },
+    { name: "@huntara/ai", desc: "Local Ollama Llama3 integration engines qualifying leads offline." }
   ]
 
   return (
@@ -48,30 +48,30 @@ export default function OpenSourcePage() {
             MIT Licensed
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Open Source
+            HUNTARA Open Source
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            The core LeadForge OS desktop application, database drivers, and local automation libraries are fully open-source. Help us build a safer outbound sales stack.
+            The core HUNTARA desktop application, database drivers, and local automation libraries are fully open-source. Help us build a safer outbound sales stack.
           </motion.p>
         </div>
 
         {/* Repositories */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Main Monorepo */}
           <div className="border border-[var(--border)] rounded-lg p-6 bg-[var(--card)] space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="p-2 rounded bg-[var(--background)] border border-[var(--border-subtle)] inline-block text-[var(--primary)]">
                 <GithubIcon className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-semibold text-[var(--foreground)]">leadforge-os Monorepo</h3>
+              <h3 className="text-sm font-semibold text-[var(--foreground)]">HUNTARA Monorepo</h3>
               <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
                 Contains the Electron shell interface, the main React workflow builder dashboard, and background circular log daemons.
               </p>
             </div>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os" 
-              target="_blank" 
+            <a
+              href="https://github.com/kjxcodez/huntara"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-9 items-center justify-center rounded border border-[var(--border)] bg-[var(--background)] px-4 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
             >
@@ -90,7 +90,7 @@ export default function OpenSourcePage() {
                 We welcome pull requests for email verification scrapers, custom SQLite WAL enhancements, and brand guidelines updates.
               </p>
             </div>
-            <a 
+            <a
               href="/contributors"
               className="inline-flex h-9 items-center justify-center rounded border border-[var(--border)] bg-[var(--background)] px-4 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
             >
@@ -128,7 +128,7 @@ export default function OpenSourcePage() {
               <Scale className="h-4 w-4 text-[var(--primary)]" /> Commercial Permission
             </h3>
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-              LeadForge OS is licensed under the permissive MIT license. You are free to fork the codebase, write custom integrations, redistribute it, or use it for commercial consulting operations without royalty fees or seat licenses.
+              HUNTARA is licensed under the permissive MIT license. You are free to fork the codebase, write custom integrations, redistribute it, or use it for commercial consulting operations without royalty fees or seat licenses.
             </p>
           </div>
         </motion.div>

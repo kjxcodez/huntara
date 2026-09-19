@@ -7,7 +7,7 @@ import type {
   ContactFilters,
   BulkContactDto,
   BulkOperationResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class ContactsModule {
   constructor(private client: HttpClient) {}

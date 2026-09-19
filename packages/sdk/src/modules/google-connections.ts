@@ -1,5 +1,5 @@
 import { HttpClient } from '../http/client.js';
-import type { GoogleConnection } from '@leadforge/schema';
+import type { GoogleConnection } from '@huntara/schema';
 
 export interface ConnectGoogleOptions {
   scopes?: string[];

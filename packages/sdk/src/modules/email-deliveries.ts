@@ -8,7 +8,7 @@ import type {
   ReserveEmailDeliveryDto,
   FinalizeEmailDeliveryDto,
   BulkOperationResult
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class EmailDeliveriesModule {
   constructor(private client: HttpClient) {}

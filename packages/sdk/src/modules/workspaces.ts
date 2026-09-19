@@ -8,7 +8,7 @@ import type {
   InviteMemberDto,
   SchedulerPolicy,
   UpdateSchedulerPolicyDto
-} from '@leadforge/schema';
+} from '@huntara/schema';
 
 export class WorkspacesModule {
   constructor(private client: HttpClient) {}

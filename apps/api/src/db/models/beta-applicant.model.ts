@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { generateEntityId } from '@leadforge/schema';
+import { generateEntityId } from '@huntara/schema';
 
 export interface BetaApplicantDocument extends Document<any> {
   _id: string;

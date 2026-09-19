@@ -71,7 +71,7 @@ export function Roadmap() {
             Product Milestone Logs
           </div>
           <h2 className="text-3xl font-bold tracking-tight text-white mb-4 md:text-4xl">
-            Where LeadForge stands
+            Where HUNTARA stands
           </h2>
           <p className="text-[var(--text-secondary)] leading-relaxed text-xs sm:text-sm">
             Live internal pipeline status direct from our source repository branches.

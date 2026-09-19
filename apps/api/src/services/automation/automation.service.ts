@@ -4,7 +4,7 @@ import { CampaignModel } from '../../db/models/campaign.model.js';
 import { ContactModel } from '../../db/models/contact.model.js';
 import { SequenceLogModel } from '../../db/models/sequence-log.model.js';
 import { SuppressionRepository } from '../../repositories/suppression/suppression.repository.js';
-import { SequenceStatus, ExecutionStatus } from '@leadforge/schema';
+import { SequenceStatus, ExecutionStatus } from '@huntara/schema';
 import { ConflictError } from '../../errors/index.js';
 
 export class AutomationService {

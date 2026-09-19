@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layers, Clock, Mail, CheckCircle2, AlertOctagon, CornerDownRight } from 'lucide-react';
-import type { SequenceStepAnalytics } from '@leadforge/schema';
+import type { SequenceStepAnalytics } from '@huntara/schema';
 import {
   Table,
   TableBody,

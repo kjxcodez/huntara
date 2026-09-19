@@ -1,6 +1,6 @@
-# LeadForge OS Project Roadmap
+# HUNTARA Project Roadmap
 
-This roadmap tracks the development progress of LeadForge OS. It outlines what features are completed, in progress, and planned for future updates.
+This roadmap tracks the development progress of HUNTARA. It outlines what features are completed, in progress, and planned for future updates.
 
 ---
 

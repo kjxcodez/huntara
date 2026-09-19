@@ -26,7 +26,7 @@ import {
   campaignSchema,
   ContactStatus,
   ContactEmailStatus
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { EmailDomainError } from './types.js';
 
 vi.mock('../../db/models/suppression.model.js');

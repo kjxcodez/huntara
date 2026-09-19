@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { WorkspaceRole } from '@leadforge/schema';
+import { WorkspaceRole } from '@huntara/schema';
 import {
   useInviteMember,
   useLeaveWorkspace,

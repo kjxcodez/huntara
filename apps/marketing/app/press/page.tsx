@@ -19,7 +19,7 @@ export default function PressPage() {
   }
 
   const factSheet = [
-    { label: "Official Name", val: "LeadForge OS" },
+    { label: "Official Name", val: "HUNTARA" },
     { label: "Initial Release", val: "August 1, 2026 (v1.0.0-beta.1)" },
     { label: "Platform Target", val: "Windows 10 / 11 (x64 desktop environment)" },
     { label: "Core Architecture", val: "Local-first SQLite with WAL write streams" },
@@ -40,16 +40,16 @@ export default function PressPage() {
             Press Kit
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Press Kit
+            HUNTARA Press Kit
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Media resources and boilerplate text for publications writing about LeadForge OS, data sovereignty, and secure local-first architectures.
+            Media resources and boilerplate text for publications writing about HUNTARA, data sovereignty, and secure local-first architectures.
           </motion.p>
         </div>
 
         {/* Media Assets */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+
           {/* Logo package */}
           <div className="border border-[var(--border)] rounded-lg p-6 bg-[var(--card)] space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
@@ -58,11 +58,11 @@ export default function PressPage() {
               </div>
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Brand Logo Package</h2>
               <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                Contains SVG vector formats of the LeadForge logo (light, dark, monochrome) for media prints.
+                Contains PNG extracts and logo suite formats of the HUNTARA logo (horizontal, stacked, icon marks) for media prints.
               </p>
             </div>
-            <a 
-              href="/brand" 
+            <a
+              href="/brand"
               className="inline-flex h-9 items-center justify-center rounded border border-[var(--border)] bg-[var(--background)] px-4 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--foreground)] hover:border-[var(--border-strong)] transition-all cursor-pointer"
             >
               Get Logo Assets
@@ -81,7 +81,7 @@ export default function PressPage() {
               </p>
             </div>
             <div className="bg-[var(--background)] border border-[var(--border-subtle)] p-3.5 rounded text-[10px] text-[var(--text-secondary)] leading-relaxed font-mono">
-              &ldquo;LeadForge OS is a local-first desktop operating system for sales discovery and direct SMTP outreach, storing all records securely inside SQLite.&rdquo;
+              &ldquo;HUNTARA helps businesses find and understand their next customers. Find the companies worth selling to.&rdquo;
             </div>
           </div>
 
@@ -89,7 +89,7 @@ export default function PressPage() {
 
         {/* Extended Section 1: Fact Sheet */}
         <motion.div variants={childVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-[var(--border-subtle)] pt-12">
-          
+
           {/* List of Facts */}
           <div className="md:col-span-2 space-y-4 text-left">
             <h2 className="text-sm font-bold text-white flex items-center gap-2">
@@ -119,8 +119,8 @@ export default function PressPage() {
                 For interview requests with the maintainers or questions about outbound security models, please open an issue in our repository.
               </p>
             </div>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os/issues"
+            <a
+              href="https://github.com/kjxcodez/huntara/issues"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-9 items-center justify-center rounded bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] hover:opacity-90 transition-all cursor-pointer"

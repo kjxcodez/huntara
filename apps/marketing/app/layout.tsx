@@ -15,36 +15,36 @@ const fontMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "LeadForge OS — Open Source Local-First Outbound Engine",
-    template: "%s | LeadForge OS"
+    default: "HUNTARA — Find the companies worth selling to.",
+    template: "%s | HUNTARA"
   },
-  description: "Crawl leads locally, enrich contact structures via offline Ollama LLMs, and dispatch outbound sequences directly from SQLite WAL databases. Zero-telemetry, open-source B2B pipelines.",
+  description: "HUNTARA helps businesses find and understand their next customers. Local-first outbound intelligence, lead qualification, and sequences.",
   keywords: [
+    "HUNTARA",
+    "find the companies worth selling to",
+    "b2b lead discovery",
     "local-first lead generation",
     "open source outbound engine",
-    "SQLite WAL email scraper",
-    "headless Google Maps scraper",
-    "Ollama contact qualification",
+    "sales intelligence",
     "private lead enrichment",
     "self-hosted B2B outreach",
-    "LeadForge OS",
     "zero telemetry lead generation"
   ],
   authors: [{ name: "kjxcodez", url: "https://github.com/kjxcodez" }],
   creator: "kjxcodez",
-  metadataBase: new URL("https://github.com/kjxcodez/leadforge-os"),
+  metadataBase: new URL("https://github.com/kjxcodez/huntara"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://github.com/kjxcodez/leadforge-os",
-    title: "LeadForge OS — Open Source Local-First Outbound Engine",
-    description: "Crawl leads locally, enrich contact structures via offline Ollama LLMs, and dispatch outbound sequences directly from SQLite WAL databases.",
-    siteName: "LeadForge OS"
+    url: "https://github.com/kjxcodez/huntara",
+    title: "HUNTARA — Find the companies worth selling to.",
+    description: "HUNTARA helps businesses find and understand their next customers.",
+    siteName: "HUNTARA"
   },
   twitter: {
     card: "summary_large_image",
-    title: "LeadForge OS — Open Source Local-First Outbound Engine",
-    description: "Crawl leads locally, enrich contact structures via offline Ollama LLMs, and dispatch outbound sequences directly from SQLite WAL databases."
+    title: "HUNTARA — Find the companies worth selling to.",
+    description: "HUNTARA helps businesses find and understand their next customers."
   },
   robots: {
     index: true,
@@ -68,7 +68,7 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "LeadForge OS",
+    "name": "HUNTARA",
     "applicationCategory": "BusinessApplication",
     "operatingSystem": "Windows 10, Windows 11, macOS, Linux",
     "license": "https://opensource.org/licenses/MIT",
@@ -82,7 +82,7 @@ export default function RootLayout({
       "name": "kjxcodez",
       "url": "https://github.com/kjxcodez"
     },
-    "description": "Open-source, local-first outbound operating system that crawls leads, enriches contacts via local Ollama models, and runs sequences directly on local SQLite databases."
+    "description": "HUNTARA helps businesses find and understand their next customers."
   }
 
   return (
@@ -97,7 +97,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[rgba(232,98,44,0.12)] selection:text-[var(--foreground)]">
+      <body className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-[rgba(250,113,37,0.15)] selection:text-[var(--foreground)]">
         <ThemeProvider>
           <div className="flex flex-col min-h-screen">
             <Navbar />

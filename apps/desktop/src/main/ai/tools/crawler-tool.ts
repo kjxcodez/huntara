@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Tool, ToolResult, ExecutionContext, SchedulerGateway } from '@leadforge/agent-core';
+import type { Tool, ToolResult, ExecutionContext, SchedulerGateway } from '@huntara/agent-core';
 
 export const CrawlWebsiteInputSchema = z.object({
   companyId: z.string().min(1, 'Company ID is required'),

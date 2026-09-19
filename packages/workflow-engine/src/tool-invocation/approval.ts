@@ -1,4 +1,4 @@
-import type { RiskLevel } from '@leadforge/agent-core';
+import type { RiskLevel } from '@huntara/agent-core';
 
 export type ApprovalStatus = 'PENDING' | 'GRANTED' | 'REJECTED' | 'NOT_REQUIRED';
 

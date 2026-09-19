@@ -21,13 +21,13 @@ interface ThemeConfig {
 
 const THEME_VARIANTS: Record<string, ThemeConfig> = {
   dark: {
-    primary: "rgba(232, 98, 44, 1)",
-    accent: "rgba(232, 98, 44, 0.2)",
-    glowGradient: "from-[rgba(232,98,44,0.15)] to-[rgba(251,146,60,0.05)]",
+    primary: "rgba(250, 113, 37, 1)",
+    accent: "rgba(250, 113, 37, 0.2)",
+    glowGradient: "from-[rgba(250,113,37,0.15)] to-[rgba(251,146,60,0.05)]",
     textGradient: "from-[var(--primary)] to-amber-500",
     badgeBg: "bg-primary/10 border-primary/20",
     badgeText: "text-primary",
-    accentColor: "#E8622C"
+    accentColor: "#FA7125"
   },
   blue: {
     primary: "rgba(59, 130, 246, 1)",
@@ -468,7 +468,7 @@ export function Hero() {
           >
             <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${activeTheme.badgeBg} ${activeTheme.badgeText} text-[10px] font-mono uppercase tracking-wider font-semibold`}>
               <Zap className="h-3 w-3 animate-pulse" />
-              LeadForge OS v1.0.0-beta.1 · Windows Early Beta
+              HUNTARA v1.0.0-beta.1 · Windows Early Beta
             </div>
           </motion.div>
 

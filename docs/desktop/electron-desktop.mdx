@@ -78,7 +78,7 @@ The desktop application manages local CRM records using SQLite through the `bett
 
 - Database connections are initialized in WAL (Write-Ahead Logging) mode using `connection.ts` to support high-concurrency writes during crawler runs.
 - `PRAGMA synchronous = NORMAL` is enabled to improve write performance while preserving database durability.
-- Workspaces are physically isolated. Each workspace has its own database file named `leadforge_${workspaceId}.db` located in the OS appData directory.
+- Workspaces are physically isolated. Each workspace has its own database file named `huntara_${workspaceId}.db` located in the OS appData directory.
 - On boot, the migration runner applies schema statements sequentially, validating tables (`companies`, `contacts`, `jobs`, `sync_queue`, `automation_locks`).
 
 ## Constraints and Trade-offs

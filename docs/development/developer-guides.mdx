@@ -5,7 +5,7 @@ category: "Development"
 order: 1
 ---
 
-LeadForge OS supports modular extension of its scraper plugins, agent tools, database schemas, and IPC channels. This guide details the steps to implement and register these modules.
+HUNTARA supports modular extension of its scraper plugins, agent tools, database schemas, and IPC channels. This guide details the steps to implement and register these modules.
 
 ## Adding a Worker Plugin
 
@@ -14,7 +14,7 @@ All long-running, CPU-heavy tasks must run inside forked Node.js child processes
 1. Create a new file under `apps/desktop/src/main/workers/plugins/` (e.g. `slack-notifier.ts`).
 2. Implement the `BasePlugin` interface:
    ```typescript
-   import { Job } from '@leadforge/schema';
+   import { Job } from '@huntara/schema';
    import { BasePlugin } from '../base-plugin';
 
    export class SlackNotifierPlugin extends BasePlugin {
@@ -57,7 +57,7 @@ Tools are executable actions exposed to agents.
    ```
 2. Implement the executor class under `packages/agent-runtime/src/tools/` implementing the `ToolExecutor` interface:
    ```typescript
-   import { SendSlackSchema } from '@leadforge/agent-core';
+   import { SendSlackSchema } from '@huntara/agent-core';
 
    export class SendSlackTool {
      name = 'send_slack_notification';
@@ -95,7 +95,7 @@ We use the Repository pattern to wrap local SQLite database queries.
 1. Create the repository class under `apps/desktop/src/main/database/repositories/` (e.g. `campaign-repo.ts`):
    ```typescript
    import { Database } from 'better-sqlite3';
-   import { Campaign } from '@leadforge/schema';
+   import { Campaign } from '@huntara/schema';
 
    export class CampaignRepository {
      constructor(private db: Database) {}
@@ -153,7 +153,7 @@ IPC handlers expose main-process Node capabilities (database queries, network tr
 2. Implement the listener in `apps/desktop/src/main/ipc/`:
    ```typescript
    import { ipcMain } from 'electron';
-   import { SLACK_CHANNELS } from '@leadforge/schema';
+   import { SLACK_CHANNELS } from '@huntara/schema';
 
    ipcMain.handle(SLACK_CHANNELS.SEND_MESSAGE, async (event, payload) => {
      // Perform operation

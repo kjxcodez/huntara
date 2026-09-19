@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: article.title,
     description: article.description,
     openGraph: {
-      title: `${article.title} | LeadForge OS Blog`,
+      title: `${article.title} | HUNTARA Blog`,
       description: article.description
     }
   }

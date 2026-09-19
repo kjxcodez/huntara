@@ -1,6 +1,6 @@
 import { useWorkspaceStore } from '../stores/workspace-store';
 import { WorkspaceService } from '../services/workspace-service';
-import type { Workspace, UpdateWorkspaceDto } from '@leadforge/schema';
+import type { Workspace, UpdateWorkspaceDto } from '@huntara/schema';
 
 /**
  * useWorkspace provides the presentation state and action handlers

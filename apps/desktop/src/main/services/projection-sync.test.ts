@@ -6,7 +6,7 @@ import fs from 'fs';
 import { getDatabase, closeDatabase } from '../database/connection';
 import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { ProjectionService } from './projection-service';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 
 /**
  * LeadForge OS — Phase 6: Projection Synchronization + Global Refresh Test Matrix

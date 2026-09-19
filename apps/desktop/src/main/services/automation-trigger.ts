@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
-import type { SdkClient } from '@leadforge/sdk';
+import type { SdkClient } from '@huntara/sdk';
 import type { LocalEventBus, AppEvent, EventType } from '../lib/event-bus';
 
 // ── Trigger type constants ────────────────────────────────────────────────────

@@ -32,10 +32,10 @@ export default function CommunityPage() {
             Operator Hub
           </motion.div>
           <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
-            LeadForge Community
+            HUNTARA Community
           </motion.h1>
           <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Collaborate with other local-first operators, share scrapers, or help shape the future of LeadForge OS.
+            Collaborate with other local-first operators, share scrapers, or help shape the future of HUNTARA.
           </motion.p>
         </div>
 
@@ -50,9 +50,9 @@ export default function CommunityPage() {
             <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
               Ask architectural questions, propose feature changes, or share custom parsing scripts.
             </p>
-            <a 
-              href="https://github.com/kjxcodez/leadforge-os/discussions" 
-              target="_blank" 
+            <a
+              href="https://github.com/kjxcodez/huntara/discussions"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-[var(--primary)] font-semibold hover:underline"
             >

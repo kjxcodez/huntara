@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, Globe } from 'lucide-react';
-import type { CampaignTimelinePoint } from '@leadforge/schema';
+import type { CampaignTimelinePoint } from '@huntara/schema';
 import {
   ResponsiveContainer,
   BarChart,

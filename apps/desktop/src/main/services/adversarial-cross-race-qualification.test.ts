@@ -3,13 +3,13 @@ import Database from 'better-sqlite3';
 import crypto from 'crypto';
 import { initCacheSchema } from '../database/cache-schema.js';
 import { DesktopSuppressionRepository } from '../database/suppression-repository.js';
-import { ProductionFixtureGenerator } from '@leadforge/core';
-import { SuppressionReason } from '@leadforge/schema';
+import { ProductionFixtureGenerator } from '@huntara/core';
+import { SuppressionReason } from '@huntara/schema';
 import {
   computeMessageFingerprint,
   captureVariablesSnapshot,
   renderCanonicalVariables
-} from '@leadforge/sdk';
+} from '@huntara/sdk';
 
 /**
  * LeadForge OS — Phase 19 Adversarial Cross-Race, Lineage & Projection Matrix

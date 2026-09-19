@@ -1,9 +1,9 @@
 import { ipcMain } from 'electron';
-import { AgentRuntime, ResearchAgent } from '@leadforge/agent-runtime';
-import { WorkflowRunner, ToolDispatcher } from '@leadforge/workflow-engine';
-import { ResearchWorkflow } from '@leadforge/agent-runtime';
-import { ResearchSummaryPrompt } from '@leadforge/agent-runtime';
-import { ContextBuilder } from '@leadforge/agent-runtime';
+import { AgentRuntime, ResearchAgent } from '@huntara/agent-runtime';
+import { WorkflowRunner, ToolDispatcher } from '@huntara/workflow-engine';
+import { ResearchWorkflow } from '@huntara/agent-runtime';
+import { ResearchSummaryPrompt } from '@huntara/agent-runtime';
+import { ContextBuilder } from '@huntara/agent-runtime';
 import { createWorkspaceToolRegistry } from '../ai/tools/registry';
 import { WorkspaceManager } from '../lib/workspace-manager';
 

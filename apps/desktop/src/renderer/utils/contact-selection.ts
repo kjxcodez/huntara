@@ -1,4 +1,4 @@
-import type { CanonicalContactQuery, BulkContactSelection } from '@leadforge/schema';
+import type { CanonicalContactQuery, BulkContactSelection } from '@huntara/schema';
 
 export type { CanonicalContactQuery, BulkContactSelection };
 

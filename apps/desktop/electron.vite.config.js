@@ -16,13 +16,13 @@ export default defineConfig({
     plugins: [
       externalizeDepsPlugin({
         exclude: [
-          '@leadforge/schema',
-          '@leadforge/sdk',
-          '@leadforge/core',
-          '@leadforge/ai',
-          '@leadforge/agent-core',
-          '@leadforge/agent-runtime',
-          '@leadforge/workflow-engine',
+          '@huntara/schema',
+          '@huntara/sdk',
+          '@huntara/core',
+          '@huntara/ai',
+          '@huntara/agent-core',
+          '@huntara/agent-runtime',
+          '@huntara/workflow-engine',
           'p-limit'
         ]
       })
@@ -32,13 +32,13 @@ export default defineConfig({
     plugins: [
       externalizeDepsPlugin({
         exclude: [
-          '@leadforge/schema',
-          '@leadforge/sdk',
-          '@leadforge/core',
-          '@leadforge/ai',
-          '@leadforge/agent-core',
-          '@leadforge/agent-runtime',
-          '@leadforge/workflow-engine'
+          '@huntara/schema',
+          '@huntara/sdk',
+          '@huntara/core',
+          '@huntara/ai',
+          '@huntara/agent-core',
+          '@huntara/agent-runtime',
+          '@huntara/workflow-engine'
         ]
       })
     ]

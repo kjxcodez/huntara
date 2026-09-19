@@ -3,7 +3,7 @@ import {
   workspacePlugin,
   type WorkspaceScopedDocument
 } from '../plugins/index.js';
-import type { JobStatus } from '@leadforge/schema';
+import type { JobStatus } from '@huntara/schema';
 
 export interface JobDocument extends mongoose.Document, WorkspaceScopedDocument {
   type: string;

@@ -4,9 +4,9 @@ export const metadata: Metadata = {
   title: "Software Releases",
   description: "Review release history, check SHA-256 binary validation, and download older software builds.",
   openGraph: {
-    title: "Software Releases | LeadForge OS",
+    title: "Software Releases | HUNTARA",
     description: "Review release history, check SHA-256 binary validation, and download older software builds.",
-    url: "https://github.com/kjxcodez/leadforge-os/releases"
+    url: "https://github.com/kjxcodez/huntara/releases"
   }
 }
 

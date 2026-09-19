@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { JobScheduler } from './scheduler.js';
-import { redactSensitiveData } from '@leadforge/logger';
+import { redactSensitiveData } from '@huntara/logger';
 
 describe('JobScheduler Automated Reliability Runner & Mutex Guards', () => {
   let mockSdk: any;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import logoLight from '../assets/app-icon-light.png';
+import huntaraMark from '../assets/huntara-mark.png';
 
 interface BootStep {
   id: string;
@@ -143,17 +143,17 @@ export function SplashScreen() {
             <div className="relative flex items-center justify-center">
               <div className="absolute inset-0 bg-primary/20 blur-xl rounded-none scale-125" />
               <div className="w-16 h-16 rounded-none bg-primary/10 border border-primary/25 flex items-center justify-center p-2.5 relative">
-                <img src={logoLight} className="h-full w-full object-contain" alt="LeadForge Logo" />
+                <img src={huntaraMark} className="h-full w-full object-contain" alt="HUNTARA Logo" />
               </div>
             </div>
 
             {/* App identity */}
             <div className="space-y-1">
               <h1 className="text-sm font-extrabold tracking-[0.25em] text-foreground uppercase">
-                LeadForge OS
+                HUNTARA
               </h1>
-              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">
-                Intelligent Sales Outbound OS
+              <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                Find the companies worth selling to.
               </p>
             </div>
 

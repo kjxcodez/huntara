@@ -3,8 +3,8 @@ import { WorkflowRunner, ToolDispatcher } from '../index';
 import { WorkflowContext } from '../workflow-context';
 import { WorkflowEvents } from '../workflow-events';
 import type { Workflow } from '../workflow';
-import { ToolRegistry } from '@leadforge/agent-core';
-import type { Tool, ToolResult, ExecutionContext } from '@leadforge/agent-core';
+import { ToolRegistry } from '@huntara/agent-core';
+import type { Tool, ToolResult, ExecutionContext } from '@huntara/agent-core';
 import { z } from 'zod';
 
 const EXEC_CTX: ExecutionContext = {

@@ -1,6 +1,6 @@
 import { EmailDeliveryModel, type EmailDeliveryDocument } from '../../db/models/email-delivery.model.js';
 import { EmailEventRepository } from '../../repositories/email-event/email-event.repository.js';
-import { EmailEventType } from '@leadforge/schema';
+import { EmailEventType } from '@huntara/schema';
 import { logger } from '../../config/index.js';
 
 // Minimal 1x1 transparent GIF binary (43 bytes)
