@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { SystemLogRepository } from '../repositories/system-log/system-log.repository.js';
-import { createSystemLogDtoSchema, bulkSystemLogDtoSchema } from '@leadforge/schema';
+import { createSystemLogDtoSchema, bulkSystemLogDtoSchema } from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId } from './common.js';
 

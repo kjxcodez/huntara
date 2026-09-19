@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { OperationsService } from '../services/operations/operations.service.js';
-import { operationsQueryDtoSchema, retryOperationDtoSchema } from '@leadforge/schema';
+import { operationsQueryDtoSchema, retryOperationDtoSchema } from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId } from './common.js';
 import { NotFoundError } from '../errors/index.js';

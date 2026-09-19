@@ -1,5 +1,5 @@
 import { OpenAPIHono, createRoute } from '@hono/zod-openapi';
-import { loginDtoSchema, registerDtoSchema, forgotPasswordDtoSchema } from '@leadforge/schema';
+import { loginDtoSchema, registerDtoSchema, forgotPasswordDtoSchema } from '@huntara/schema';
 import { auth } from '../../config/auth.js';
 import { ErrorResponseSchema } from '../../openapi/index.js';
 import { successResponse } from '../../utils/index.js';

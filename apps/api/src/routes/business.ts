@@ -12,7 +12,7 @@ import {
   updateContactDtoSchema,
   createCampaignDtoSchema,
   updateCampaignDtoSchema
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { WorkspaceService } from '../services/workspace/workspace.service.js';
 import { CompanyService } from '../services/company/company.service.js';
 import { ContactService } from '../services/contact/contact.service.js';

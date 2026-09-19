@@ -3,7 +3,7 @@ import { CampaignAnalyticsService } from '../services/analytics/campaign-analyti
 import {
   campaignAnalyticsQuerySchema,
   campaignCompareQuerySchema
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId } from './common.js';
 import { BadRequestError } from '../errors/index.js';

@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { SuppressionRepository } from '../repositories/suppression/suppression.repository.js';
-import { createSuppressionDtoSchema, SuppressionTargetType, SuppressionReason } from '@leadforge/schema';
+import { createSuppressionDtoSchema, SuppressionTargetType, SuppressionReason } from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId, getUserId } from './common.js';
 import { BadRequestError } from '../errors/index.js';

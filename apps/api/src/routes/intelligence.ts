@@ -22,7 +22,7 @@ import {
   bulkIntelligenceEvidenceDtoSchema,
   createIntelligenceClaimDtoSchema,
   createIntelligenceInferenceDtoSchema
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId } from './common.js';
 import { NotFoundError } from '../errors/index.js';

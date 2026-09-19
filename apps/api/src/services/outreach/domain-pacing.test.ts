@@ -11,7 +11,7 @@ import {
   evaluateCompanyCardinality,
   isCircuitBreakerRejectionCategory,
   EmailFailureCategory
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { classifyEmailFailure } from '../email/email.service.js';
 
 // Mocks

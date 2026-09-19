@@ -13,7 +13,7 @@ import {
   htmlToPlainText,
   wrapHtmlWithDefaultTypography,
   plainTextToHtml
-} from '@leadforge/sdk';
+} from '@huntara/sdk';
 import { EmailTemplateRepository } from '../../repositories/email-template/email-template.repository.js';
 import mongoose from 'mongoose';
 

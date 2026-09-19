@@ -1,6 +1,6 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { AuditLogRepository } from '../repositories/audit-log/audit-log.repository.js';
-import { createAuditLogDtoSchema } from '@leadforge/schema';
+import { createAuditLogDtoSchema } from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId } from './common.js';
 

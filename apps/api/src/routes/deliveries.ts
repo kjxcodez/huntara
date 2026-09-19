@@ -8,7 +8,7 @@ import {
   updateEmailDeliveryDtoSchema,
   reserveEmailDeliveryDtoSchema,
   finalizeEmailDeliveryDtoSchema
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId, getUserId } from './common.js';
 import { NotFoundError, BadRequestError } from '../errors/index.js';

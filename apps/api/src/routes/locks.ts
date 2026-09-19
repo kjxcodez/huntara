@@ -3,7 +3,7 @@ import { AutomationLockRepository } from '../repositories/automation-lock/automa
 import {
   acquireLockDtoSchema,
   releaseLockDtoSchema
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { successResponse } from '../utils/index.js';
 import { getWorkspaceId } from './common.js';
 

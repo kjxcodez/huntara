@@ -19,7 +19,7 @@ import {
   type OutreachPacingConfig,
   type DomainPacingEvaluation,
   type CompanyCardinalityEvaluation
-} from '@leadforge/schema';
+} from '@huntara/schema';
 import { logger } from '../../config/index.js';
 
 export interface CheckAndReservePacingInput {
