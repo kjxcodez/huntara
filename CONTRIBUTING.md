@@ -1,6 +1,6 @@
-# Contributing to LeadForge OS
+# Contributing to HUNTARA
 
-Thank you for your interest in contributing to LeadForge OS! This document outlines our development philosophy, coding standards, branching strategies, and testing requirements to help maintain a stable, clean, and secure local-first codebase.
+Thank you for your interest in contributing to HUNTARA! This document outlines our development philosophy, coding standards, branching strategies, and testing requirements to help maintain a stable, clean, and secure local-first codebase.
 
 ---
 
@@ -8,7 +8,7 @@ Thank you for your interest in contributing to LeadForge OS! This document outli
 
 1. **Local-First & Offline Ready**: All features should remain functional without a network connection. Cloud APIs should be optional sync adapters, never blockers.
 2. **UI Responsiveness is Critical**: The Electron UI must remain smooth and responsive (maintain 60fps). Never run synchronous file system operations, heavy calculations, or scraping tasks directly in the React UI or Electron Main threads. Use sandboxed child workers.
-3. **No Unused Code or Duplication**: Maintain modular package boundaries. Do not duplicate logic between the Hono REST API server (`apps/api/`) and the Electron application (`apps/desktop/`). Use shared packages under `packages/` (e.g. `@leadforge/schema`).
+3. **No Unused Code or Duplication**: Maintain modular package boundaries. Do not duplicate logic between the Hono REST API server (`apps/api/`) and the Electron application (`apps/desktop/`). Use shared packages under `packages/` (e.g. `@huntara/schema`).
 4. **Absolute Privacy by Design**: Credentials and API keys must never be logged or exposed in plaintext. When writing logs or export bundles, ensure that sensitive strings are automatically masked.
 
 ---
@@ -20,7 +20,7 @@ We enforce strict formatting and static code checks:
 - **TypeScript**: We require strict type checking. Avoid the use of `any`. Explicitly type parameters and function returns.
 - **Formatting**: Code formatting is handled automatically by Prettier. Run `pnpm format` before proposing changes.
 - **Linting**: We use ESLint flat configuration. Run `pnpm lint` to make sure there are no lint warnings or errors.
-- **Directory Layout Rules**: Maintain package boundaries. `@leadforge/desktop` can import from packages, but packages cannot import from `apps/desktop` or each other in a circular fashion.
+- **Directory Layout Rules**: Maintain package boundaries. `@huntara/desktop` can import from packages, but packages cannot import from `apps/desktop` or each other in a circular fashion.
 
 ---
 
@@ -83,7 +83,7 @@ For comprehensive details on running and writing tests, view the [Testing & QA G
 
 ## 📜 Documentation Requirements
 
-Documentation is a first-class citizen in LeadForge OS:
+Documentation is a first-class citizen in HUNTARA:
 
 - If you modify database schemas or add new entities, update [docs/architecture/README.md](file:///c:/Users/91637/Desktop/Business%20Project/leadforge-os/docs/architecture/README.md) and record the migrations.
 - If you add new tools or worker plugins, update the developer guides in [docs/development/README.md](file:///c:/Users/91637/Desktop/Business%20Project/leadforge-os/docs/development/README.md).

@@ -149,7 +149,7 @@ pnpm dev
 pnpm dev --filter=api
 
 # Run only the Electron Desktop application
-pnpm dev --filter=@leadforge/desktop
+pnpm dev --filter=@huntara/desktop
 ```
 
 ### Key CLI Commands

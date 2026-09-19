@@ -18,7 +18,7 @@ This guide covers common errors, recovery actions, and diagnostic steps for reso
 - **Cause**: The native SQLite binary was compiled for the global Node version instead of Electron's internal Node ABI.
 - **Solution**: Force rebuild native modules for Electron:
   ```bash
-  pnpm -F @leadforge/desktop exec electron-builder install-app-deps
+  pnpm -F @huntara/desktop exec electron-builder install-app-deps
   ```
 
 ## Database & Migration Failures
