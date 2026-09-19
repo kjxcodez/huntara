@@ -1,177 +1,96 @@
-"use client"
-
 import React from "react"
-import { motion } from "motion/react"
-import { ArrowDownToLine, Monitor, Apple, Terminal } from "lucide-react"
-import { GENERATED_RELEASES } from "../../lib/generated-releases"
+import Link from "next/link"
+import { Monitor, Apple, Terminal, ArrowRight, Tag } from "lucide-react"
+import { getAllReleases, PlatformId } from "../../lib/generated-releases"
 
-export default function ReleasesPage() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 }
-    }
-  }
+function PlatformIcon({ id, className }: { id: PlatformId; className?: string }) {
+  if (id === "windows") return <Monitor className={className || "h-3.5 w-3.5"} />
+  if (id === "macos") return <Apple className={className || "h-3.5 w-3.5"} />
+  return <Terminal className={className || "h-3.5 w-3.5"} />
+}
 
-  const childVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" as const } }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    })
-  }
+export default function ReleasesIndexPage() {
+  const releases = getAllReleases()
 
   return (
     <div className="container mx-auto px-6 py-20 min-h-[85vh] text-left">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-4xl mx-auto space-y-16"
-      >
+      <div className="max-w-3xl mx-auto space-y-12">
         {/* Header Block */}
-        <div className="space-y-4 max-w-2xl">
-          <motion.div variants={childVariants} className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase tracking-wider font-mono">
-            Release History
-          </motion.div>
-          <motion.h1 variants={childVariants} className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
+        <div className="space-y-4">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase tracking-wider font-mono">
+            <Tag className="h-3 w-3 text-primary" />
+            Release Archive
+          </div>
+          <h1 className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-5xl">
             HUNTARA Releases
-          </motion.h1>
-          <motion.p variants={childVariants} className="text-base text-[var(--text-secondary)] leading-relaxed">
-            Download the official releases of HUNTARA for Windows, macOS, and Linux. Find the companies worth selling to.
-          </motion.p>
+          </h1>
+          <p className="text-base text-[var(--text-secondary)] leading-relaxed">
+            Archive of official HUNTARA desktop releases. Discover the companies worth selling to.
+          </p>
         </div>
 
-        {/* Releases Timeline */}
-        <motion.div variants={childVariants} className="space-y-10">
-          {GENERATED_RELEASES.map((rel) => {
-            const winAsset = rel.assets.find(a => a.platform === 'Windows' || a.name.endsWith('.exe'))
-            const macAsset = rel.assets.find(a => a.platform === 'macOS' || a.name.endsWith('.dmg') || a.name.endsWith('.zip'))
-            const linuxAsset = rel.assets.find(a => a.platform === 'Linux' || a.name.endsWith('.AppImage'))
-
-            return (
-              <div key={rel.version} className="border border-[var(--border)] rounded-xl p-6 bg-[var(--card)] space-y-6">
-                {/* Release Header */}
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-subtle)] pb-4">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-xl font-bold text-[var(--foreground)] font-mono">
-                      HUNTARA {rel.version}
-                    </h2>
-                    <span className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${
-                      !rel.prerelease 
-                        ? "bg-[rgba(63,178,127,0.12)] text-[#3FB27F] border-[rgba(63,178,127,0.2)]" 
+        {/* Releases List */}
+        <div className="divide-y divide-[var(--border-subtle)] border-y border-[var(--border-subtle)]">
+          {releases.map((rel) => (
+            <article key={rel.version} className="py-8 space-y-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Link 
+                    href={`/releases/${rel.version}`}
+                    className="text-xl font-bold text-[var(--foreground)] hover:text-primary transition-colors font-mono"
+                  >
+                    HUNTARA {rel.version}
+                  </Link>
+                  <span
+                    className={`text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border ${
+                      rel.status === "stable"
+                        ? "bg-[rgba(63,178,127,0.12)] text-[#3FB27F] border-[rgba(63,178,127,0.2)]"
                         : "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                    }`}>
-                      {rel.prerelease ? "Pre-release" : "Stable"}
-                    </span>
-                  </div>
-                  <div className="text-xs font-mono text-[var(--text-tertiary)]">
-                    Released {formatDate(rel.releaseDate)}
-                  </div>
+                    }`}
+                  >
+                    {rel.status === "stable" ? "Stable" : "Pre-release"}
+                  </span>
                 </div>
-
-                {/* Release Notes */}
-                {rel.releaseNotes && (
-                  <div className="space-y-2">
-                    <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] font-semibold">
-                      Release Notes
-                    </div>
-                    <div className="text-xs text-[var(--text-secondary)] leading-relaxed bg-[rgba(10,10,11,0.25)] border border-[var(--border-subtle)] p-4 rounded-lg whitespace-pre-wrap font-sans">
-                      {rel.releaseNotes}
-                    </div>
-                  </div>
-                )}
-
-                {/* Platform Downloads Cards */}
-                <div className="space-y-3">
-                  <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] font-semibold">
-                    Downloads
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Windows */}
-                    <div className="border border-[var(--border-subtle)] rounded-lg p-4 bg-[var(--background)] flex flex-col justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Monitor className="h-5 w-5 text-white shrink-0" />
-                        <div>
-                          <div className="text-xs font-semibold text-white">Windows</div>
-                          <div className="text-[10px] text-[var(--text-tertiary)]">HUNTARA for Windows</div>
-                        </div>
-                      </div>
-                      {winAsset ? (
-                        <a
-                          href={winAsset.downloadUrl}
-                          className="inline-flex h-8 items-center justify-center rounded bg-[var(--primary)] px-3 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1.5 cursor-pointer"
-                        >
-                          <ArrowDownToLine className="h-3.5 w-3.5" />
-                          Download for Windows
-                        </a>
-                      ) : (
-                        <div className="inline-flex h-8 items-center justify-center rounded bg-zinc-800/60 px-3 text-[11px] font-medium text-zinc-500 cursor-not-allowed">
-                          Coming soon
-                        </div>
-                      )}
-                    </div>
-
-                    {/* macOS */}
-                    <div className="border border-[var(--border-subtle)] rounded-lg p-4 bg-[var(--background)] flex flex-col justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Apple className="h-5 w-5 text-white shrink-0" />
-                        <div>
-                          <div className="text-xs font-semibold text-white">macOS</div>
-                          <div className="text-[10px] text-[var(--text-tertiary)]">HUNTARA for macOS</div>
-                        </div>
-                      </div>
-                      {macAsset ? (
-                        <a
-                          href={macAsset.downloadUrl}
-                          className="inline-flex h-8 items-center justify-center rounded bg-[var(--primary)] px-3 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1.5 cursor-pointer"
-                        >
-                          <ArrowDownToLine className="h-3.5 w-3.5" />
-                          Download for macOS
-                        </a>
-                      ) : (
-                        <div className="inline-flex h-8 items-center justify-center rounded bg-zinc-800/60 px-3 text-[11px] font-medium text-zinc-500 cursor-not-allowed">
-                          Coming soon
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Linux */}
-                    <div className="border border-[var(--border-subtle)] rounded-lg p-4 bg-[var(--background)] flex flex-col justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <Terminal className="h-5 w-5 text-white shrink-0" />
-                        <div>
-                          <div className="text-xs font-semibold text-white">Linux</div>
-                          <div className="text-[10px] text-[var(--text-tertiary)]">HUNTARA for Linux</div>
-                        </div>
-                      </div>
-                      {linuxAsset ? (
-                        <a
-                          href={linuxAsset.downloadUrl}
-                          className="inline-flex h-8 items-center justify-center rounded bg-[var(--primary)] px-3 text-xs font-medium text-[var(--primary-foreground)] hover:opacity-90 transition-all gap-1.5 cursor-pointer"
-                        >
-                          <ArrowDownToLine className="h-3.5 w-3.5" />
-                          Download for Linux
-                        </a>
-                      ) : (
-                        <div className="inline-flex h-8 items-center justify-center rounded bg-zinc-800/60 px-3 text-[11px] font-medium text-zinc-500 cursor-not-allowed">
-                          Coming soon
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <time 
+                  dateTime={rel.releasedAt} 
+                  className="text-xs font-mono text-[var(--text-tertiary)]"
+                >
+                  {rel.releasedDateFormatted}
+                </time>
               </div>
-            )
-          })}
-        </motion.div>
-      </motion.div>
+
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+                {rel.summary}
+              </p>
+
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-tertiary)] mr-1">
+                    Available on:
+                  </span>
+                  {rel.platforms.map((plat) => (
+                    <Link
+                      key={plat.id}
+                      href={`/releases/${rel.version}/${plat.id}`}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border-subtle)] hover:border-primary/50 text-[11px] font-medium text-[var(--foreground)] hover:text-primary transition-colors"
+                    >
+                      <PlatformIcon id={plat.id} className="h-3 w-3 text-[var(--text-secondary)]" />
+                      {plat.label}
+                    </Link>
+                  ))}
+                </div>
+
+                <Link
+                  href={`/releases/${rel.version}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  View release <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
