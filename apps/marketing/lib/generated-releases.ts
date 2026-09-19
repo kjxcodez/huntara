@@ -35,6 +35,93 @@ export interface Release {
 
 export const GENERATED_RELEASES: Release[] = [
   {
+    "version": "v1.2.1-beta.1",
+    "status": "pre-release",
+    "releasedAt": "2026-09-19T23:54:25Z",
+    "releasedDateFormatted": "September 20, 2026",
+    "summary": "HUNTARA desktop preview release (v1.2.1-beta.1) running locally on your hardware.",
+    "notes": "Maintenance release with reliability and stability enhancements.",
+    "platforms": [
+      {
+        "id": "windows",
+        "label": "Windows",
+        "icon": "Monitor",
+        "artifacts": [
+          {
+            "id": "windows-x64-exe",
+            "name": "HUNTARA-1.2.1-beta.1-win-x64.exe",
+            "platformId": "windows",
+            "platformLabel": "Windows",
+            "architecture": "x64",
+            "architectureLabel": "x64",
+            "artifactType": "NSIS Installer",
+            "extension": "exe",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.2.1-beta.1/HUNTARA-1.2.1-beta.1-win-x64.exe",
+            "sizeBytes": 100785843,
+            "sizeFormatted": "96.1 MB",
+            "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "id": "macos",
+        "label": "macOS",
+        "icon": "Apple",
+        "artifacts": [
+          {
+            "id": "macos-arm64-dmg",
+            "name": "HUNTARA-1.2.1-beta.1-mac-arm64.dmg",
+            "platformId": "macos",
+            "platformLabel": "macOS",
+            "architecture": "arm64",
+            "architectureLabel": "Apple Silicon",
+            "artifactType": "Apple Disk Image",
+            "extension": "dmg",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.2.1-beta.1/HUNTARA-1.2.1-beta.1-mac-arm64.dmg",
+            "sizeBytes": 112726150,
+            "sizeFormatted": "107.5 MB",
+            "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "id": "macos-arm64-zip",
+            "name": "HUNTARA-1.2.1-beta.1-mac-arm64.zip",
+            "platformId": "macos",
+            "platformLabel": "macOS",
+            "architecture": "arm64",
+            "architectureLabel": "Apple Silicon",
+            "artifactType": "ZIP Archive",
+            "extension": "zip",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.2.1-beta.1/HUNTARA-1.2.1-beta.1-mac-arm64.zip",
+            "sizeBytes": 121551531,
+            "sizeFormatted": "115.9 MB",
+            "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      },
+      {
+        "id": "linux",
+        "label": "Linux",
+        "icon": "Terminal",
+        "artifacts": [
+          {
+            "id": "linux-x64-AppImage",
+            "name": "HUNTARA-1.2.1-beta.1-linux-x86_64.AppImage",
+            "platformId": "linux",
+            "platformLabel": "Linux",
+            "architecture": "x64",
+            "architectureLabel": "x64",
+            "artifactType": "AppImage",
+            "extension": "AppImage",
+            "downloadUrl": "https://github.com/kjxcodez/huntara/releases/download/v1.2.1-beta.1/HUNTARA-1.2.1-beta.1-linux-x86_64.AppImage",
+            "sizeBytes": 104403014,
+            "sizeFormatted": "99.6 MB",
+            "checksum": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "v1.2.0-beta",
     "status": "pre-release",
     "releasedAt": "2026-09-16T13:01:16Z",
