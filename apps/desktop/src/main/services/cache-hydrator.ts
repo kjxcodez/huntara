@@ -149,8 +149,18 @@ export class CacheHydrator {
       {
         table: 'company_discovery_runs',
         fetch: async () => {
-          const res = await sdk.companyDiscoveryRuns.list();
-          return Array.isArray(res) ? res : (res as any)?.data || [];
+          let all: any[] = [];
+          let page = 1;
+          const limit = 100;
+          while (true) {
+            const res = await sdk.companyDiscoveryRuns.list({ page, limit });
+            const items = Array.isArray(res) ? res : (res as any)?.data || [];
+            if (!items || items.length === 0) break;
+            all = all.concat(items);
+            if (items.length < limit) break;
+            page++;
+          }
+          return all;
         }
       },
       {
