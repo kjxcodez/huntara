@@ -56,7 +56,7 @@ describe('Phase 3 — Discovery Run Historical Cache-Miss Suite', () => {
     process.env.WORKSPACES_DB_DIR = tempDbDir;
 
     // Reset connectivity to ONLINE
-    ConnectivityService.setState({ status: 'ONLINE', latency: 25 });
+    ConnectivityService.setState({ status: 'ONLINE', error: null });
 
     // Setup mock SDK backed by cloud store
     mockSdk = {
@@ -138,8 +138,8 @@ describe('Phase 3 — Discovery Run Historical Cache-Miss Suite', () => {
     // Populate SQLite cache
     db.prepare(`
       INSERT INTO discovery_runs (id, workspaceId, name, query, status, resultCount, createdAt)
-      VALUES (?, ?, ?, ?, 'completed', 2, ?)
-    `).run(runId, workspaceA, 'Austin Plumbers', 'plumbers austin', new Date().toISOString());
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(runId, workspaceA, 'Austin Plumbers', 'plumbers austin', 'completed', 2, new Date().toISOString());
 
     const insertComp = db.prepare(`
       INSERT INTO companies (id, workspaceId, name, domain, createdAt)
@@ -250,8 +250,8 @@ describe('Phase 3 — Discovery Run Historical Cache-Miss Suite', () => {
     // 2. Pre-seed local cache with only the first 100 companies (partial cache)
     db.prepare(`
       INSERT INTO discovery_runs (id, workspaceId, name, query, status, resultCount, createdAt)
-      VALUES (?, ?, 'Large Run', 'large run query', 'completed', ?, ?)
-    `).run(runId, workspaceA, totalCompanies, new Date().toISOString());
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(runId, workspaceA, 'Large Run', 'large run query', 'completed', totalCompanies, new Date().toISOString());
 
     for (let i = 1; i <= cachedCount; i++) {
       const cId = `comp_p_${i}`;
@@ -263,7 +263,7 @@ describe('Phase 3 — Discovery Run Historical Cache-Miss Suite', () => {
       db.prepare(`
         INSERT INTO company_discovery_runs (id, workspaceId, discoveryRunId, companyId, createdAt)
         VALUES (?, ?, ?, ?, ?)
-      `).run(`l_${i}`, workspaceA, runId, cId, new Date().toISOString());
+      `).run(`${runId}_${cId}`, workspaceA, runId, cId, new Date().toISOString());
     }
 
     // Verify SQLite currently only has 100
@@ -455,18 +455,20 @@ describe('Phase 3 — Discovery Run Historical Cache-Miss Suite', () => {
     const db = getDatabase(workspaceA);
     db.prepare(`
       INSERT INTO discovery_runs (id, workspaceId, name, query, status, resultCount, createdAt)
-      VALUES (?, ?, 'Flaky Run', 'flaky', 'completed', 5, ?)
-    `).run(runId, workspaceA, new Date().toISOString());
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(runId, workspaceA, 'Flaky Run', 'flaky', 'completed', 5, new Date().toISOString());
 
-    db.prepare(`
+    const insertCompFb = db.prepare(`
       INSERT INTO companies (id, workspaceId, name, domain, createdAt)
-      VALUES ('c_fallback_1', ?, 'Cached Fallback Co', 'fallback.com', ?)
-    `).run(workspaceA, new Date().toISOString());
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    insertCompFb.run('c_fallback_1', workspaceA, 'Cached Fallback Co', 'fallback.com', new Date().toISOString());
 
-    db.prepare(`
+    const insertLinkFb = db.prepare(`
       INSERT INTO company_discovery_runs (id, workspaceId, discoveryRunId, companyId, createdAt)
-      VALUES ('link_fb_1', ?, ?, 'c_fallback_1', ?)
-    `).run(workspaceA, runId, new Date().toISOString());
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    insertLinkFb.run(`${runId}_c_fallback_1`, workspaceA, runId, 'c_fallback_1', new Date().toISOString());
 
     // API simulates network failure
     mockSdk.discovery.listCompaniesForRun.mockRejectedValueOnce(new Error('503 Service Unavailable'));

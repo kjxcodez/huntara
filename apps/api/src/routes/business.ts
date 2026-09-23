@@ -870,8 +870,12 @@ discoveryRunsRouter.get('/:id', async (c) => {
 discoveryRunsRouter.get('/:id/companies', async (c) => {
   const wsId = getWorkspaceId(c);
   const id = c.req.param('id');
+  const pageStr = c.req.query('page');
+  const limitStr = c.req.query('limit');
+  const page = pageStr ? parseInt(pageStr) : undefined;
+  const limit = limitStr ? parseInt(limitStr) : undefined;
   const service = new DiscoveryRunService(wsId);
-  const companies = await service.getCompaniesForRun(id);
+  const companies = await service.getCompaniesForRun(id, page, limit);
   return c.json(successResponse(companies));
 });
 

@@ -75,8 +75,12 @@ export class DiscoveryModule {
     return this.client.get<DiscoveryRun>(`/discovery-runs/${id}`);
   }
 
-  public async listCompaniesForRun(id: string): Promise<any[]> {
-    return this.client.get<any[]>(`/discovery-runs/${id}/companies`);
+  public async listCompaniesForRun(id: string, options?: { page?: number; limit?: number }): Promise<any[]> {
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', String(options.page));
+    if (options?.limit) params.append('limit', String(options.limit));
+    const qs = params.toString();
+    return this.client.get<any[]>(`/discovery-runs/${id}/companies${qs ? `?${qs}` : ''}`);
   }
 
   public async updateRun(id: string, payload: Partial<DiscoveryRun>): Promise<DiscoveryRun> {

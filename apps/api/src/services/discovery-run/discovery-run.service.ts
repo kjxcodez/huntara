@@ -269,9 +269,30 @@ export class DiscoveryRunService {
     return records.map((r) => r.companyId);
   }
 
-  public async getCompaniesForRun(discoveryRunId: string): Promise<CompanyDocument[]> {
+  public async getCompaniesForRun(
+    discoveryRunId: string,
+    page?: number,
+    limit?: number
+  ): Promise<CompanyDocument[]> {
+    // 1. Verify discovery run exists and belongs to active workspace (throws NotFoundError if unauthorized/nonexistent)
+    await this.getRunById(discoveryRunId);
+
+    // 2. Fetch linked company IDs for this discovery run within workspace
     const companyIds = await this.listCompaniesForRun(discoveryRunId);
     if (!companyIds.length) return [];
-    return this.companyRepository.findMany({ _id: { $in: companyIds } } as any);
+
+    // 3. Query non-deleted companies with deterministic ordering and optional pagination
+    const options: any = { sort: { createdAt: -1 } };
+    if (page && limit) {
+      options.skip = (page - 1) * limit;
+      options.limit = limit;
+    } else if (limit) {
+      options.limit = limit;
+    }
+
+    return this.companyRepository.findMany(
+      { _id: { $in: companyIds }, deletedAt: null } as any,
+      options
+    );
   }
 }

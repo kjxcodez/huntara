@@ -473,7 +473,7 @@ export default function DiscoveryScreen() {
               </div>
 
               <div className="flex-1 min-h-0 overflow-auto px-4 pb-4 pt-0">
-                {companiesQuery.isLoading ? (
+                {(companiesQuery.isLoading || (selectedJobId && selectedRunCompaniesQuery.isLoading)) ? (
                   <div className="p-8 text-center text-muted-foreground animate-pulse">Loading scraper database...</div>
                 ) : results.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">

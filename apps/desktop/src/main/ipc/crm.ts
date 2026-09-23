@@ -3,6 +3,7 @@ import { LocalCRMRepository } from '../database/repositories/local-crm';
 import { getDatabase } from '../database/connection';
 import { WorkspaceManager } from '../lib/workspace-manager';
 import { ProjectionService } from '../services/projection-service';
+import { ConnectivityService } from '../services/connectivity-service';
 import { loadSession } from '../lib/session';
 import type { CanonicalContactQuery, BulkContactSelection } from '@huntara/schema';
 
@@ -23,6 +24,23 @@ export function registerCrmIpc() {
 
   safeRegister('companies:query', async (_event, { workspaceId, search, status, industry, discoveryRunId, location, city, state, country }) => {
     if (!workspaceId) throw new Error('workspaceId is required.');
+
+    // If querying by discoveryRunId, ensure the local cache has hydrated relationships
+    if (discoveryRunId) {
+      try {
+        const cacheStatus = ProjectionService.isRunCacheComplete(workspaceId, discoveryRunId);
+        if (!cacheStatus.isComplete) {
+          const connState = ConnectivityService.getState();
+          if (connState.status === 'ONLINE') {
+            const sdk = WorkspaceManager.getSdk(workspaceId);
+            await ProjectionService.reconcileDiscoveryRun(workspaceId, discoveryRunId, sdk);
+          }
+        }
+      } catch (err: any) {
+        // Best-effort reconcile; continue to query local projection
+      }
+    }
+
     const db = getDatabase(workspaceId);
 
     let query = 'SELECT DISTINCT c.* FROM companies c';

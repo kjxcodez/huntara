@@ -90,14 +90,29 @@ export function registerDiscoveryIpc() {
     const connState = ConnectivityService.getState();
     const isOnline = connState.status === 'ONLINE';
 
-    // Only do a full MongoDB reconcile when explicitly requested (e.g. after a job completes).
-    // Regular polling reads from the local SQLite projection to avoid a reconcile→broadcast→refetch loop.
-    if (isOnline && forceSync) {
-      const sdk = WorkspaceManager.getSdk();
-      return await ProjectionService.reconcileDiscoveryRun(workspaceId, runId, sdk);
+    // 1. If not forcing sync, check if local SQLite projection completely satisfies the request
+    if (!forceSync) {
+      const cacheStatus = ProjectionService.isRunCacheComplete(workspaceId, runId);
+      if (cacheStatus.isComplete) {
+        return cacheStatus.cachedRows;
+      }
     }
 
-    // Default: serve from the existing SQLite projection (fast, no broadcast side-effect)
+    // 2. Cache miss, partial cache, or forceSync requested -> authoritative read-through fallback
+    if (isOnline) {
+      try {
+        const sdk = WorkspaceManager.getSdk(workspaceId);
+        return await ProjectionService.reconcileDiscoveryRun(workspaceId, runId, sdk);
+      } catch (err: any) {
+        // If 404 (nonexistent or unauthorized cross-workspace run), return empty without corrupting projection
+        if (err?.status === 404 || err?.statusCode === 404 || /not found/i.test(err?.message || '')) {
+          return [];
+        }
+        console.warn(`[DiscoveryIPC] Authoritative fallback failed for run "${runId}", serving local projection:`, err?.message || err);
+      }
+    }
+
+    // 3. Fallback: serve whatever rows exist in local SQLite projection
     const db = getDatabase(workspaceId);
     const rows = db
       .prepare(

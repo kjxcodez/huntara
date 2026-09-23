@@ -66,10 +66,14 @@ export class ProjectionService {
     }
   }
 
+  private static inFlightReconcileRuns = new Map<string, Promise<any[]>>();
+
   /**
    * Reconciles a DiscoveryRun and its associated company relationships.
    * Pulls authoritative companies for the run from MongoDB, updates
-   * company_discovery_runs provenance links and discovery_runs result count.
+   * company_discovery_runs provenance links, discovery_runs result count,
+   * and cache_metadata hydration status.
+   * Deduplicates concurrent in-flight reconciliation requests.
    */
   public static async reconcileDiscoveryRun(
     workspaceId: string,
@@ -78,61 +82,177 @@ export class ProjectionService {
   ): Promise<any[]> {
     if (!workspaceId || !runId) return [];
 
-    try {
-      AppLogger.info('ProjectionService', `Reconciling DiscoveryRun "${runId}"`, workspaceId);
+    const inFlightKey = `${workspaceId}:${runId}`;
+    if (this.inFlightReconcileRuns.has(inFlightKey)) {
+      return this.inFlightReconcileRuns.get(inFlightKey)!;
+    }
 
-      // 1. Fetch authoritative companies linked to this run from MongoDB
-      const serverCompanies = await sdk.discovery.listCompaniesForRun(runId);
-      const companiesList = Array.isArray(serverCompanies) ? serverCompanies : [];
+    const task = (async () => {
+      try {
+        AppLogger.info('ProjectionService', `Reconciling DiscoveryRun "${runId}"`, workspaceId);
 
-      // 2. Project companies into SQLite
-      if (companiesList.length > 0) {
-        await this.projectEntities('companies', companiesList, workspaceId);
+        // 1. Fetch authoritative companies linked to this run from MongoDB (paginated if supported)
+        let companiesList: any[] = [];
+        let page = 1;
+        const limit = 100;
+        while (true) {
+          const batch = await sdk.discovery.listCompaniesForRun(runId, { page, limit });
+          const items = Array.isArray(batch) ? batch : [];
+          companiesList = companiesList.concat(items);
+          if (items.length < limit || items.length > limit) break;
+          page++;
+        }
 
-        // 3. Project company_discovery_runs provenance links
-        const links = companiesList.map((c: any) => ({
-          id: `${runId}_${c.id || c._id}`,
+        // 2. Project companies into SQLite
+        if (companiesList.length > 0) {
+          await this.projectEntities('companies', companiesList, workspaceId);
+
+          // 3. Project company_discovery_runs provenance links
+          const links = companiesList.map((c: any) => ({
+            id: `${runId}_${c.id || c._id}`,
+            workspaceId,
+            companyId: c.id || c._id,
+            discoveryRunId: runId,
+            createdAt: c.createdAt || new Date().toISOString()
+          }));
+          await this.projectEntities('company_discovery_runs', links, workspaceId);
+        }
+
+        // 4. Update the discovery run record in SQLite with latest count and status
+        let existingRun = await LocalCRMRepository.findById('discovery_runs', workspaceId, runId);
+        if (!existingRun) {
+          try {
+            const serverRun = await sdk.discovery.getRun(runId);
+            if (serverRun) {
+              existingRun = serverRun;
+            }
+          } catch {
+            // Best effort if company records were already retrieved
+          }
+        }
+
+        const runRecord = {
+          id: runId,
           workspaceId,
-          companyId: c.id || c._id,
-          discoveryRunId: runId,
-          createdAt: c.createdAt || new Date().toISOString()
-        }));
-        await this.projectEntities('company_discovery_runs', links, workspaceId);
+          ...(existingRun || {}),
+          resultCount: companiesList.length,
+          status: existingRun?.status === 'running' ? 'completed' : (existingRun?.status || 'completed'),
+          finishedAt: existingRun?.finishedAt || new Date().toISOString()
+        };
+        await LocalCRMRepository.saveFromServer('discovery_runs', runRecord);
+
+        // 5. Record explicit hydration marker in cache_metadata
+        const db = getDatabase(workspaceId);
+        try {
+          db.prepare(
+            `INSERT OR REPLACE INTO cache_metadata (key, value, updatedAt) VALUES (?, ?, ?)`
+          ).run(
+            `discovery_run_hydrated:${runId}`,
+            companiesList.length === 0 ? 'empty' : 'complete',
+            new Date().toISOString()
+          );
+        } catch {
+          // Safe fallback in test or partial environments
+        }
+
+        // 6. Query and return distinct companies from SQLite projection
+        const rows = db
+          .prepare(
+            `SELECT DISTINCT c.* FROM companies c
+             INNER JOIN company_discovery_runs cdr ON c.id = cdr.companyId
+             WHERE c.workspaceId = ? AND cdr.workspaceId = ? AND cdr.discoveryRunId = ? AND c.deletedAt IS NULL
+             ORDER BY c.createdAt DESC`
+          )
+          .all(workspaceId, workspaceId, runId) as any[];
+
+        this.broadcastProjectionUpdated('discovery_runs', workspaceId);
+        return rows || [];
+      } catch (err: any) {
+        AppLogger.error(
+          'ProjectionService',
+          `Reconcile DiscoveryRun "${runId}" failed: ${err?.message || err}`,
+          workspaceId,
+          err
+        );
+        throw err;
       }
+    })();
 
-      // 4. Update the discovery run record in SQLite with latest count and status
-      const existingRun = await LocalCRMRepository.findById('discovery_runs', workspaceId, runId);
-      const runRecord = {
-        id: runId,
-        workspaceId,
-        ...(existingRun || {}),
-        resultCount: companiesList.length,
-        status: existingRun?.status === 'running' ? 'completed' : (existingRun?.status || 'completed'),
-        finishedAt: existingRun?.finishedAt || new Date().toISOString()
-      };
-      await LocalCRMRepository.saveFromServer('discovery_runs', runRecord);
+    this.inFlightReconcileRuns.set(inFlightKey, task);
+    try {
+      return await task;
+    } finally {
+      this.inFlightReconcileRuns.delete(inFlightKey);
+    }
+  }
 
-      // 5. Query and return distinct companies from SQLite projection
+  /**
+   * Checks whether the local SQLite cache completely satisfies queries for a given DiscoveryRun.
+   * Accurately distinguishes between cache hits, partial cache, confirmed empty runs, and misses.
+   */
+  public static isRunCacheComplete(
+    workspaceId: string,
+    runId: string
+  ): { isComplete: boolean; isKnownEmpty: boolean; cachedRows: any[] } {
+    if (!workspaceId || !runId) {
+      return { isComplete: false, isKnownEmpty: false, cachedRows: [] };
+    }
+
+    try {
       const db = getDatabase(workspaceId);
-      const rows = db
+
+      // 1. Fetch cached companies for this run
+      const cachedRows = (db
         .prepare(
           `SELECT DISTINCT c.* FROM companies c
            INNER JOIN company_discovery_runs cdr ON c.id = cdr.companyId
-           WHERE cdr.workspaceId = ? AND cdr.discoveryRunId = ? AND c.deletedAt IS NULL
+           WHERE c.workspaceId = ? AND cdr.workspaceId = ? AND cdr.discoveryRunId = ? AND c.deletedAt IS NULL
            ORDER BY c.createdAt DESC`
         )
-        .all(workspaceId, runId) as any[];
+        .all(workspaceId, workspaceId, runId) as any[]) || [];
 
-      this.broadcastProjectionUpdated('discovery_runs', workspaceId);
-      return rows || [];
-    } catch (err: any) {
-      AppLogger.error(
-        'ProjectionService',
-        `Reconcile DiscoveryRun "${runId}" failed: ${err?.message || err}`,
-        workspaceId,
-        err
-      );
-      throw err;
+      // 2. Fetch discovery run record
+      const runRecord = db
+        .prepare(
+          `SELECT * FROM discovery_runs
+           WHERE workspaceId = ? AND id = ? AND deletedAt IS NULL`
+        )
+        .get(workspaceId, runId) as any;
+
+      if (!runRecord) {
+        // Run record missing entirely from local cache -> cache miss
+        return { isComplete: false, isKnownEmpty: false, cachedRows };
+      }
+
+      // 3. Check cache_metadata for explicit hydration marker
+      let metaRow: any = null;
+      try {
+        metaRow = db
+          .prepare(`SELECT value FROM cache_metadata WHERE key = ?`)
+          .get(`discovery_run_hydrated:${runId}`) as any;
+      } catch {
+        // In case cache_metadata is not yet initialized
+      }
+
+      // Case: Legitimate confirmed empty run
+      if (runRecord.resultCount === 0 && (metaRow?.value === 'empty' || (runRecord.status === 'completed' && metaRow?.value === 'complete'))) {
+        return { isComplete: true, isKnownEmpty: true, cachedRows: [] };
+      }
+
+      // Case: Known complete run with positive count where all relationships are cached
+      if (runRecord.resultCount > 0 && cachedRows.length >= runRecord.resultCount) {
+        return { isComplete: true, isKnownEmpty: false, cachedRows };
+      }
+
+      // Case: Hydrated marker exists and cachedRows matches or exceeds expected resultCount
+      if (metaRow?.value === 'complete' && cachedRows.length >= (runRecord.resultCount || 0) && (runRecord.resultCount || 0) > 0) {
+        return { isComplete: true, isKnownEmpty: false, cachedRows };
+      }
+
+      // Otherwise: Incomplete, partial, or unverified cache -> requires authoritative fallback
+      return { isComplete: false, isKnownEmpty: false, cachedRows };
+    } catch {
+      return { isComplete: false, isKnownEmpty: false, cachedRows: [] };
     }
   }
 
