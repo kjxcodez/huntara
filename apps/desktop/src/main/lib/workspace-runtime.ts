@@ -40,6 +40,7 @@ export class WorkspaceRuntime {
   public schedulerDuration: number = 0;
   public cacheHydrationDuration: number = 0;
   public automationDuration: number = 0;
+  private hydrationPromise: Promise<any> | null = null;
 
   private static restartCounts = new Map<string, number>();
 
@@ -76,7 +77,7 @@ export class WorkspaceRuntime {
   /**
    * Initializes workspace-scoped database tables and starts background engines.
    */
-  public async start(): Promise<void> {
+  public async start(options?: { backgroundHydration?: boolean }): Promise<void> {
     if (this.isRunning) return;
 
     this.startupStartedAt = new Date();
@@ -143,12 +144,22 @@ export class WorkspaceRuntime {
     // 4. Trigger Workspace Cache Hydration from MongoDB
     sendBootProgress('cache:hydrate', '✓ Hydrating local cache from MongoDB');
     const hydrateStart = Date.now();
-    try {
-      await CacheHydrator.hydrateWorkspaceCache(this.workspaceId, this.sdk);
-    } catch (err) {
-      console.warn(`[WorkspaceRuntime] Workspace cache hydration error: ${err}`);
+    const hydrationTask = async () => {
+      try {
+        const res = await CacheHydrator.hydrateWorkspaceCache(this.workspaceId, this.sdk);
+        this.cacheHydrationDuration = Date.now() - hydrateStart;
+        return res;
+      } catch (err) {
+        console.warn(`[WorkspaceRuntime] Workspace cache hydration error: ${err}`);
+        return null;
+      }
+    };
+
+    if (options?.backgroundHydration) {
+      this.hydrationPromise = hydrationTask();
+    } else {
+      await hydrationTask();
     }
-    this.cacheHydrationDuration = Date.now() - hydrateStart;
 
     // 5. Start EventBridge to forward LocalEventBus events to the renderer process
     this.eventBridge.start();
@@ -176,12 +187,31 @@ export class WorkspaceRuntime {
   }
 
   /**
+   * Allows callers to await background cache hydration completion when needed.
+   */
+  public async waitForHydration(): Promise<any> {
+    if (this.hydrationPromise) {
+      return this.hydrationPromise;
+    }
+    return null;
+  }
+
+  /**
    * Shuts down background polling, closes database file lock cleanly.
    */
   public async stop(): Promise<void> {
     if (!this.isRunning) return;
 
     console.log(`[WorkspaceRuntime] Stopping workspace runtime: ${this.workspaceId}`);
+
+    // Cleanly finalize any in-flight background hydration before closing database
+    if (this.hydrationPromise) {
+      try {
+        await this.hydrationPromise;
+      } catch {
+        // Ignore errors during spin down
+      }
+    }
 
     // 1. Stop Concurrency Scheduler
     await this.scheduler.stop();

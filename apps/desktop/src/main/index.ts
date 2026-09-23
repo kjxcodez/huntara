@@ -252,45 +252,6 @@ app.whenReady().then(async () => {
     getPersistedActiveWorkspace
   );
 
-  // 4. API Connectivity & Health Gate
-  // Gated startup: verify API reachability before activating workspace runtimes
-  updateSplashProgress('connectivity:check', 'Verifying API connectivity...');
-  const connState = await ConnectivityService.checkConnectivity(config.apiUrl, 3500);
-
-  if (connState.status === 'ONLINE') {
-    updateSplashProgress('connectivity:ready', '✓ API Connected');
-    if (restoredSession) {
-      const persistedWorkspace = getPersistedActiveWorkspace();
-      const wsId = persistedWorkspace || restoredSession.activeWorkspaceId;
-      if (wsId) {
-        try {
-          await WorkspaceManager.setActiveWorkspace(wsId);
-          AppLogger.info('workspace', `Workspace runtime eagerly activated on startup: ${wsId}`);
-        } catch (wsErr) {
-          AppLogger.error('workspace', `Failed to activate restored workspace on startup: ${wsId}`, wsId, wsErr);
-        }
-      }
-    }
-  } else if (connState.status === 'AUTHENTICATION_REQUIRED') {
-    updateSplashProgress('connectivity:auth', 'Authentication required');
-    AppLogger.warn('auth', 'Stored session is invalid or expired. Clearing stale session credentials.');
-    clearSession();
-    activeToken = null;
-    delete customHeaders['x-workspace-id'];
-    persistActiveWorkspace(null);
-  } else {
-    // DEGRADED / OFFLINE
-    updateSplashProgress('connectivity:degraded', 'Operating in Offline Mode');
-    AppLogger.warn(
-      'connectivity',
-      `workspace_runtime_start_blocked: API is ${connState.error?.code || 'UNREACHABLE'}. Operating in degraded offline state.`,
-      undefined,
-      { error: connState.error }
-    );
-    // Note: Do NOT activate WorkspaceRuntime or start scheduler when offline.
-    // Preserved session on disk remains available for reconnection.
-  }
-
   // Synchronous settings getter for theme/sidebar restore on boot
   ipcMain.on('settings:getSync', (event) => {
     try {
@@ -329,6 +290,7 @@ app.whenReady().then(async () => {
     // macOS specific menu setup can go here
   }
 
+  // 4. Promptly create BrowserWindow so renderer process begins booting immediately
   createWindow();
 
   // Setup system tray
@@ -340,6 +302,52 @@ app.whenReady().then(async () => {
   } catch (err) {
     AppLogger.error('Updater', 'Failed to initialize UpdateManager on start', undefined, err);
   }
+
+  // 5. API Connectivity & Background Workspace Runtime Activation
+  // Decoupled from window creation: verify API reachability and eagerly activate workspace
+  // runtime in the background without blocking window creation or renderer mounting
+  (async () => {
+    try {
+      updateSplashProgress('connectivity:check', 'Verifying API connectivity...');
+      const connState = await ConnectivityService.checkConnectivity(config.apiUrl, 3500);
+
+      if (connState.status === 'ONLINE') {
+        updateSplashProgress('connectivity:ready', '✓ API Connected');
+        if (restoredSession) {
+          const persistedWorkspace = getPersistedActiveWorkspace();
+          const wsId = persistedWorkspace || restoredSession.activeWorkspaceId;
+          if (wsId) {
+            try {
+              await WorkspaceManager.setActiveWorkspace(wsId, { backgroundHydration: true });
+              AppLogger.info('workspace', `Workspace runtime eagerly activated on startup: ${wsId}`);
+            } catch (wsErr) {
+              AppLogger.error('workspace', `Failed to activate restored workspace on startup: ${wsId}`, wsId, wsErr);
+            }
+          }
+        }
+      } else if (connState.status === 'AUTHENTICATION_REQUIRED') {
+        updateSplashProgress('connectivity:auth', 'Authentication required');
+        AppLogger.warn('auth', 'Stored session is invalid or expired. Clearing stale session credentials.');
+        clearSession();
+        activeToken = null;
+        delete customHeaders['x-workspace-id'];
+        persistActiveWorkspace(null);
+      } else {
+        // DEGRADED / OFFLINE
+        updateSplashProgress('connectivity:degraded', 'Operating in Offline Mode');
+        AppLogger.warn(
+          'connectivity',
+          `workspace_runtime_start_blocked: API is ${connState.error?.code || 'UNREACHABLE'}. Operating in degraded offline state.`,
+          undefined,
+          { error: connState.error }
+        );
+        // Note: Do NOT activate WorkspaceRuntime or start scheduler when offline.
+        // Preserved session on disk remains available for reconnection.
+      }
+    } catch (bgErr) {
+      AppLogger.error('app', 'Background connectivity/workspace startup error', undefined, bgErr);
+    }
+  })();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

@@ -33,7 +33,10 @@ class WorkspaceManagerClass {
    * Switches the active workspace, spinning down the previous runtime and booting the new one.
    * Serializes transitions to ensure zero duplicate runtime instances or race conditions.
    */
-  public async setActiveWorkspace(workspaceId: string | null): Promise<WorkspaceRuntime | null> {
+  public async setActiveWorkspace(
+    workspaceId: string | null,
+    options?: { backgroundHydration?: boolean }
+  ): Promise<WorkspaceRuntime | null> {
     if (this.activeRuntime && this.activeRuntime.workspaceId === workspaceId && !this.transitionPromise) {
       console.log(
         `[WorkspaceManager] Workspace ${workspaceId} is already active, skipping restart.`
@@ -79,7 +82,7 @@ class WorkspaceManagerClass {
       const runtime = new WorkspaceRuntime(workspaceId, this.getSdk());
       const activateStart = Date.now();
       try {
-        await runtime.start();
+        await runtime.start(options);
 
         const activateDuration = Date.now() - activateStart;
         this.totalStarts++;
@@ -149,6 +152,16 @@ class WorkspaceManagerClass {
    */
   public getActiveRuntime(): WorkspaceRuntime | null {
     return this.activeRuntime;
+  }
+
+  /**
+   * Awaits completion of background cache hydration for the currently active runtime.
+   */
+  public async waitForActiveHydration(): Promise<any> {
+    if (this.activeRuntime) {
+      return this.activeRuntime.waitForHydration();
+    }
+    return null;
   }
 
   /**
