@@ -187,7 +187,8 @@ export function pruneStaleSelectedIds(
  */
 export function matchesCanonicalQuery(
   contact: any,
-  query: CanonicalContactQuery
+  query: CanonicalContactQuery,
+  discoveryRunCompanyIds?: Set<string>
 ): boolean {
   if (!contact) return false;
 
@@ -234,7 +235,11 @@ export function matchesCanonicalQuery(
   }
 
   if (query.discoveryRunId) {
-    if (contact.discoveryRunId !== query.discoveryRunId) {
+    if (discoveryRunCompanyIds) {
+      if (!contact.companyId || !discoveryRunCompanyIds.has(contact.companyId)) {
+        return false;
+      }
+    } else if (contact.discoveryRunId !== query.discoveryRunId) {
       return false;
     }
   }

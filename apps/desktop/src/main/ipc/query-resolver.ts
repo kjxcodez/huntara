@@ -24,6 +24,11 @@ export function resolveMatchingContactIds(
 
   if (filterQuery.discoveryRunId) {
     query += ' INNER JOIN company_discovery_runs cdr ON c.companyId = cdr.companyId';
+    if (!hasGeoFilter) {
+      query += ' INNER JOIN companies comp ON c.companyId = comp.id AND comp.deletedAt IS NULL';
+    }
+    conditions.push('cdr.workspaceId = ?');
+    params.push(workspaceId);
     conditions.push('cdr.discoveryRunId = ?');
     params.push(filterQuery.discoveryRunId);
   }

@@ -206,7 +206,10 @@ export default function CompaniesScreen() {
     discoveryRunFilter ? {
       label: 'Discovery',
       value: discoveryRuns.find((r: any) => r.id === discoveryRunFilter)?.name || 'Run',
-      onRemove: () => setDiscoveryRunFilter('')
+      onRemove: () => {
+        setDiscoveryRunFilter('');
+        setCurrentPage(1);
+      }
     } : null
   ].filter(Boolean) as Array<{ label: string; value: string; onRemove: () => void }>;
 
@@ -454,7 +457,10 @@ export default function CompaniesScreen() {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider font-mono">Discovery Run</span>
               <select
                 value={discoveryRunFilter}
-                onChange={(e) => setDiscoveryRunFilter(e.target.value)}
+                onChange={(e) => {
+                  setDiscoveryRunFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="bg-surface-3 border border-border-subtle rounded-none px-2.5 py-1 text-xs outline-none text-foreground focus:ring-1 focus:ring-ring h-8 min-w-[130px]"
               >
                 <option value="">All Discovery Runs</option>
@@ -469,7 +475,7 @@ export default function CompaniesScreen() {
         </EntityToolbar>
 
 
-        {companiesQuery.isLoading ? (
+        {companiesQuery.isLoading || (!!discoveryRunFilter && discoveryRunCompaniesQuery.isLoading) ? (
           <div className="h-[300px] flex items-center justify-center text-muted-foreground">
             Loading companies...
           </div>

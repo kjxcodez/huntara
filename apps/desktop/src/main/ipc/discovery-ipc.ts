@@ -103,10 +103,10 @@ export function registerDiscoveryIpc() {
       .prepare(
         `SELECT DISTINCT c.* FROM companies c
          INNER JOIN company_discovery_runs cdr ON c.id = cdr.companyId
-         WHERE cdr.workspaceId = ? AND cdr.discoveryRunId = ? AND c.deletedAt IS NULL
+         WHERE c.workspaceId = ? AND cdr.workspaceId = ? AND cdr.discoveryRunId = ? AND c.deletedAt IS NULL
          ORDER BY c.createdAt DESC`
       )
-      .all(workspaceId, runId) as any[];
+      .all(workspaceId, workspaceId, runId) as any[];
 
     return rows || [];
   });

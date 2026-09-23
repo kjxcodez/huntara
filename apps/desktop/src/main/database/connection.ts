@@ -239,7 +239,7 @@ export function getDatabase(workspaceId?: string): Database.Database {
               continue;
             }
 
-            const eqMatch = trimmedCond.match(/^([a-zA-Z0-9_]+)\s*=\s*\?$/);
+            const eqMatch = trimmedCond.match(/^(?:[a-zA-Z0-9_]+\.)?([a-zA-Z0-9_]+)\s*=\s*\?$/);
             if (eqMatch && eqMatch[1]) {
               const col = eqMatch[1];
               const val = params[paramIdx++];
@@ -247,7 +247,7 @@ export function getDatabase(workspaceId?: string): Database.Database {
               continue;
             }
 
-            const neMatch = trimmedCond.match(/^([a-zA-Z0-9_]+)\s*!=\s*\?$/);
+            const neMatch = trimmedCond.match(/^(?:[a-zA-Z0-9_]+\.)?([a-zA-Z0-9_]+)\s*!=\s*\?$/);
             if (neMatch && neMatch[1]) {
               const col = neMatch[1];
               const val = params[paramIdx++];
@@ -353,7 +353,7 @@ export function getDatabase(workspaceId?: string): Database.Database {
               }
 
               // Special junction/join queries
-              if (/company_discovery_runs/i.test(trimmed) && /companies/i.test(trimmed)) {
+              if (/company_discovery_runs/i.test(trimmed) && /companies/i.test(trimmed) && !/contacts/i.test(trimmed)) {
                 return {
                   all: (...params: any[]) => {
                     const cdrTable = getTable('company_discovery_runs');
@@ -366,6 +366,58 @@ export function getDatabase(workspaceId?: string): Database.Database {
                     );
                     const uniqueCompanyIds = new Set(matchedLinks.map((l) => l.companyId));
                     return Array.from(uniqueCompanyIds).map((id) => compTable.get(id)).filter(Boolean);
+                  }
+                };
+              }
+
+              if (/contacts/i.test(trimmed) && /company_discovery_runs/i.test(trimmed)) {
+                return {
+                  all: (...params: any[]) => {
+                    const contTable = getTable('contacts');
+                    const cdrTable = getTable('company_discovery_runs');
+                    const compTable = getTable('companies');
+                    const wsId = params[0];
+
+                    let runId = params.find((p, idx) => idx > 0 && typeof p === 'string' && Array.from(cdrTable.values()).some((l) => l.discoveryRunId === p));
+                    if (!runId) {
+                      runId = params.find((p, idx) => idx > 0 && typeof p === 'string' && p !== wsId && !p.startsWith('%'));
+                    }
+
+                    if (!runId) return [];
+
+                    const matchedCdrs = Array.from(cdrTable.values()).filter(
+                      (l) => l.discoveryRunId === runId && (!wsId || l.workspaceId === wsId)
+                    );
+                    const validCompanyIds = new Set(
+                      matchedCdrs
+                        .map((l) => l.companyId)
+                        .filter((cId) => {
+                          const comp = compTable.get(cId);
+                          return comp && (!comp.deletedAt || comp.deletedAt === null);
+                        })
+                    );
+
+                    let rows = Array.from(contTable.values()).filter(
+                      (c) => (!wsId || c.workspaceId === wsId) && (!c.deletedAt || c.deletedAt === null) && c.companyId && validCompanyIds.has(c.companyId)
+                    );
+
+                    if (/firstName\s+LIKE/i.test(trimmed)) {
+                      const searchParam = params.find((p) => typeof p === 'string' && p.startsWith('%') && p.endsWith('%'));
+                      if (searchParam) {
+                        const term = searchParam.replace(/%/g, '').toLowerCase();
+                        rows = rows.filter((c) =>
+                          (c.firstName && c.firstName.toLowerCase().includes(term)) ||
+                          (c.lastName && c.lastName.toLowerCase().includes(term)) ||
+                          (c.email && c.email.toLowerCase().includes(term)) ||
+                          (c.title && c.title.toLowerCase().includes(term))
+                        );
+                      }
+                    }
+
+                    if (/SELECT DISTINCT c\.id/i.test(trimmed)) {
+                      return rows.map((c) => ({ id: c.id }));
+                    }
+                    return rows;
                   }
                 };
               }
