@@ -293,6 +293,7 @@ export function getDatabase(workspaceId?: string): Database.Database {
                   const table = getTable(tableName);
                   const key =
                     row.id ||
+                    (row.key ? row.key : null) ||
                     (row.companyId && !row.discoveryRunId ? row.companyId : null) ||
                     row.contactId ||
                     (row.discoveryRunId && row.companyId ? `${row.discoveryRunId}_${row.companyId}` : null) ||
@@ -359,13 +360,15 @@ export function getDatabase(workspaceId?: string): Database.Database {
                     const cdrTable = getTable('company_discovery_runs');
                     const compTable = getTable('companies');
                     const wsId = params[0];
-                    const runId = params[1];
+                    const runId = params.length >= 3 ? params[2] : params[1];
 
                     const matchedLinks = Array.from(cdrTable.values()).filter(
                       (l) => l.discoveryRunId === runId && (!wsId || l.workspaceId === wsId)
                     );
                     const uniqueCompanyIds = new Set(matchedLinks.map((l) => l.companyId));
-                    return Array.from(uniqueCompanyIds).map((id) => compTable.get(id)).filter(Boolean);
+                    return Array.from(uniqueCompanyIds)
+                      .map((id) => compTable.get(id))
+                      .filter((c) => c && (!c.deletedAt || c.deletedAt === null));
                   }
                 };
               }
@@ -457,6 +460,9 @@ export function getDatabase(workspaceId?: string): Database.Database {
                   const whereMatch = trimmed.match(/WHERE\s+([\s\S]+?)(?:\s+ORDER\s+BY|\s+LIMIT|\s+GROUP\s+BY|$)/i);
                   if (whereMatch && whereMatch[1]) {
                     rows = rows.filter((r) => matchesWhere(r, whereMatch[1]!, params));
+                  }
+                  if (/COUNT\s*\(/i.test(trimmed)) {
+                    return { count: rows.length };
                   }
                   return rows[0] || null;
                 },
