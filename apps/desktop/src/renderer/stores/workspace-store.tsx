@@ -19,7 +19,7 @@ export interface WorkspaceState {
 // Actions
 // ---------------------------------------------------------------------------
 
-type WorkspaceAction =
+export type WorkspaceAction =
   | { type: 'WORKSPACES_LOADING' }
   | { type: 'WORKSPACES_LOADED'; payload: { workspaces: Workspace[]; active: Workspace | null } }
   | { type: 'WORKSPACE_SWITCHED'; payload: Workspace }
@@ -30,7 +30,7 @@ type WorkspaceAction =
 // Reducer
 // ---------------------------------------------------------------------------
 
-const initialState: WorkspaceState = {
+export const initialState: WorkspaceState = {
   workspaces: [],
   activeWorkspace: null,
   isLoading: false,
@@ -38,7 +38,7 @@ const initialState: WorkspaceState = {
   error: null
 };
 
-function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): WorkspaceState {
+export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): WorkspaceState {
   switch (action.type) {
     case 'WORKSPACES_LOADING':
       return { ...state, isLoading: true, error: null };

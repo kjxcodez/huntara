@@ -294,4 +294,73 @@ describe('LeadForge OS — Workspace Rehydration & Lifecycle Suite', () => {
     expect(localCompanies.length).toBe(1);
     expect(localCompanies[0].id).toBe('comp_A1');
   });
+
+  it('10. background_hydration_allows_immediate_readiness_without_waiting: runtime starts before hydration completes', async () => {
+    await WorkspaceManager.setActiveWorkspace(null);
+
+    let finishHydration: () => void = () => {};
+    const slowHydrationPromise = new Promise<void>((resolve) => {
+      finishHydration = resolve;
+    });
+
+    const originalHydrate = CacheHydrator.hydrateWorkspaceCache;
+    vi.spyOn(CacheHydrator, 'hydrateWorkspaceCache').mockImplementationOnce(async (wsId, sdk) => {
+      await slowHydrationPromise;
+      return originalHydrate(wsId, sdk);
+    });
+
+    // Act: activate workspaceC with backgroundHydration: true
+    const startPromise = WorkspaceManager.setActiveWorkspace(workspaceC, { backgroundHydration: true });
+
+    // startPromise resolves promptly without waiting for slowHydrationPromise
+    const runtime = await startPromise;
+    expect(runtime).toBeDefined();
+    expect(runtime?.isRunning).toBe(true);
+
+    // Database tables are ready even while hydration is still in flight
+    const inFlightCompanies = await LocalCRMRepository.findMany('companies', workspaceC);
+    expect(inFlightCompanies).toHaveLength(0); // not yet hydrated
+
+    // Resolve the background hydration
+    finishHydration();
+    await WorkspaceManager.waitForActiveHydration();
+
+    // Now hydrated data is in SQLite
+    const hydratedCompanies = await LocalCRMRepository.findMany('companies', workspaceC);
+    expect(hydratedCompanies).toHaveLength(1);
+    expect(hydratedCompanies[0].name).toBe('Gamma Enterprises');
+  });
+
+  it('11. background_hydration_failure_does_not_crash_runtime: catches and logs without tearing down runtime', async () => {
+    await WorkspaceManager.setActiveWorkspace(null);
+    vi.spyOn(CacheHydrator, 'hydrateWorkspaceCache').mockRejectedValueOnce(new Error('Network gateway timeout'));
+
+    const runtime = await WorkspaceManager.setActiveWorkspace(workspaceB, { backgroundHydration: true });
+    expect(runtime).toBeDefined();
+    expect(runtime?.isRunning).toBe(true);
+
+    // Awaiting hydration returns safely (null) without unhandled rejection
+    const res = await WorkspaceManager.waitForActiveHydration();
+    expect(res).toBeNull();
+    expect(runtime?.isRunning).toBe(true);
+  });
+
+  it('12. spin_down_cleanly_awaits_in_flight_hydration: stop() awaits background hydration before closing db', async () => {
+    await WorkspaceManager.setActiveWorkspace(null);
+    let hydrationCompleted = false;
+    vi.spyOn(CacheHydrator, 'hydrateWorkspaceCache').mockImplementationOnce(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+      hydrationCompleted = true;
+      return {} as any;
+    });
+
+    const runtime = await WorkspaceManager.setActiveWorkspace(workspaceC, { backgroundHydration: true });
+    expect(runtime).toBeDefined();
+    expect(hydrationCompleted).toBe(false);
+
+    // Stop runtime while hydration is in flight
+    await WorkspaceManager.setActiveWorkspace(null);
+    expect(hydrationCompleted).toBe(true);
+  });
 });
+
