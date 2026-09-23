@@ -71,6 +71,7 @@ export function useWorkspace() {
     workspaces: state.workspaces,
     activeWorkspace: state.activeWorkspace,
     isLoading: state.isLoading,
+    isInitialized: state.isInitialized,
     error: state.error,
     setActive,
     createWorkspace,

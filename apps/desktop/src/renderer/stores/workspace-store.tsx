@@ -11,6 +11,7 @@ export interface WorkspaceState {
   workspaces: Workspace[];
   activeWorkspace: Workspace | null;
   isLoading: boolean;
+  isInitialized: boolean;
   error: string | null;
 }
 
@@ -33,6 +34,7 @@ const initialState: WorkspaceState = {
   workspaces: [],
   activeWorkspace: null,
   isLoading: false,
+  isInitialized: false,
   error: null
 };
 
@@ -44,13 +46,15 @@ function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): Works
       return {
         ...state,
         isLoading: false,
+        isInitialized: true,
         workspaces: action.payload.workspaces,
-        activeWorkspace: action.payload.active
+        activeWorkspace: action.payload.active,
+        error: null
       };
     case 'WORKSPACE_SWITCHED':
       return { ...state, activeWorkspace: action.payload };
     case 'WORKSPACES_ERROR':
-      return { ...state, isLoading: false, error: action.payload };
+      return { ...state, isLoading: false, isInitialized: true, error: action.payload };
     case 'WORKSPACES_RESET':
       return initialState;
     default:

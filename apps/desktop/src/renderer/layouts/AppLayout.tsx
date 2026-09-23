@@ -28,7 +28,7 @@ import { ConnectivityBanner } from '../components/common/ConnectivityBanner';
  * 180ms fade + y-slide so navigation feels immediate and premium.
  */
 export function AppLayout() {
-  const { activeWorkspace } = useWorkspace();
+  const { activeWorkspace, isInitialized, isLoading, workspaces, error } = useWorkspace();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
@@ -42,12 +42,12 @@ export function AppLayout() {
     }
   }, [navigate]);
 
-  // Show window frame even when no workspace exists
+  // Show window frame only when workspace state has been deterministically resolved
   useEffect(() => {
-    if (!activeWorkspace) {
+    if (isInitialized && (!activeWorkspace || workspaces.length === 0)) {
       window.ipc.invoke('electron:ready-to-show' as any, null).catch(() => {});
     }
-  }, [activeWorkspace]);
+  }, [isInitialized, activeWorkspace, workspaces.length]);
 
   // Invalidate all queries when a sync completes or connection is recovered.
   // Debounced to 500 ms to prevent rapid-fire sync:completed events (e.g. from a
@@ -99,10 +99,25 @@ export function AppLayout() {
     };
   }, [activeWorkspace?.id, queryClient]);
 
-  const { isLoading } = useWorkspace();
+  // ── Error state: display actionable error with reload rather than failing through to Create Workspace ──
+  if (error && !activeWorkspace) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background px-4">
+        <div className="flex flex-col items-center gap-4 text-center max-w-sm">
+          <p className="text-sm text-destructive font-medium">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // ── Initializing state: show clean progress gate ─────────────────────────
-  if (isLoading && !activeWorkspace) {
+  // ── Initializing state: show clean progress gate if not resolved yet ─────
+  if (!isInitialized || (isLoading && !activeWorkspace)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background px-4">
         <div className="flex flex-col items-center gap-3 text-center">
@@ -113,8 +128,8 @@ export function AppLayout() {
     );
   }
 
-  // ── No workspace: prompt to create one ───────────────────────────────────
-  if (!activeWorkspace) {
+  // ── No workspace: ONLY prompt to create one if resolution completed and 0 workspaces exist ──
+  if (!activeWorkspace && workspaces.length === 0) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background px-4">
         <motion.div

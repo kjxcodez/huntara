@@ -8,24 +8,29 @@ async function loadAndSetActiveWorkspace(
   authUser: AuthUser,
   workspaceStore: ReturnType<typeof useWorkspaceStore>
 ) {
-  const workspaces = await WorkspaceService.listWorkspaces();
-  const persistedActiveId = await WorkspaceService.getActiveWorkspaceId();
+  workspaceStore.setLoading();
+  try {
+    const workspaces = await WorkspaceService.listWorkspaces();
+    const persistedActiveId = await WorkspaceService.getActiveWorkspaceId();
 
-  let active = workspaces.find((w) => w.id === persistedActiveId) || null;
-  if (!active) {
-    active = workspaces.find((w) => w.id === authUser.activeWorkspaceId) || null;
-  }
-  if (!active && workspaces.length > 0) {
-    active = workspaces[0] || null;
-  }
+    let active = workspaces.find((w) => w.id === persistedActiveId) || null;
+    if (!active) {
+      active = workspaces.find((w) => w.id === authUser.activeWorkspaceId) || null;
+    }
+    if (!active && workspaces.length > 0) {
+      active = workspaces[0] || null;
+    }
 
-  if (active) {
-    await WorkspaceService.syncActiveWorkspace(active.id);
-  } else {
-    await WorkspaceService.syncActiveWorkspace(null);
-  }
+    if (active) {
+      await WorkspaceService.syncActiveWorkspace(active.id);
+    } else {
+      await WorkspaceService.syncActiveWorkspace(null);
+    }
 
-  workspaceStore.setWorkspaces(workspaces, active);
+    workspaceStore.setWorkspaces(workspaces, active);
+  } catch (err: any) {
+    workspaceStore.setError(err.message || 'Failed to load workspaces');
+  }
 }
 
 /**
@@ -40,10 +45,11 @@ export function useAuth() {
 
   const login = async (email: string, password: string) => {
     setLoading();
+    workspaceStore.setLoading();
     try {
       const result = await AuthService.login({ email, password });
-      setAuthenticated(result.user, result.token);
       await loadAndSetActiveWorkspace(result.user, workspaceStore);
+      setAuthenticated(result.user, result.token);
     } catch (err: any) {
       setUnauthenticated(err.message ?? 'Login failed');
       throw err;
@@ -52,10 +58,11 @@ export function useAuth() {
 
   const loginWithGoogle = async () => {
     setLoading();
+    workspaceStore.setLoading();
     try {
       const result = await AuthService.loginWithGoogle();
-      setAuthenticated(result.user, result.token);
       await loadAndSetActiveWorkspace(result.user, workspaceStore);
+      setAuthenticated(result.user, result.token);
     } catch (err: any) {
       setUnauthenticated(err.message ?? 'Google sign-in failed');
       throw err;
@@ -64,10 +71,11 @@ export function useAuth() {
 
   const register = async (email: string, password: string, name: string) => {
     setLoading();
+    workspaceStore.setLoading();
     try {
       const result = await AuthService.register({ email, password, name });
-      setAuthenticated(result.user, result.token);
       await loadAndSetActiveWorkspace(result.user, workspaceStore);
+      setAuthenticated(result.user, result.token);
     } catch (err: any) {
       setUnauthenticated(err.message ?? 'Registration failed');
       throw err;
@@ -82,12 +90,17 @@ export function useAuth() {
 
   const restoreSession = async () => {
     setLoading();
-    const result = await AuthService.restoreSession();
-    if (result) {
-      setAuthenticated(result.user, result.token);
-      await loadAndSetActiveWorkspace(result.user, workspaceStore);
-    } else {
-      setUnauthenticated();
+    workspaceStore.setLoading();
+    try {
+      const result = await AuthService.restoreSession();
+      if (result) {
+        await loadAndSetActiveWorkspace(result.user, workspaceStore);
+        setAuthenticated(result.user, result.token);
+      } else {
+        setUnauthenticated();
+      }
+    } catch (err: any) {
+      setUnauthenticated(err.message ?? 'Session restore failed');
     }
   };
 
