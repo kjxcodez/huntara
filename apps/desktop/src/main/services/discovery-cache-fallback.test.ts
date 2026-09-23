@@ -535,4 +535,233 @@ describe('Phase 3 — Discovery Run Historical Cache-Miss Suite', () => {
     expect(matchingCompanies).toHaveLength(1);
     expect(matchingCompanies[0].id).toBe('c_roofer_1');
   });
+
+  // --------------------------------------------------------------------------
+  // SCENARIO 10: Multi-Run Contacts Isolation
+  // --------------------------------------------------------------------------
+  it('10. Multi-Run Contacts Isolation — multiple historical runs hydrate independently without contact cross-talk', async () => {
+    const runAlpha = 'run_alpha_101';
+    const runBeta = 'run_beta_102';
+
+    // Seed cloud data for Run Alpha and Run Beta
+    mockSdk._cloudRuns.push(
+      { id: runAlpha, workspaceId: workspaceA, name: 'Run Alpha', query: 'alpha', status: 'completed', resultCount: 1 },
+      { id: runBeta, workspaceId: workspaceA, name: 'Run Beta', query: 'beta', status: 'completed', resultCount: 1 }
+    );
+    mockSdk._cloudCompanies.push(
+      { id: 'c_alpha_1', workspaceId: workspaceA, name: 'Alpha Corp', domain: 'alpha.com' },
+      { id: 'c_beta_1', workspaceId: workspaceA, name: 'Beta Corp', domain: 'beta.com' }
+    );
+    mockSdk._cloudLinks.push(
+      { id: 'l_a1', workspaceId: workspaceA, discoveryRunId: runAlpha, companyId: 'c_alpha_1' },
+      { id: 'l_b1', workspaceId: workspaceA, discoveryRunId: runBeta, companyId: 'c_beta_1' }
+    );
+
+    // Seed contacts in local SQLite
+    const db = getDatabase(workspaceA);
+    const insertCont = db.prepare(`
+      INSERT INTO contacts (id, workspaceId, companyId, firstName, lastName, email, createdAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertCont.run('ct_a1', workspaceA, 'c_alpha_1', 'Alice', 'Alpha', 'alice@alpha.com', new Date().toISOString());
+    insertCont.run('ct_b1', workspaceA, 'c_beta_1', 'Bob', 'Beta', 'bob@beta.com', new Date().toISOString());
+
+    // Hydrate Run Alpha via read-through fallback
+    const resA = await invokeIpc('discovery:run:companies', { workspaceId: workspaceA, runId: runAlpha });
+    expect(resA).toHaveLength(1);
+    expect(resA[0].id).toBe('c_alpha_1');
+
+    // Hydrate Run Beta via read-through fallback
+    const resB = await invokeIpc('discovery:run:companies', { workspaceId: workspaceA, runId: runBeta });
+    expect(resB).toHaveLength(1);
+    expect(resB[0].id).toBe('c_beta_1');
+
+    // Filter contacts for Alpha
+    const contactsAlpha = resolveMatchingContactIds(db, workspaceA, { discoveryRunId: runAlpha });
+    expect(contactsAlpha).toEqual(['ct_a1']);
+
+    // Filter contacts for Beta
+    const contactsBeta = resolveMatchingContactIds(db, workspaceA, { discoveryRunId: runBeta });
+    expect(contactsBeta).toEqual(['ct_b1']);
+  });
+
+  // --------------------------------------------------------------------------
+  // SCENARIO 11: Bulk Selection Integrity with Discovery Filter
+  // --------------------------------------------------------------------------
+  it('11. Bulk Selection Integrity — bulk selection respecting active discovery run filter works correctly', async () => {
+    const runId = 'run_bulk_111';
+
+    mockSdk._cloudRuns.push({
+      id: runId,
+      workspaceId: workspaceA,
+      name: 'Bulk Run',
+      query: 'bulk',
+      status: 'completed',
+      resultCount: 2
+    });
+    mockSdk._cloudCompanies.push(
+      { id: 'c_bk_1', workspaceId: workspaceA, name: 'Bulk Co 1', domain: 'bulk1.com' },
+      { id: 'c_bk_2', workspaceId: workspaceA, name: 'Bulk Co 2', domain: 'bulk2.com' },
+      { id: 'c_bk_other', workspaceId: workspaceA, name: 'Unrelated Co', domain: 'other.com' }
+    );
+    mockSdk._cloudLinks.push(
+      { id: 'l_bk1', workspaceId: workspaceA, discoveryRunId: runId, companyId: 'c_bk_1' },
+      { id: 'l_bk2', workspaceId: workspaceA, discoveryRunId: runId, companyId: 'c_bk_2' }
+    );
+
+    // Seed contacts
+    const db = getDatabase(workspaceA);
+    const insertCont = db.prepare(`
+      INSERT INTO contacts (id, workspaceId, companyId, firstName, lastName, email, createdAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    insertCont.run('ct_1', workspaceA, 'c_bk_1', 'C1', 'L1', 'c1@b1.com', new Date().toISOString());
+    insertCont.run('ct_2', workspaceA, 'c_bk_2', 'C2', 'L2', 'c2@b2.com', new Date().toISOString());
+    insertCont.run('ct_other', workspaceA, 'c_bk_other', 'C3', 'L3', 'c3@other.com', new Date().toISOString());
+
+    // Hydrate run
+    await invokeIpc('discovery:run:companies', { workspaceId: workspaceA, runId });
+
+    // Canonical query with discoveryRunId and exclusion
+    const matchingMinusExcluded = resolveMatchingContactIds(
+      db,
+      workspaceA,
+      { discoveryRunId: runId },
+      ['ct_2'] // ct_2 explicitly excluded
+    );
+
+    expect(matchingMinusExcluded).toEqual(['ct_1']);
+  });
+
+  // --------------------------------------------------------------------------
+  // SCENARIO 12: Multi-Page Remote Hydration (>100 records)
+  // --------------------------------------------------------------------------
+  it('12. Multi-Page Remote Hydration — paginated authoritative responses across multiple pages are fully hydrated', async () => {
+    const runId = 'run_multipage_120';
+    const totalRecords = 150;
+
+    for (let i = 1; i <= totalRecords; i++) {
+      const cId = `comp_mp_${i}`;
+      mockSdk._cloudCompanies.push({
+        id: cId,
+        workspaceId: workspaceA,
+        name: `MultiPage Company ${i}`,
+        domain: `mp${i}.com`
+      });
+      mockSdk._cloudLinks.push({
+        id: `link_mp_${i}`,
+        workspaceId: workspaceA,
+        discoveryRunId: runId,
+        companyId: cId
+      });
+    }
+
+    mockSdk._cloudRuns.push({
+      id: runId,
+      workspaceId: workspaceA,
+      name: 'MultiPage Run',
+      query: 'multipage query',
+      status: 'completed',
+      resultCount: totalRecords
+    });
+
+    const result = await invokeIpc('discovery:run:companies', {
+      workspaceId: workspaceA,
+      runId
+    });
+
+    expect(result).toHaveLength(totalRecords);
+
+    // Verify all 150 records exist in SQLite
+    const db = getDatabase(workspaceA);
+    const linkCount = db.prepare('SELECT count(*) as count FROM company_discovery_runs WHERE discoveryRunId = ?').get(runId) as any;
+    expect(linkCount.count).toBe(totalRecords);
+  });
+
+  // --------------------------------------------------------------------------
+  // SCENARIO 13: Background Hydration and Targeted Fallback Interleaving
+  // --------------------------------------------------------------------------
+  it('13. Background Hydration Interleaving — targeted hydration safely reconciles even if background hydration runs later', async () => {
+    const runId = 'run_interleave_130';
+
+    mockSdk._cloudRuns.push({
+      id: runId,
+      workspaceId: workspaceA,
+      name: 'Interleaved Run',
+      query: 'interleaved',
+      status: 'completed',
+      resultCount: 1
+    });
+    mockSdk._cloudCompanies.push({
+      id: 'c_il_1',
+      workspaceId: workspaceA,
+      name: 'Interleaved Co',
+      domain: 'interleaved.com'
+    });
+    mockSdk._cloudLinks.push({
+      id: 'l_il_1',
+      workspaceId: workspaceA,
+      discoveryRunId: runId,
+      companyId: 'c_il_1'
+    });
+
+    // 1. Targeted fallback hydrates Run 130 first
+    await invokeIpc('discovery:run:companies', { workspaceId: workspaceA, runId });
+
+    // 2. Later, background hydration syncs discovery runs and links
+    await LocalCRMRepository.saveManyFromServer('company_discovery_runs', [
+      {
+        id: `${runId}_c_il_1`,
+        workspaceId: workspaceA,
+        discoveryRunId: runId,
+        companyId: 'c_il_1',
+        createdAt: new Date().toISOString()
+      }
+    ]);
+
+    // 3. Subsequent read remains completely idempotent and consistent
+    const db = getDatabase(workspaceA);
+    const links = db.prepare('SELECT count(*) as count FROM company_discovery_runs WHERE discoveryRunId = ?').get(runId) as any;
+    expect(links.count).toBe(1);
+
+    const result = await invokeIpc('discovery:run:companies', { workspaceId: workspaceA, runId });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('c_il_1');
+  });
+
+  // --------------------------------------------------------------------------
+  // SCENARIO 14: Cross-Workspace Data Leakage Prevention
+  // --------------------------------------------------------------------------
+  it('14. Cross-Workspace Data Isolation — Workspace B data is never inserted into or returned by Workspace A queries', async () => {
+    const runA = 'run_ws_a_140';
+    const runB = 'run_ws_b_140';
+
+    mockSdk._cloudRuns.push(
+      { id: runA, workspaceId: workspaceA, name: 'Run A', query: 'a', status: 'completed', resultCount: 1 },
+      { id: runB, workspaceId: workspaceB, name: 'Run B', query: 'b', status: 'completed', resultCount: 1 }
+    );
+    mockSdk._cloudCompanies.push(
+      { id: 'c_ws_a', workspaceId: workspaceA, name: 'Company A Only', domain: 'a.com' },
+      { id: 'c_ws_b', workspaceId: workspaceB, name: 'Company B Only', domain: 'b.com' }
+    );
+    mockSdk._cloudLinks.push(
+      { id: 'l_ws_a', workspaceId: workspaceA, discoveryRunId: runA, companyId: 'c_ws_a' },
+      { id: 'l_ws_b', workspaceId: workspaceB, discoveryRunId: runB, companyId: 'c_ws_b' }
+    );
+
+    // Query Workspace A
+    const resA = await invokeIpc('discovery:run:companies', { workspaceId: workspaceA, runId: runA });
+    expect(resA).toHaveLength(1);
+    expect(resA[0].id).toBe('c_ws_a');
+
+    // Query Workspace B
+    const resB = await invokeIpc('discovery:run:companies', { workspaceId: workspaceB, runId: runB });
+    expect(resB).toHaveLength(1);
+    expect(resB[0].id).toBe('c_ws_b');
+
+    // Verify Workspace A database does NOT contain company B
+    const dbA = getDatabase(workspaceA);
+    const leakedComp = dbA.prepare('SELECT * FROM companies WHERE id = ?').get('c_ws_b');
+    expect(leakedComp).toBeNull();
+  });
 });
