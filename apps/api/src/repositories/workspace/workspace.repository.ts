@@ -12,12 +12,17 @@ export class WorkspaceRepository extends BaseRepository<WorkspaceDocument> {
 
   public async findUserWorkspaces(userId: string): Promise<WorkspaceDocument[]> {
     return this.findMany({
-      members: {
-        $elemMatch: {
-          userId,
-          status: 'ACTIVE'
+      $or: [
+        { ownerId: userId },
+        {
+          members: {
+            $elemMatch: {
+              userId,
+              status: 'ACTIVE'
+            }
+          }
         }
-      }
+      ]
     });
   }
 
