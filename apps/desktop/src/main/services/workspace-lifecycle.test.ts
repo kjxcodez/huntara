@@ -315,7 +315,7 @@ describe('LeadForge OS — Workspace Rehydration & Lifecycle Suite', () => {
     // startPromise resolves promptly without waiting for slowHydrationPromise
     const runtime = await startPromise;
     expect(runtime).toBeDefined();
-    expect(runtime?.isRunning).toBe(true);
+    expect(runtime?.running).toBe(true);
 
     // Database tables are ready even while hydration is still in flight
     const inFlightCompanies = await LocalCRMRepository.findMany('companies', workspaceC);
@@ -337,12 +337,12 @@ describe('LeadForge OS — Workspace Rehydration & Lifecycle Suite', () => {
 
     const runtime = await WorkspaceManager.setActiveWorkspace(workspaceB, { backgroundHydration: true });
     expect(runtime).toBeDefined();
-    expect(runtime?.isRunning).toBe(true);
+    expect(runtime?.running).toBe(true);
 
     // Awaiting hydration returns safely (null) without unhandled rejection
     const res = await WorkspaceManager.waitForActiveHydration();
     expect(res).toBeNull();
-    expect(runtime?.isRunning).toBe(true);
+    expect(runtime?.running).toBe(true);
   });
 
   it('12. spin_down_cleanly_awaits_in_flight_hydration: stop() awaits background hydration before closing db', async () => {

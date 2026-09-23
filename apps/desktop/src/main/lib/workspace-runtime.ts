@@ -48,6 +48,10 @@ export class WorkspaceRuntime {
     return WorkspaceRuntime.restartCounts.get(this.workspaceId) || 0;
   }
 
+  public get running(): boolean {
+    return this.isRunning;
+  }
+
   constructor(workspaceId: string, sdk: SdkClient) {
     this.workspaceId = workspaceId;
     this.sdk = sdk;
