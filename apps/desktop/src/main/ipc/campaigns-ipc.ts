@@ -176,11 +176,11 @@ export function registerCampaignsIpc(): void {
       LEFT JOIN contacts c ON se.contactId = c.id
       LEFT JOIN companies comp ON c.companyId = comp.id
       LEFT JOIN sequences s ON se.sequenceId = s.id
-      WHERE se.campaignId = ? AND se.deletedAt IS NULL
+      WHERE se.workspaceId = ? AND se.campaignId = ? AND se.deletedAt IS NULL
       ORDER BY se.createdAt DESC
     `
       )
-      .all(campaignId) as any[];
+      .all(workspaceId, campaignId) as any[];
 
     return rows.map((row) => {
       try {

@@ -437,31 +437,51 @@ export function registerCrmIpc() {
     const campaigns = await LocalCRMRepository.findMany('campaigns', workspaceId, filter);
     const db = getDatabase(workspaceId);
 
-    // Enrich campaigns with aggregate stats and auto-calculated statuses
+    // Enrich campaigns with aggregate stats and auto-calculated statuses in a single query
+    const statsRows = (campaigns.length > 0
+      ? db
+          .prepare(
+            `
+          SELECT
+            campaignId,
+            COUNT(id) as total,
+            SUM(CASE WHEN UPPER(status) IN ('RUNNING', 'QUEUED', 'STARTING') THEN 1 ELSE 0 END) as running,
+            SUM(CASE WHEN UPPER(status) = 'WAITING' THEN 1 ELSE 0 END) as waiting,
+            SUM(CASE WHEN UPPER(status) = 'REPLIED' THEN 1 ELSE 0 END) as replied,
+            SUM(CASE WHEN UPPER(status) = 'FAILED' THEN 1 ELSE 0 END) as failed,
+            SUM(CASE WHEN UPPER(status) = 'PAUSED' THEN 1 ELSE 0 END) as paused,
+            SUM(CASE WHEN UPPER(status) = 'COMPLETED' THEN 1 ELSE 0 END) as completed
+          FROM sequence_executions
+          WHERE workspaceId = ? AND deletedAt IS NULL
+          GROUP BY campaignId
+        `
+          )
+          .all(workspaceId)
+      : []) as Array<{
+      campaignId: string;
+      total: number;
+      running: number;
+      waiting: number;
+      replied: number;
+      failed: number;
+      paused: number;
+      completed: number;
+    }>;
+
+    const statsMap = new Map<string, (typeof statsRows)[number]>();
+    for (const row of statsRows) {
+      statsMap.set(row.campaignId, row);
+    }
+
     for (const campaign of campaigns) {
-      const stats = db
-        .prepare(
-          `
-        SELECT 
-          COUNT(id) as total,
-          SUM(CASE WHEN status IN ('running', 'queued', 'starting') THEN 1 ELSE 0 END) as running,
-          SUM(CASE WHEN status = 'waiting' THEN 1 ELSE 0 END) as waiting,
-          SUM(CASE WHEN status IN ('replied', 'REPLIED') THEN 1 ELSE 0 END) as replied,
-          SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
-          SUM(CASE WHEN status = 'paused' THEN 1 ELSE 0 END) as paused,
-          SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
-        FROM sequence_executions
-        WHERE campaignId = ? AND deletedAt IS NULL
-      `
-        )
-        .get(campaign.id) as {
-        total: number;
-        running: number;
-        waiting: number;
-        replied: number;
-        failed: number;
-        paused: number;
-        completed: number;
+      const stats = statsMap.get(campaign.id) || {
+        total: 0,
+        running: 0,
+        waiting: 0,
+        replied: 0,
+        failed: 0,
+        paused: 0,
+        completed: 0
       };
 
       campaign.contactsCount = stats.total;
@@ -475,7 +495,7 @@ export function registerCrmIpc() {
       // Canonical status is preserved from authoritative store; provide computed execution status for UI
       const upperStatus = String(campaign.status || 'DRAFT').toUpperCase();
       campaign.status = upperStatus;
-      if (stats.total > 0 && (stats.completed + stats.replied + stats.failed === stats.total) && upperStatus === 'ACTIVE') {
+      if (stats.total > 0 && stats.completed + stats.replied + stats.failed === stats.total && upperStatus === 'ACTIVE') {
         campaign.executionState = 'COMPLETED';
       } else {
         campaign.executionState = upperStatus;
@@ -504,10 +524,10 @@ export function registerCrmIpc() {
         SUM(CASE WHEN UPPER(status) = 'PAUSED' THEN 1 ELSE 0 END) as paused,
         SUM(CASE WHEN UPPER(status) = 'COMPLETED' THEN 1 ELSE 0 END) as completed
       FROM sequence_executions
-      WHERE campaignId = ? AND deletedAt IS NULL
+      WHERE workspaceId = ? AND campaignId = ? AND deletedAt IS NULL
     `
       )
-      .get(campaign.id) as {
+      .get(workspaceId, campaign.id) as {
       total: number;
       running: number;
       waiting: number;
