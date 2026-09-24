@@ -128,6 +128,7 @@ export function initCacheSchema(db: Database.Database): void {
 
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_companies_ws ON companies(workspaceId)`).run();
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_companies_ws_del ON companies(workspaceId, deletedAt)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_companies_ws_del_created ON companies(workspaceId, deletedAt, createdAt DESC)`).run();
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_companies_domain ON companies(workspaceId, domain)`).run();
 
     // 4. Contacts Cache
@@ -178,6 +179,7 @@ export function initCacheSchema(db: Database.Database): void {
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_contacts_ws ON contacts(workspaceId)`).run();
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_contacts_ws_comp ON contacts(workspaceId, companyId)`).run();
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_contacts_ws_del ON contacts(workspaceId, deletedAt)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_contacts_ws_del_created ON contacts(workspaceId, deletedAt, createdAt DESC)`).run();
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_contacts_email ON contacts(workspaceId, email)`).run();
 
     // 5. Campaigns Cache
@@ -537,6 +539,8 @@ export function initCacheSchema(db: Database.Database): void {
     `).run();
 
     db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_comp_disc_ws ON company_discovery_runs(workspaceId, discoveryRunId)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_comp_disc_comp ON company_discovery_runs(workspaceId, companyId)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_comp_disc_run_comp ON company_discovery_runs(workspaceId, discoveryRunId, companyId)`).run();
 
     // 13. Intelligence Sources Cache
     db.prepare(`
@@ -844,6 +848,20 @@ export function registerResetWorkspaceCache(
 }
 
 /**
+ * Idempotently verifies and adds additive performance indexes to existing clean databases.
+ */
+export function ensureCacheIndexes(db: Database.Database): void {
+  try {
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_companies_ws_del_created ON companies(workspaceId, deletedAt, createdAt DESC)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_contacts_ws_del_created ON contacts(workspaceId, deletedAt, createdAt DESC)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_comp_disc_comp ON company_discovery_runs(workspaceId, companyId)`).run();
+    db.prepare(`CREATE INDEX IF NOT EXISTS idx_cache_comp_disc_run_comp ON company_discovery_runs(workspaceId, discoveryRunId, companyId)`).run();
+  } catch (err) {
+    console.warn('[CacheSchema] Note ensuring performance indexes:', err);
+  }
+}
+
+/**
  * Ensures a workspace database is in a clean cache state.
  * If legacy or corrupt, safely archives and rebuilds a fresh cache.
  */
@@ -854,6 +872,7 @@ export function ensureCleanCache(
   const state = detectCacheState(db);
 
   if (state === 'CLEAN') {
+    ensureCacheIndexes(db);
     return db;
   }
 
