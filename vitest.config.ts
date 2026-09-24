@@ -37,7 +37,8 @@ export default defineConfig({
       'apps/desktop/src/main/services/post-release-stabilization.test.ts',
       'apps/desktop/src/main/services/release-qualification.test.ts',
       'apps/desktop/src/main/services/scheduler-execution-hardening.test.ts',
-      'apps/desktop/src/main/services/adversarial-cross-race-qualification.test.ts'
+      'apps/desktop/src/main/services/adversarial-cross-race-qualification.test.ts',
+      'apps/desktop/src/main/services/phase4-performance.test.ts'
     ],
     alias: {
       '@': path.resolve(__dirname, 'apps/desktop/src'),
