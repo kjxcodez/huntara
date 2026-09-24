@@ -30,7 +30,8 @@ const integrationTests = [
   'src/main/services/adversarial-cross-race-qualification.test.ts',
   'src/main/services/post-release-stabilization.test.ts',
   'src/main/services/release-qualification.test.ts',
-  'src/main/services/scheduler-execution-hardening.test.ts'
+  'src/main/services/scheduler-execution-hardening.test.ts',
+  'src/main/services/phase4-performance.test.ts'
 ];
 
 let electronPath = null;
