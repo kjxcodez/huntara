@@ -40,6 +40,7 @@ const companyDiscoveryRunSchema = new Schema<CompanyDiscoveryRunDocument>(
 
 companyDiscoveryRunSchema.index({ workspaceId: 1, companyId: 1, discoveryRunId: 1 }, { unique: true });
 companyDiscoveryRunSchema.index({ workspaceId: 1, discoveryRunId: 1 });
+companyDiscoveryRunSchema.index({ workspaceId: 1, discoveryRunId: 1, companyId: 1 });
 companyDiscoveryRunSchema.plugin(workspacePlugin);
 companyDiscoveryRunSchema.plugin(timestampPlugin);
 

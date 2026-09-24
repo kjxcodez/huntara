@@ -130,6 +130,8 @@ const companySchema = new Schema<CompanyDocument>(
 companySchema.index({ workspaceId: 1, domain: 1 });
 // 2. workspaceId + status (enables fast tenant filtering by pipeline status)
 companySchema.index({ workspaceId: 1, status: 1 });
+// 3. workspaceId + createdAt (enables fast reverse-chronological sorting without in-memory sort buffer)
+companySchema.index({ workspaceId: 1, createdAt: -1 });
 
 companySchema.plugin(workspacePlugin);
 companySchema.plugin(softDeletePlugin);

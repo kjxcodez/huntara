@@ -265,7 +265,10 @@ export class DiscoveryRunService {
   }
 
   public async listCompaniesForRun(discoveryRunId: string): Promise<string[]> {
-    const records = await this.companyDiscoveryRunRepository.findMany({ discoveryRunId });
+    const records = await this.companyDiscoveryRunRepository.findMany(
+      { discoveryRunId },
+      { projection: { companyId: 1, _id: 0 } }
+    );
     return records.map((r) => r.companyId);
   }
 

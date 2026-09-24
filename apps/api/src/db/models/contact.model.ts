@@ -125,6 +125,8 @@ contactSchema.index(
     partialFilterExpression: { email: { $type: 'string' } }
   }
 );
+// 3. workspaceId + createdAt (enables fast reverse-chronological sorting without in-memory sort buffer)
+contactSchema.index({ workspaceId: 1, createdAt: -1 });
 
 contactSchema.plugin(workspacePlugin);
 contactSchema.plugin(softDeletePlugin);

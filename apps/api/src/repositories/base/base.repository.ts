@@ -71,16 +71,17 @@ export class BaseRepository<T extends Document<any>> {
 
   public async findMany(
     filter: FilterQuery<T> = {},
-    options: { sort?: any; limit?: number; skip?: number } = {},
+    options: { sort?: any; limit?: number; skip?: number; projection?: any } = {},
     session?: ClientSession
   ): Promise<T[]> {
     try {
       const scopedFilter = this.applyScope(filter);
-      let query = this.model.find(scopedFilter).session(session || null);
+      let query: any = this.model.find(scopedFilter).session(session || null);
+      if (options.projection) query = query.select(options.projection);
       if (options.sort) query = query.sort(options.sort);
       if (options.skip) query = query.skip(options.skip);
       if (options.limit) query = query.limit(options.limit);
-      return await query;
+      return (await query) as T[];
     } catch (error) {
       this.handleError(error);
     }
