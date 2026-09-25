@@ -42,14 +42,32 @@ export class WorkspaceService {
     this.userRepository = new UserRepository();
   }
 
-  public async getWorkspaceById(id: string): Promise<WorkspaceDocument> {
+  public async getWorkspaceById(id: string, callerUserId?: string): Promise<WorkspaceDocument> {
     const workspace = await this.workspaceRepository.findById(id);
     if (!workspace) throw new NotFoundError('Workspace not found.');
+    if (callerUserId) {
+      const isOwner = workspace.ownerId === callerUserId;
+      const isMember = Array.isArray(workspace.members) &&
+        workspace.members.some((m) => m.userId === callerUserId && m.status !== WorkspaceMemberStatus.EXPIRED);
+      if (!isOwner && !isMember) {
+        throw new NotFoundError('Workspace not found.');
+      }
+    }
     return workspace;
   }
 
-  public async getWorkspaceBySlug(slug: string): Promise<WorkspaceDocument | null> {
-    return this.workspaceRepository.findBySlug(slug);
+  public async getWorkspaceBySlug(slug: string, callerUserId?: string): Promise<WorkspaceDocument | null> {
+    const workspace = await this.workspaceRepository.findBySlug(slug);
+    if (!workspace) return null;
+    if (callerUserId) {
+      const isOwner = workspace.ownerId === callerUserId;
+      const isMember = Array.isArray(workspace.members) &&
+        workspace.members.some((m) => m.userId === callerUserId && m.status !== WorkspaceMemberStatus.EXPIRED);
+      if (!isOwner && !isMember) {
+        return null;
+      }
+    }
+    return workspace;
   }
 
   public async listUserWorkspaces(userId: string): Promise<WorkspaceDocument[]> {

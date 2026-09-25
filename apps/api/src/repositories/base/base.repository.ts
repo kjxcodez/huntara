@@ -170,7 +170,7 @@ export class BaseRepository<T extends Document<any>> {
         return true;
       }
 
-      const result = await this.model.deleteOne({ _id: id } as any).session(session || null);
+      const result = await this.model.deleteOne(filter).session(session || null);
       return result.deletedCount > 0;
     } catch (error) {
       if (error instanceof NotFoundError) throw error;

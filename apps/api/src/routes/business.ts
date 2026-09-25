@@ -87,7 +87,8 @@ const getWorkspaceRoute = createRoute({
 
 workspacesRouter.openapi(getWorkspaceRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const workspace = await workspaceService.getWorkspaceById(id);
+  const userId = getUserId(c);
+  const workspace = await workspaceService.getWorkspaceById(id, userId);
   return c.json(successResponse(workspace));
 });
 
@@ -297,7 +298,8 @@ const listMembersRoute = createRoute({
 
 workspacesRouter.openapi(listMembersRoute, async (c) => {
   const { id } = c.req.valid('param');
-  const workspace = await workspaceService.getWorkspaceById(id);
+  const userId = getUserId(c);
+  const workspace = await workspaceService.getWorkspaceById(id, userId);
   return c.json(successResponse(workspace.members));
 });
 

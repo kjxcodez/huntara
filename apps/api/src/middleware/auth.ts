@@ -50,9 +50,21 @@ export async function workspaceMiddleware(c: Context, next: Next): Promise<void>
     }
   } else {
     if (user.activeWorkspaceId) {
-      workspaceId = user.activeWorkspaceId;
-      c.set('workspaceId', workspaceId);
-    } else {
+      try {
+        const workspace = await WorkspaceModel.findById(user.activeWorkspaceId);
+        const userIdStr = userId ? String(userId) : '';
+        const isOwner = workspace?.ownerId ? String(workspace.ownerId) === userIdStr : false;
+        const isMember = Array.isArray(workspace?.members)
+          ? workspace.members.some((m: any) => m.userId && String(m.userId) === userIdStr)
+          : false;
+        if (workspace && (isOwner || isMember)) {
+          workspaceId = user.activeWorkspaceId;
+          c.set('workspaceId', workspaceId);
+        }
+      } catch {}
+    }
+
+    if (!c.get('workspaceId')) {
       const existingWorkspace = await WorkspaceModel.findOne({
         $or: [{ ownerId: userId }, { 'members.userId': userId }]
       });
