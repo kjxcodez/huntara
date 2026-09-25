@@ -109,6 +109,16 @@ export default function DiscoveryScreen() {
     setJobsPage(page);
   }, []);
 
+  const cachedJobs = (queryClient.getQueryData(['scheduler_jobs', 'list', workspaceId]) || []) as any[];
+  const cachedRuns = (queryClient.getQueryData(['discovery_runs', 'list', workspaceId]) || []) as any[];
+  const hasActiveWork =
+    cachedJobs.some((j: any) =>
+      ['running', 'queued', 'retrying', 'starting', 'pending'].includes(String(j.status || '').toLowerCase())
+    ) ||
+    cachedRuns.some((r: any) =>
+      ['running', 'queued', 'retrying', 'starting', 'pending'].includes(String(r.status || '').toLowerCase())
+    );
+
   const jobsQuery = useQuery({
     queryKey: ['scheduler_jobs', 'list', workspaceId],
     queryFn: async () => {
@@ -116,7 +126,7 @@ export default function DiscoveryScreen() {
       return window.ipc.invoke('scheduler:jobs:list', { workspaceId });
     },
     enabled: !!workspaceId,
-    refetchInterval: 5000
+    refetchInterval: hasActiveWork ? 4000 : false
   });
 
   const discoveryRunsQuery = useQuery({
@@ -126,7 +136,7 @@ export default function DiscoveryScreen() {
       return window.ipc.invoke('discovery:run:list', { workspaceId });
     },
     enabled: !!workspaceId,
-    refetchInterval: 5000
+    refetchInterval: hasActiveWork ? 4000 : false
   });
 
   const companiesQuery = useQuery({
@@ -136,7 +146,7 @@ export default function DiscoveryScreen() {
       return SyncCompanyRepository.listAndSync(workspaceId);
     },
     enabled: !!workspaceId,
-    refetchInterval: 2000
+    refetchInterval: hasActiveWork ? 3000 : false
   });
 
   const contactsQuery = useQuery({
@@ -146,7 +156,7 @@ export default function DiscoveryScreen() {
       return SyncContactRepository.listAndSync(workspaceId);
     },
     enabled: !!workspaceId,
-    refetchInterval: 2000
+    refetchInterval: hasActiveWork ? 3000 : false
   });
 
   const createRunMutation = useMutation({
@@ -275,18 +285,6 @@ export default function DiscoveryScreen() {
   const existingCompanies = (companiesQuery.data || []) as any[];
   const existingContacts = (contactsQuery.data || []) as any[];
 
-  const selectedRunCompaniesQuery = useQuery({
-    queryKey: ['discovery_run_companies', workspaceId, selectedJobId],
-    queryFn: async () => {
-      if (!workspaceId || !selectedJobId) return [];
-      const run = discoveryRunsList.find((r) => r.id === selectedJobId || r.mapsJobId === selectedJobId);
-      const targetRunId = run?.id || selectedJobId;
-      return window.ipc.invoke('discovery:run:companies', { workspaceId, runId: targetRunId });
-    },
-    enabled: !!workspaceId && !!selectedJobId,
-    refetchInterval: 2500
-  });
-
   // Helper to safely parse job payloads regardless of string vs object serialization
   const safeParsePayload = (payload: any) => {
     if (!payload) return {};
@@ -328,13 +326,29 @@ export default function DiscoveryScreen() {
     );
   }, [rawDiscoveryRuns, allJobs]);
 
+  const selectedRun = discoveryRunsList.find((r) => r.id === selectedJobId || r.mapsJobId === selectedJobId);
+  const isSelectedRunActive = selectedRun
+    ? ['running', 'queued', 'retrying', 'starting', 'pending'].includes(String(selectedRun.status || '').toLowerCase())
+    : false;
+
+  const selectedRunCompaniesQuery = useQuery({
+    queryKey: ['discovery_run_companies', workspaceId, selectedJobId],
+    queryFn: async () => {
+      if (!workspaceId || !selectedJobId) return [];
+      const run = discoveryRunsList.find((r) => r.id === selectedJobId || r.mapsJobId === selectedJobId);
+      const targetRunId = run?.id || selectedJobId;
+      return window.ipc.invoke('discovery:run:companies', { workspaceId, runId: targetRunId });
+    },
+    enabled: !!workspaceId && !!selectedJobId,
+    refetchInterval: isSelectedRunActive ? 2500 : false
+  });
+
   const crawlerJobs = allJobs.filter((j) => j.type === 'crawler:website');
   const runningCrawlers = crawlerJobs.filter((j) =>
     ['running', 'queued', 'retrying'].includes(j.status)
   ).length;
   const completedCrawlers = crawlerJobs.filter((j) => j.status === 'completed').length;
 
-  const selectedRun = discoveryRunsList.find((r) => r.id === selectedJobId || r.mapsJobId === selectedJobId);
   const selectedQuery = (selectedRun?.query || '').toLowerCase().trim();
 
   // Scraper results matching the active query or discovery run
