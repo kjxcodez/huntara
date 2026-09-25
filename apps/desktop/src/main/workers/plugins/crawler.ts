@@ -227,6 +227,85 @@ function extractInternalLinks(html: string, currentUrl: string, origin: string):
 }
 
 /**
+ * Security guard preventing Server-Side Request Forgery (SSRF) against
+ * loopback, cloud metadata, link-local, and private RFC-1918 networks.
+ */
+export function isSafeCrawlerUrl(rawUrl: string): { safe: boolean; reason?: string } {
+  if (!rawUrl || typeof rawUrl !== 'string') {
+    return { safe: false, reason: 'Empty or invalid URL input.' };
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl.includes('://') ? rawUrl : `https://${rawUrl}`);
+  } catch {
+    return { safe: false, reason: 'Malformed URL syntax.' };
+  }
+
+  // 1. Only allow HTTP and HTTPS protocols
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    return { safe: false, reason: `Disallowed protocol scheme: "${parsed.protocol}"` };
+  }
+
+  const hostname = parsed.hostname.toLowerCase().trim();
+
+  // 2. Reject localhost and local names
+  if (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.internal')
+  ) {
+    return { safe: false, reason: 'Localhost and internal hostnames are prohibited.' };
+  }
+
+  // 3. Reject IPv4 loopback, link-local / cloud metadata, and private network ranges
+  const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  const ipMatch = hostname.match(ipv4Regex);
+  if (ipMatch) {
+    const raw1 = ipMatch[1];
+    const raw2 = ipMatch[2];
+    if (raw1 && raw2) {
+      const octet1 = parseInt(raw1, 10);
+      const octet2 = parseInt(raw2, 10);
+
+    if (octet1 === 127) {
+      return { safe: false, reason: 'IPv4 loopback addresses are prohibited.' };
+    }
+    if (octet1 === 169 && octet2 === 254) {
+      return { safe: false, reason: 'Cloud metadata and link-local addresses are prohibited.' };
+    }
+    if (octet1 === 10) {
+      return { safe: false, reason: 'Private network addresses (10.0.0.0/8) are prohibited.' };
+    }
+    if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) {
+      return { safe: false, reason: 'Private network addresses (172.16.0.0/12) are prohibited.' };
+    }
+    if (octet1 === 192 && octet2 === 168) {
+      return { safe: false, reason: 'Private network addresses (192.168.0.0/16) are prohibited.' };
+    }
+    if (octet1 === 0) {
+      return { safe: false, reason: 'Wildcard addresses (0.0.0.0/8) are prohibited.' };
+    }
+  }
+}
+
+  // 4. Reject IPv6 loopback (::1), unique local (fc00::/7), link-local (fe80::/10)
+  if (
+    hostname === '::1' ||
+    hostname === '[::1]' ||
+    hostname.startsWith('fe80:') ||
+    hostname.startsWith('[fe80:') ||
+    hostname.startsWith('fc00:') ||
+    hostname.startsWith('[fc00:')
+  ) {
+    return { safe: false, reason: 'IPv6 local and loopback addresses are prohibited.' };
+  }
+
+  return { safe: true };
+}
+
+/**
  * Website Crawler Plugin (Phase 7 - API/MongoDB-First).
  * Crawls domains using bounded concurrency and persists discovered contacts and metadata directly via SdkClient.
  */
@@ -243,6 +322,12 @@ export async function crawlWebsite(ctx: JobContext): Promise<any> {
 
   if (!companyId || !website) {
     throw new Error('companyId and website payload parameters are required.');
+  }
+
+  const safetyCheck = isSafeCrawlerUrl(website);
+  if (!safetyCheck.safe) {
+    ctx.emitLog(`SSRF safety violation: ${safetyCheck.reason} Target: "${website}"`, 'error');
+    throw new Error(`Target URL failed SSRF safety validation: ${safetyCheck.reason}`);
   }
 
   let companyDomain: string | undefined;
