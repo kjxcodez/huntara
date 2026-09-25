@@ -51,7 +51,14 @@ function getGlobalDbPath(): string {
   return join(process.cwd(), 'report/temp-workspaces/huntara.db');
 }
 
+export function isValidWorkspaceId(id: string): boolean {
+  return typeof id === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(id) && !id.includes('..');
+}
+
 function resolveWorkspaceDbPath(workspacesPath: string, workspaceId: string): string {
+  if (!isValidWorkspaceId(workspaceId)) {
+    throw new Error(`Invalid workspaceId: directory traversal or invalid characters detected ("${workspaceId}")`);
+  }
   const canonicalPath = join(workspacesPath, `huntara_${workspaceId}.db`);
   if (fs.existsSync(canonicalPath)) {
     return canonicalPath;

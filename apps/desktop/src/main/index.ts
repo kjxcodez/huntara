@@ -271,11 +271,19 @@ app.whenReady().then(async () => {
   // Asynchronous settings setter
   ipcMain.on('settings:set', (_event, settings) => {
     try {
+      if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+        return;
+      }
       const configPath = getLocalConfigPath();
       const config = fs.existsSync(configPath)
         ? JSON.parse(fs.readFileSync(configPath, 'utf8'))
         : {};
-      config.settings = { ...(config.settings || {}), ...settings };
+      const sanitizedSettings = { ...(config.settings || {}) };
+      for (const [key, value] of Object.entries(settings)) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+        sanitizedSettings[key] = value;
+      }
+      config.settings = sanitizedSettings;
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8');
     } catch (err) {
       console.error('Failed to set settings:', err);
