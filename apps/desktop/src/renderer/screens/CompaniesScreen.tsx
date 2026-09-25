@@ -38,6 +38,8 @@ import { CompanyStatus, ContactStatus, type DeleteCompanyMode } from '@huntara/s
 import { useWorkspace } from '../hooks/useWorkspace';
 import { useProjectionRefresh } from '../hooks/useProjectionRefresh';
 import { motion } from 'framer-motion';
+import { useVirtualTable } from '../hooks/useVirtualTable';
+import { CompanyTableRow } from '../components/crm/CompanyTableRow';
 
 /**
  * CompaniesScreen presents a list of target organizations, a details panel,
@@ -72,7 +74,7 @@ export default function CompaniesScreen() {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   // Distinct values query for dropdowns
   const distinctQuery = useQuery({
@@ -164,54 +166,115 @@ export default function CompaniesScreen() {
   const distinctValues = (distinctQuery.data || { industries: [], locations: [], cities: [], states: [], countries: [] }) as { industries: string[]; locations: string[]; cities: string[]; states: string[]; countries: string[] };
   const discoveryRuns = discoveryRunsQuery.data || [];
 
-  // Filter & Search logic
-  const filtered = companies.filter((c: any) => {
-    const nameStr = c.name || '';
-    const domainStr = c.domain || '';
-    const tagsStr = Array.isArray(c.tags) ? c.tags.join(' ') : '';
-    let notesStr = '';
-    if (c.notes) {
-      if (Array.isArray(c.notes)) {
-        notesStr = c.notes.map((n: any) => n.content || '').join(' ');
-      } else {
-        notesStr = String(c.notes);
-      }
+  // Memoized company map for O(1) resolution
+  const companyMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const comp of companies) {
+      if (comp.id) map.set(comp.id, comp.name);
     }
-    const searchLower = search.toLowerCase();
-    const matchesSearch =
-      !search ||
-      nameStr.toLowerCase().includes(searchLower) ||
-      domainStr.toLowerCase().includes(searchLower) ||
-      tagsStr.toLowerCase().includes(searchLower) ||
-      notesStr.toLowerCase().includes(searchLower);
-    const matchesStatus = !statusFilter || (c.status && String(c.status).toUpperCase() === statusFilter.toUpperCase());
-    const matchesIndustry = !industryFilter || (c.industry && c.industry.toLowerCase().includes(industryFilter.toLowerCase()));
-    const matchesLocation = !locationFilter || (c.location && c.location.toLowerCase().includes(locationFilter.toLowerCase()));
-    const matchesCity = !cityFilter || (c.city && c.city.toLowerCase() === cityFilter.toLowerCase()) || (c.location && c.location.toLowerCase().includes(cityFilter.toLowerCase()));
-    const matchesState = !stateFilter || (c.state && c.state.toLowerCase() === stateFilter.toLowerCase()) || (c.location && c.location.toLowerCase().includes(stateFilter.toLowerCase()));
-    const matchesCountry = !countryFilter || (c.country && c.country.toLowerCase() === countryFilter.toLowerCase()) || (c.location && c.location.toLowerCase().includes(countryFilter.toLowerCase()));
-    const matchesDiscoveryRun = !discoveryRunFilter || discoveryRunCompanyIds.has(c.id);
+    return map;
+  }, [companies]);
 
-    return matchesSearch && matchesStatus && matchesIndustry && matchesLocation && matchesCity && matchesState && matchesCountry && matchesDiscoveryRun;
-  });
+  // Memoized discovery run map for O(1) resolution
+  const discoveryRunMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of discoveryRuns) {
+      if (r.id) map.set(r.id, r.name);
+    }
+    return map;
+  }, [discoveryRuns]);
 
-  // Build active filter chips
-  const activeFilterChips = [
-    statusFilter ? { label: 'Status', value: statusFilter, onRemove: () => setStatusFilter('') } : null,
-    industryFilter ? { label: 'Industry', value: industryFilter, onRemove: () => setIndustryFilter('') } : null,
-    cityFilter ? { label: 'City', value: cityFilter, onRemove: () => setCityFilter('') } : null,
-    stateFilter ? { label: 'State', value: stateFilter, onRemove: () => setStateFilter('') } : null,
-    countryFilter ? { label: 'Country', value: countryFilter, onRemove: () => setCountryFilter('') } : null,
-    locationFilter ? { label: 'Location', value: locationFilter, onRemove: () => setLocationFilter('') } : null,
-    discoveryRunFilter ? {
-      label: 'Discovery',
-      value: discoveryRuns.find((r: any) => r.id === discoveryRunFilter)?.name || 'Run',
-      onRemove: () => {
-        setDiscoveryRunFilter('');
-        setCurrentPage(1);
+  const selectedIdsSet = React.useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  // Filter & Search logic — memoized with prepared lowercased search terms
+  const filtered = React.useMemo(() => {
+    if (!companies || companies.length === 0) return [];
+    const searchLower = search.trim().toLowerCase();
+    const statusUpper = statusFilter.toUpperCase();
+    const indLower = industryFilter.toLowerCase();
+    const locLower = locationFilter.toLowerCase();
+    const cityLower = cityFilter.toLowerCase();
+    const stateLower = stateFilter.toLowerCase();
+    const countryLower = countryFilter.toLowerCase();
+
+    return companies.filter((c: any) => {
+      if (searchLower) {
+        const nameStr = (c.name || '').toLowerCase();
+        const domainStr = (c.domain || '').toLowerCase();
+        const tagsStr = Array.isArray(c.tags) ? c.tags.join(' ').toLowerCase() : '';
+        let notesStr = '';
+        if (c.notes) {
+          notesStr = Array.isArray(c.notes)
+            ? c.notes.map((n: any) => n.content || '').join(' ').toLowerCase()
+            : String(c.notes).toLowerCase();
+        }
+        const matchesSearch =
+          nameStr.includes(searchLower) ||
+          domainStr.includes(searchLower) ||
+          tagsStr.includes(searchLower) ||
+          notesStr.includes(searchLower);
+        if (!matchesSearch) return false;
       }
-    } : null
-  ].filter(Boolean) as Array<{ label: string; value: string; onRemove: () => void }>;
+
+      if (statusFilter && (!c.status || String(c.status).toUpperCase() !== statusUpper)) {
+        return false;
+      }
+      if (industryFilter && (!c.industry || !c.industry.toLowerCase().includes(indLower))) {
+        return false;
+      }
+      if (locationFilter && (!c.location || !c.location.toLowerCase().includes(locLower))) {
+        return false;
+      }
+      if (cityFilter) {
+        const matchesCity = (c.city && c.city.toLowerCase() === cityLower) || (c.location && c.location.toLowerCase().includes(cityLower));
+        if (!matchesCity) return false;
+      }
+      if (stateFilter) {
+        const matchesState = (c.state && c.state.toLowerCase() === stateLower) || (c.location && c.location.toLowerCase().includes(stateLower));
+        if (!matchesState) return false;
+      }
+      if (countryFilter) {
+        const matchesCountry = (c.country && c.country.toLowerCase() === countryLower) || (c.location && c.location.toLowerCase().includes(countryLower));
+        if (!matchesCountry) return false;
+      }
+      if (discoveryRunFilter && !discoveryRunCompanyIds.has(c.id)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    companies,
+    search,
+    statusFilter,
+    industryFilter,
+    locationFilter,
+    cityFilter,
+    stateFilter,
+    countryFilter,
+    discoveryRunFilter,
+    discoveryRunCompanyIds
+  ]);
+
+  // Build active filter chips with O(1) map lookups and memoization
+  const activeFilterChips = React.useMemo(() => {
+    return [
+      statusFilter ? { label: 'Status', value: statusFilter, onRemove: () => setStatusFilter('') } : null,
+      industryFilter ? { label: 'Industry', value: industryFilter, onRemove: () => setIndustryFilter('') } : null,
+      cityFilter ? { label: 'City', value: cityFilter, onRemove: () => setCityFilter('') } : null,
+      stateFilter ? { label: 'State', value: stateFilter, onRemove: () => setStateFilter('') } : null,
+      countryFilter ? { label: 'Country', value: countryFilter, onRemove: () => setCountryFilter('') } : null,
+      locationFilter ? { label: 'Location', value: locationFilter, onRemove: () => setLocationFilter('') } : null,
+      discoveryRunFilter ? {
+        label: 'Discovery',
+        value: discoveryRunMap.get(discoveryRunFilter) || 'Run',
+        onRemove: () => {
+          setDiscoveryRunFilter('');
+          setCurrentPage(1);
+        }
+      } : null
+    ].filter(Boolean) as Array<{ label: string; value: string; onRemove: () => void }>;
+  }, [statusFilter, industryFilter, cityFilter, stateFilter, countryFilter, locationFilter, discoveryRunFilter, discoveryRunMap]);
 
   const handleClearAllFilters = () => {
     setSearch('');
@@ -227,23 +290,41 @@ export default function CompaniesScreen() {
   // Selected Contacts for Static Audience creation (all contacts belonging to selected companies)
   const selectedContactsForAudience: PreloadedContact[] = React.useMemo(() => {
     if (selectedIds.length === 0) return [];
-    const matchedContacts = contacts.filter((ct: any) => selectedIds.includes(ct.companyId));
+    const matchedContacts = contacts.filter((ct: any) => selectedIdsSet.has(ct.companyId));
     return matchedContacts.map((ct: any) => ({
       id: ct.id,
       firstName: ct.firstName,
       lastName: ct.lastName,
       email: ct.email,
       title: ct.title,
-      companyName: companies.find((comp: any) => comp.id === ct.companyId)?.name
+      companyName: ct.companyId ? companyMap.get(ct.companyId) : undefined
     }));
-  }, [selectedIds, contacts, companies]);
+  }, [selectedIds.length, selectedIdsSet, contacts, companyMap]);
+
+  // Stable row edit handler
+  const handleEditClick = useCallback((company: any) => {
+    setSelectedCompany(company);
+    setEditOpen(true);
+  }, []);
 
   // Pagination calculation
   const totalItems = filtered.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const adjustedPage = Math.min(Math.max(1, currentPage), totalPages || 1);
-  const startIndex = (adjustedPage - 1) * itemsPerPage;
-  const paginatedCompanies = filtered.slice(startIndex, startIndex + itemsPerPage);
+  const isAllPages = itemsPerPage === -1;
+  const totalPages = isAllPages ? 1 : Math.ceil(totalItems / itemsPerPage);
+  const adjustedPage = isAllPages ? 1 : Math.min(Math.max(1, currentPage), totalPages || 1);
+  const startIndex = isAllPages ? 0 : (adjustedPage - 1) * itemsPerPage;
+  const paginatedCompanies = isAllPages ? filtered : filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  const {
+    containerRef,
+    virtualIndices,
+    topSpacerHeight,
+    bottomSpacerHeight
+  } = useVirtualTable({
+    count: paginatedCompanies.length,
+    estimateRowHeight: 49,
+    overscan: 6
+  });
 
   const handleCreate = async (data: any) => {
     await createMutation.mutateAsync(data);
@@ -320,19 +401,23 @@ export default function CompaniesScreen() {
     }
   };
 
-  const toggleSelect = (id: string) => {
+  const handleDeleteClick = useCallback((id: string) => {
+    handleDelete(id);
+  }, [companies]);
+
+  const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
-  };
+  }, []);
 
-  const toggleSelectAll = () => {
-    if (selectedIds.length === paginatedCompanies.length) {
+  const toggleSelectAll = useCallback(() => {
+    if (selectedIds.length === paginatedCompanies.length && paginatedCompanies.length > 0) {
       setSelectedIds([]);
     } else {
       setSelectedIds(paginatedCompanies.map((c: any) => c.id));
     }
-  };
+  }, [selectedIds.length, paginatedCompanies]);
 
   return (
     <div className="flex h-full gap-4 text-xs font-sans">
@@ -507,9 +592,12 @@ export default function CompaniesScreen() {
           </motion.div>
         ) : (
           <div className="flex flex-col justify-between">
-            <div className="bg-card border border-border-subtle overflow-hidden shadow-sm rounded-none">
+            <div
+              ref={containerRef}
+              className="bg-card border border-border-subtle overflow-y-auto max-h-[calc(100vh-320px)] min-h-[300px] shadow-sm rounded-none"
+            >
               <table className="w-full border-collapse text-left">
-                <thead>
+                <thead className="sticky top-0 z-10 bg-surface-3 shadow-sm">
                   <tr className="bg-surface-3 border-b border-border-subtle text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
                     <th className="px-4 py-3 w-10">
                       <input
@@ -527,163 +615,160 @@ export default function CompaniesScreen() {
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <motion.tbody
-                  className="divide-y divide-border-subtle/50"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-                >
-                  {paginatedCompanies.map((item: any) => {
-                    const isSelected = selectedIds.includes(item.id);
+                <tbody className="divide-y divide-border-subtle/50">
+                  {topSpacerHeight > 0 && (
+                    <tr style={{ height: topSpacerHeight }} aria-hidden="true">
+                      <td colSpan={7} className="p-0 border-0" />
+                    </tr>
+                  )}
+                  {virtualIndices.map((idx) => {
+                    const item = paginatedCompanies[idx];
+                    if (!item) return null;
+                    const isSelected = selectedIdsSet.has(item.id);
                     const isPanelSelected = selectedCompany?.id === item.id;
 
                     return (
-                      <motion.tr
+                      <CompanyTableRow
                         key={item.id}
-                        variants={{
-                          hidden: { opacity: 0, y: 8 },
-                          visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] } }
-                        }}
-                        onClick={() => setSelectedCompany(item)}
-                        className={`hover:bg-surface-3/45 cursor-pointer transition-colors ${
-                          isPanelSelected ? 'bg-primary/12' : ''
-                        }`}
-                      >
-                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => toggleSelect(item.id)}
-                            className="rounded-none border-border-subtle text-primary focus:ring-ring"
-                          />
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-foreground">{item.name}</td>
-                        <td className="px-4 py-3 font-mono text-primary">{item.domain || 'N/A'}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{item.industry || 'N/A'}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{item.size || 'N/A'}</td>
-                        <td className="px-4 py-3">
-                          <Badge
-                            variant="outline"
-                            className={`text-[9px] font-bold rounded-none ${
-                              item.status === 'CUSTOMER'
-                                ? 'bg-success-muted text-success border-success/20'
-                                : item.status === 'QUALIFIED'
-                                ? 'bg-info-muted text-info border-info/20'
-                                : 'bg-muted-muted text-muted-foreground border-border-subtle'
-                            }`}
-                          >
-                            {item.status}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedCompany(item);
-                              setEditOpen(true);
-                            }}
-                            className="h-7 text-[10px] rounded-none hover:bg-surface-3"
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(item.id)}
-                            className="h-7 text-[10px] text-danger hover:bg-danger-muted hover:text-danger rounded-none"
-                          >
-                            Delete
-                          </Button>
-                        </td>
-                      </motion.tr>
+                        company={item}
+                        isSelected={isSelected}
+                        isPanelSelected={isPanelSelected}
+                        onToggleSelect={toggleSelect}
+                        onSelectCompany={setSelectedCompany}
+                        onEdit={handleEditClick}
+                        onDelete={handleDeleteClick}
+                      />
                     );
                   })}
-                </motion.tbody>
+                  {bottomSpacerHeight > 0 && (
+                    <tr style={{ height: bottomSpacerHeight }} aria-hidden="true">
+                      <td colSpan={7} className="p-0 border-0" />
+                    </tr>
+                  )}
+                </tbody>
               </table>
             </div>
 
             {/* Pagination controls */}
-            {totalPages > 1 && (
+            {(totalPages > 1 || totalItems > 10) && (
               <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-4 select-none">
-                <span className="text-[11px] text-muted-foreground">
-                  Showing{' '}
-                  <strong className="text-foreground font-mono">{startIndex + 1}</strong>{' '}
-                  to{' '}
-                  <strong className="text-foreground font-mono">
-                    {Math.min(startIndex + itemsPerPage, totalItems)}
-                  </strong>{' '}
-                  of <strong className="text-foreground font-mono">{totalItems}</strong> companies
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-muted-foreground">
+                    Showing{' '}
+                    <strong className="text-foreground font-mono">{totalItems === 0 ? 0 : startIndex + 1}</strong>{' '}
+                    to{' '}
+                    <strong className="text-foreground font-mono">
+                      {isAllPages ? totalItems : Math.min(startIndex + itemsPerPage, totalItems)}
+                    </strong>{' '}
+                    of <strong className="text-foreground font-mono">{totalItems}</strong> companies
+                  </span>
 
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setCurrentPage((p) => Math.max(1, p - 1));
-                    }}
-                    disabled={adjustedPage === 1}
-                    className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Previous
-                  </Button>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((p) => {
-                      return p === 1 || p === totalPages || Math.abs(p - adjustedPage) <= 1;
-                    })
-                    .map((p, idx, arr) => {
-                      const prev = arr[idx - 1];
-                      const showEllipsis = prev && p - prev > 1;
-
-                      return (
-                        <React.Fragment key={p}>
-                          {showEllipsis && (
-                            <span className="px-2 text-muted-foreground font-mono text-xs select-none">
-                              ...
-                            </span>
-                          )}
-                          <Button
-                            type="button"
-                            variant={p === adjustedPage ? 'default' : 'secondary'}
-                            size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setCurrentPage(p);
-                            }}
-                            className={[
-                              'h-8 w-8 rounded-none text-[11px] font-semibold transition-colors cursor-pointer',
-                              p === adjustedPage
-                                ? 'bg-primary text-primary-foreground border-primary font-bold'
-                                : 'hover:bg-surface-3'
-                            ].join(' ')}
-                          >
-                            {p}
-                          </Button>
-                        </React.Fragment>
-                      );
-                    })}
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setCurrentPage((p) => Math.min(totalPages, p + 1));
-                    }}
-                    disabled={adjustedPage === totalPages}
-                    className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Next
-                  </Button>
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <span>Show:</span>
+                    {[25, 50, 100, 250].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setItemsPerPage(size);
+                          setCurrentPage(1);
+                        }}
+                        className={`px-1.5 py-0.5 font-mono text-[10px] rounded-none border ${
+                          itemsPerPage === size
+                            ? 'bg-primary text-primary-foreground border-primary font-bold'
+                            : 'border-border-subtle hover:bg-surface-3'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setItemsPerPage(-1);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-1.5 py-0.5 font-mono text-[10px] rounded-none border ${
+                        itemsPerPage === -1
+                          ? 'bg-primary text-primary-foreground border-primary font-bold'
+                          : 'border-border-subtle hover:bg-surface-3'
+                      }`}
+                    >
+                      All
+                    </button>
+                  </div>
                 </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentPage((p) => Math.max(1, p - 1));
+                      }}
+                      disabled={adjustedPage === 1}
+                      className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Previous
+                    </Button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((p) => {
+                        return p === 1 || p === totalPages || Math.abs(p - adjustedPage) <= 1;
+                      })
+                      .map((p, idx, arr) => {
+                        const prev = arr[idx - 1];
+                        const showEllipsis = prev && p - prev > 1;
+
+                        return (
+                          <React.Fragment key={p}>
+                            {showEllipsis && (
+                              <span className="px-2 text-muted-foreground font-mono text-xs select-none">
+                                ...
+                              </span>
+                            )}
+                            <Button
+                              type="button"
+                              variant={p === adjustedPage ? 'default' : 'secondary'}
+                              size="sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setCurrentPage(p);
+                              }}
+                              className={[
+                                'h-8 w-8 rounded-none text-[11px] font-semibold transition-colors cursor-pointer',
+                                p === adjustedPage
+                                  ? 'bg-primary text-primary-foreground border-primary font-bold'
+                                  : 'hover:bg-surface-3'
+                              ].join(' ')}
+                            >
+                              {p}
+                            </Button>
+                          </React.Fragment>
+                        );
+                      })}
+
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentPage((p) => Math.min(totalPages, p + 1));
+                      }}
+                      disabled={adjustedPage === totalPages}
+                      className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
