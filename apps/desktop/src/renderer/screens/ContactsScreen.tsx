@@ -29,6 +29,8 @@ import { toast } from 'sonner';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { EmailStatusBadge, EngagementPills, DirectionBadge } from '../components/email/EmailStatusBadge';
 import { EmailQualityBadge } from '../components/email/EmailQualityBadge';
+import { useVirtualTable } from '../hooks/useVirtualTable';
+import { ContactTableRow } from '../components/crm/ContactTableRow';
 
 function ContactEmailHistory({ contactId, workspaceId }: { contactId: string; workspaceId: string }) {
   const navigate = useNavigate();
@@ -142,7 +144,7 @@ export default function ContactsScreen() {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
 
   const handleSearchChange = useCallback((val: string) => {
     setSearch(val);
@@ -339,12 +341,39 @@ export default function ContactsScreen() {
       }));
   }, [effectiveSelectedCount, isAllMatching, excludedIds, selectedIds, filtered, contacts, companies]);
 
+  // Memoized company map for O(1) resolution
+  const companyMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const comp of companies) {
+      if (comp.id) map.set(comp.id, comp.name);
+    }
+    return map;
+  }, [companies]);
+
+  // Stable row edit handler
+  const handleEditClick = useCallback((contact: any) => {
+    setSelectedContact(contact);
+    setEditOpen(true);
+  }, []);
+
   // Pagination calculation
   const totalItems = filtered.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const adjustedPage = Math.min(Math.max(1, currentPage), totalPages || 1);
-  const startIndex = (adjustedPage - 1) * itemsPerPage;
-  const paginatedContacts = filtered.slice(startIndex, startIndex + itemsPerPage);
+  const isAllPages = itemsPerPage === -1;
+  const totalPages = isAllPages ? 1 : Math.ceil(totalItems / itemsPerPage);
+  const adjustedPage = isAllPages ? 1 : Math.min(Math.max(1, currentPage), totalPages || 1);
+  const startIndex = isAllPages ? 0 : (adjustedPage - 1) * itemsPerPage;
+  const paginatedContacts = isAllPages ? filtered : filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  const {
+    containerRef,
+    virtualIndices,
+    topSpacerHeight,
+    bottomSpacerHeight
+  } = useVirtualTable({
+    count: paginatedContacts.length,
+    estimateRowHeight: 49,
+    overscan: 6
+  });
 
   const currentPageIds = React.useMemo(
     () => paginatedContacts.map((c: any) => c.id),
@@ -659,9 +688,12 @@ export default function ContactsScreen() {
               </div>
             )}
 
-            <div className="bg-card border border-border-subtle overflow-hidden shadow-sm rounded-none">
+            <div
+              ref={containerRef}
+              className="bg-card border border-border-subtle overflow-y-auto max-h-[calc(100vh-320px)] min-h-[300px] shadow-sm rounded-none"
+            >
               <table className="w-full border-collapse text-left">
-                <thead>
+                <thead className="sticky top-0 z-10 bg-surface-3 shadow-sm">
                   <tr className="bg-surface-3 border-b border-border-subtle text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
                     <th className="px-4 py-3 w-10">
                       <input
@@ -681,182 +713,162 @@ export default function ContactsScreen() {
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <motion.tbody
-                  className="divide-y divide-border-subtle/50"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-                >
-                  {paginatedContacts.map((item: any) => {
+                <tbody className="divide-y divide-border-subtle/50">
+                  {topSpacerHeight > 0 && (
+                    <tr style={{ height: topSpacerHeight }} aria-hidden="true">
+                      <td colSpan={8} className="p-0 border-0" />
+                    </tr>
+                  )}
+                  {virtualIndices.map((idx) => {
+                    const item = paginatedContacts[idx];
+                    if (!item) return null;
                     const rowSelected = isSelected(item.id);
                     const isPanelSelected = selectedContact?.id === item.id;
+                    const compName = item.companyId ? companyMap.get(item.companyId) : undefined;
 
                     return (
-                      <motion.tr
+                      <ContactTableRow
                         key={item.id}
-                        variants={{
-                          hidden: { opacity: 0, y: 8 },
-                          visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] } }
-                        }}
-                        onClick={() => setSelectedContact(item)}
-                        className={`hover:bg-surface-3/45 cursor-pointer transition-colors ${
-                          isPanelSelected ? 'bg-primary/12' : ''
-                        }`}
-                      >
-                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            checked={rowSelected}
-                            onChange={() => toggleContact(item.id)}
-                            className="rounded-none border-border-subtle text-primary focus:ring-ring"
-                          />
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-foreground">
-                          {item.firstName} {item.lastName || ''}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {companies.find((c: any) => c.id === item.companyId)?.name || (
-                            <span className="opacity-40">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 font-mono text-primary">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span>{item.email || '—'}</span>
-                            {item.email && (
-                              <EmailQualityBadge
-                                status={item.emailQuality?.status || (item.status === 'BOUNCED' ? 'INVALID' : item.emailStatus)}
-                                size="sm"
-                              />
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground font-mono">{item.phone || '—'}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{item.title || '—'}</td>
-                        <td className="px-4 py-3">
-                          <Badge
-                            variant="outline"
-                            className={`text-[9px] font-bold rounded-none ${
-                              item.status === 'REPLIED'
-                                ? 'bg-success-muted text-success border-success/20'
-                                : item.status === 'CONTACTED'
-                                ? 'bg-info-muted text-info border-info/20'
-                                : item.status === 'BOUNCED'
-                                ? 'bg-danger-muted text-danger border-danger/20'
-                                : 'bg-muted-muted text-muted-foreground border-border-subtle'
-                            }`}
-                          >
-                            {item.status}
-                          </Badge>
-                        </td>
-                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedContact(item);
-                              setEditOpen(true);
-                            }}
-                            className="h-7 text-[10px] rounded-none hover:bg-surface-3"
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(item.id)}
-                            className="h-7 text-[10px] text-danger hover:bg-danger-muted hover:text-danger rounded-none"
-                          >
-                            Delete
-                          </Button>
-                        </td>
-                      </motion.tr>
+                        contact={item}
+                        rowSelected={rowSelected}
+                        isPanelSelected={isPanelSelected}
+                        companyName={compName}
+                        onToggleSelect={toggleContact}
+                        onSelectRow={setSelectedContact}
+                        onEdit={handleEditClick}
+                        onDelete={handleDelete}
+                      />
                     );
                   })}
-                </motion.tbody>
+                  {bottomSpacerHeight > 0 && (
+                    <tr style={{ height: bottomSpacerHeight }} aria-hidden="true">
+                      <td colSpan={8} className="p-0 border-0" />
+                    </tr>
+                  )}
+                </tbody>
               </table>
             </div>
 
             {/* Pagination Controls */}
-            {totalPages > 1 && (
+            {(totalPages > 1 || totalItems > 10) && (
               <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-4 select-none">
-                <span className="text-[11px] text-muted-foreground">
-                  Showing{' '}
-                  <strong className="text-foreground font-mono">{startIndex + 1}</strong>{' '}
-                  to{' '}
-                  <strong className="text-foreground font-mono">
-                    {Math.min(startIndex + itemsPerPage, totalItems)}
-                  </strong>{' '}
-                  of <strong className="text-foreground font-mono">{totalItems}</strong> contacts
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-muted-foreground">
+                    Showing{' '}
+                    <strong className="text-foreground font-mono">{totalItems === 0 ? 0 : startIndex + 1}</strong>{' '}
+                    to{' '}
+                    <strong className="text-foreground font-mono">
+                      {isAllPages ? totalItems : Math.min(startIndex + itemsPerPage, totalItems)}
+                    </strong>{' '}
+                    of <strong className="text-foreground font-mono">{totalItems}</strong> contacts
+                  </span>
 
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setCurrentPage((p) => Math.max(1, p - 1));
-                    }}
-                    disabled={adjustedPage === 1}
-                    className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Previous
-                  </Button>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter((p) => {
-                      return p === 1 || p === totalPages || Math.abs(p - adjustedPage) <= 1;
-                    })
-                    .map((p, idx, arr) => {
-                      const prev = arr[idx - 1];
-                      const showEllipsis = prev && p - prev > 1;
-
-                      return (
-                        <React.Fragment key={p}>
-                          {showEllipsis && (
-                            <span className="px-2 text-muted-foreground font-mono text-xs select-none">
-                              ...
-                            </span>
-                          )}
-                          <Button
-                            type="button"
-                            variant={p === adjustedPage ? 'default' : 'secondary'}
-                            size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setCurrentPage(p);
-                            }}
-                            className={[
-                              'h-8 w-8 rounded-none text-[11px] font-semibold transition-colors cursor-pointer',
-                              p === adjustedPage
-                                ? 'bg-primary text-primary-foreground border-primary font-bold'
-                                : 'hover:bg-surface-3'
-                            ].join(' ')}
-                          >
-                            {p}
-                          </Button>
-                        </React.Fragment>
-                      );
-                    })}
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setCurrentPage((p) => Math.min(totalPages, p + 1));
-                    }}
-                    disabled={adjustedPage === totalPages}
-                    className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
-                  >
-                    Next
-                  </Button>
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <span>Show:</span>
+                    {[25, 50, 100, 250].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setItemsPerPage(size);
+                          setCurrentPage(1);
+                        }}
+                        className={`px-1.5 py-0.5 font-mono text-[10px] rounded-none border ${
+                          itemsPerPage === size
+                            ? 'bg-primary text-primary-foreground border-primary font-bold'
+                            : 'border-border-subtle hover:bg-surface-3'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setItemsPerPage(-1);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-1.5 py-0.5 font-mono text-[10px] rounded-none border ${
+                        itemsPerPage === -1
+                          ? 'bg-primary text-primary-foreground border-primary font-bold'
+                          : 'border-border-subtle hover:bg-surface-3'
+                      }`}
+                    >
+                      All
+                    </button>
+                  </div>
                 </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentPage((p) => Math.max(1, p - 1));
+                      }}
+                      disabled={adjustedPage === 1}
+                      className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Previous
+                    </Button>
+
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((p) => {
+                        return p === 1 || p === totalPages || Math.abs(p - adjustedPage) <= 1;
+                      })
+                      .map((p, idx, arr) => {
+                        const prev = arr[idx - 1];
+                        const showEllipsis = prev && p - prev > 1;
+
+                        return (
+                          <React.Fragment key={p}>
+                            {showEllipsis && (
+                              <span className="px-2 text-muted-foreground font-mono text-xs select-none">
+                                ...
+                              </span>
+                            )}
+                            <Button
+                              type="button"
+                              variant={p === adjustedPage ? 'default' : 'secondary'}
+                              size="sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setCurrentPage(p);
+                              }}
+                              className={[
+                                'h-8 w-8 rounded-none text-[11px] font-semibold transition-colors cursor-pointer',
+                                p === adjustedPage
+                                  ? 'bg-primary text-primary-foreground border-primary font-bold'
+                                  : 'hover:bg-surface-3'
+                              ].join(' ')}
+                            >
+                              {p}
+                            </Button>
+                          </React.Fragment>
+                        );
+                      })}
+
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCurrentPage((p) => Math.min(totalPages, p + 1));
+                      }}
+                      disabled={adjustedPage === totalPages}
+                      className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
