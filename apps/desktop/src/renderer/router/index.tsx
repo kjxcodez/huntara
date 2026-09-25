@@ -43,7 +43,6 @@ const OperationsCenterScreen = lazy(() =>
 );
 const ReportsScreen = lazy(() => import('../screens/ReportsScreen'));
 const AudiencesScreen = lazy(() => import('../screens/AudiencesScreen'));
-const OnboardingScreen = lazy(() => import('../screens/OnboardingScreen'));
 const PreferencesScreen = lazy(() => import('../screens/PreferencesScreen'));
 
 // ---------------------------------------------------------------------------
@@ -113,14 +112,10 @@ const router = createHashRouter([
     )
   },
 
-  // ── Onboarding Experience ────────────────────────────────────────────────
+  // ── Onboarding Experience (redirects to authoritative app entry) ───────────
   {
     path: '/onboarding',
-    element: (
-      <BlankLayout>
-        <OnboardingScreen />
-      </BlankLayout>
-    )
+    element: <Navigate to="/" replace />
   },
 
   // ── Session expired ──────────────────────────────────────────────────────

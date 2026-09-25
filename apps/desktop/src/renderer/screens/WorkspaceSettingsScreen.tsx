@@ -329,16 +329,16 @@ export default function WorkspaceSettingsScreen() {
       {/* ── SECTION 4: Application Updates ─────────────────────────────── */}
       {activeSection === 'updates' && <AutoUpdateSection />}
 
-      {/* ── SECTION 5: Onboarding & Interactive Guides ──────────────── */}
+      {/* ── SECTION 5: Interactive Guides & Diagnostics ──────────────── */}
       {activeSection === 'onboarding' && (
         <div className="bg-card border border-border-subtle rounded-none p-5 space-y-4 shadow-sm">
           <div>
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span>Interactive Guides & Onboarding</span>
+              <span>Interactive Guides & Diagnostics</span>
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Replay app tours or reset workspace initialization configuration.
+              Replay product tours or inspect system health diagnostics.
             </p>
           </div>
 
@@ -366,9 +366,9 @@ export default function WorkspaceSettingsScreen() {
 
             <div className="flex items-center justify-between border border-border-subtle rounded-none p-3 bg-surface-3/30">
               <div>
-                <p className="text-xs font-semibold text-foreground">Workspace Setup Wizard</p>
+                <p className="text-xs font-semibold text-foreground">Operations & Health</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  Rerun the health check diagnostics and setup steps.
+                  Inspect active queue jobs, memory, and runtime health.
                 </p>
               </div>
               <Button
@@ -377,11 +377,10 @@ export default function WorkspaceSettingsScreen() {
                 variant="outline"
                 className="rounded-none text-[10px] h-8 font-semibold"
                 onClick={() => {
-                  localStorage.removeItem('onboarding_completed');
-                  navigate('/onboarding');
+                  navigate('/operations');
                 }}
               >
-                Reset Setup
+                View Diagnostics
               </Button>
             </div>
           </div>
