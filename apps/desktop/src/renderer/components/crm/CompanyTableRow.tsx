@@ -31,11 +31,11 @@ export const CompanyTableRow = memo(function CompanyTableRow({
   return (
     <tr
       onClick={() => onSelectCompany(company)}
-      className={`hover:bg-surface-3/45 cursor-pointer transition-colors ${
+      className={`h-[52px] max-h-[52px] border-b border-border-subtle/50 hover:bg-surface-3/45 cursor-pointer transition-colors ${
         isPanelSelected ? 'bg-primary/12' : ''
       }`}
     >
-      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+      <td className="px-4 py-2.5 w-10 text-center" onClick={(e) => e.stopPropagation()}>
         <input
           type="checkbox"
           checked={isSelected}
@@ -43,32 +43,42 @@ export const CompanyTableRow = memo(function CompanyTableRow({
           className="rounded-none border-border-subtle text-primary focus:ring-ring"
         />
       </td>
-      <td className="px-4 py-3 font-semibold text-foreground">{company.name}</td>
-      <td className="px-4 py-3 font-mono text-primary">{company.domain || 'N/A'}</td>
-      <td className="px-4 py-3 text-muted-foreground">{company.industry || 'N/A'}</td>
-      <td className="px-4 py-3 text-muted-foreground">{company.size || 'N/A'}</td>
-      <td className="px-4 py-3">
-        <Badge variant="outline" className={`text-[9px] font-bold rounded-none ${statusBadgeClass}`}>
+      <td className="px-4 py-2.5 font-semibold text-foreground truncate max-w-0" title={company.name}>
+        <span className="truncate block">{company.name}</span>
+      </td>
+      <td className="px-4 py-2.5 font-mono text-primary truncate max-w-0" title={company.domain || undefined}>
+        <span className="truncate block">{company.domain || 'N/A'}</span>
+      </td>
+      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-0" title={company.industry || undefined}>
+        <span className="truncate block">{company.industry || 'N/A'}</span>
+      </td>
+      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-0" title={company.size || undefined}>
+        <span className="truncate block">{company.size || 'N/A'}</span>
+      </td>
+      <td className="px-4 py-2.5 whitespace-nowrap">
+        <Badge variant="outline" className={`text-[9px] font-bold rounded-none shrink-0 ${statusBadgeClass}`}>
           {company.status}
         </Badge>
       </td>
-      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onEdit(company)}
-          className="h-7 text-[10px] rounded-none hover:bg-surface-3"
-        >
-          Edit
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDelete(company.id)}
-          className="h-7 text-[10px] text-danger hover:bg-danger-muted hover:text-danger rounded-none"
-        >
-          Delete
-        </Button>
+      <td className="px-4 py-2.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(company)}
+            className="h-7 text-[10px] rounded-none hover:bg-surface-3 px-2"
+          >
+            Edit
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(company.id)}
+            className="h-7 text-[10px] text-danger hover:bg-danger-muted hover:text-danger rounded-none px-2"
+          >
+            Delete
+          </Button>
+        </div>
       </td>
     </tr>
   );

@@ -415,7 +415,7 @@ export default function DiscoveryScreen() {
     bottomSpacerHeight: resultsBottomSpacerHeight
   } = useVirtualTable({
     count: paginatedResults.length,
-    estimateRowHeight: 49,
+    estimateRowHeight: 52,
     overscan: 6
   });
 
@@ -542,21 +542,29 @@ export default function DiscoveryScreen() {
                       ref={resultsContainerRef}
                       className="border border-border-subtle rounded-none overflow-y-auto max-h-[calc(100vh-340px)] min-h-[300px]"
                     >
-                      <table className="w-full text-left border-collapse min-w-[640px]">
+                      <table className="table-fixed w-full text-left border-collapse min-w-[640px]">
                         <thead className="sticky top-0 z-10 bg-surface-3 shadow-sm">
-                          <tr className="bg-surface-3 border-b border-border-subtle text-[9px] font-bold text-muted-foreground uppercase tracking-wider select-none">
-                            <th className="px-4 py-2.5">Company</th>
-                            <th className="px-4 py-2.5">Website</th>
-                            <th className="px-4 py-2.5">Phone</th>
-                            <th className="px-4 py-2.5">Location</th>
-                            <th className="px-4 py-2.5">Contacts / Emails</th>
-                            <th className="px-4 py-2.5 text-right">Actions</th>
+                          <tr className="bg-surface-3 border-b border-border-subtle text-[9px] font-bold text-muted-foreground uppercase tracking-wider select-none h-10">
+                            <th className="px-4 py-2.5 w-[24%]">Company</th>
+                            <th className="px-4 py-2.5 w-[18%]">Website</th>
+                            <th className="px-4 py-2.5 w-[14%]">Phone</th>
+                            <th className="px-4 py-2.5 w-[16%]">Location</th>
+                            <th className="px-4 py-2.5 w-[18%]">Contacts / Emails</th>
+                            <th className="px-4 py-2.5 w-[10%] text-right">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border-subtle/50">
+                        <tbody>
                           {resultsTopSpacerHeight > 0 && (
-                            <tr style={{ height: resultsTopSpacerHeight }} aria-hidden="true">
-                              <td colSpan={6} className="p-0 border-0" />
+                            <tr
+                              style={{ height: `${resultsTopSpacerHeight}px`, maxHeight: `${resultsTopSpacerHeight}px` }}
+                              aria-hidden="true"
+                              className="p-0 m-0 border-0 pointer-events-none"
+                            >
+                              <td
+                                colSpan={6}
+                                style={{ height: `${resultsTopSpacerHeight}px`, maxHeight: `${resultsTopSpacerHeight}px`, padding: 0, border: 'none', lineHeight: 0, fontSize: 0 }}
+                                className="p-0 m-0 border-0 pointer-events-none"
+                              />
                             </tr>
                           )}
                           {resultsVirtualIndices.map((idx) => {
@@ -577,8 +585,16 @@ export default function DiscoveryScreen() {
                             );
                           })}
                           {resultsBottomSpacerHeight > 0 && (
-                            <tr style={{ height: resultsBottomSpacerHeight }} aria-hidden="true">
-                              <td colSpan={6} className="p-0 border-0" />
+                            <tr
+                              style={{ height: `${resultsBottomSpacerHeight}px`, maxHeight: `${resultsBottomSpacerHeight}px` }}
+                              aria-hidden="true"
+                              className="p-0 m-0 border-0 pointer-events-none"
+                            >
+                              <td
+                                colSpan={6}
+                                style={{ height: `${resultsBottomSpacerHeight}px`, maxHeight: `${resultsBottomSpacerHeight}px`, padding: 0, border: 'none', lineHeight: 0, fontSize: 0 }}
+                                className="p-0 m-0 border-0 pointer-events-none"
+                              />
                             </tr>
                           )}
                         </tbody>

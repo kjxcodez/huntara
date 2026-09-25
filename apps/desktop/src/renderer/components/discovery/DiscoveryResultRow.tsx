@@ -33,20 +33,21 @@ export const DiscoveryResultRow = memo(function DiscoveryResultRow({
   }, [companyContacts]);
 
   return (
-    <tr className="hover:bg-surface-3/45 transition-colors">
-      <td className="px-4 py-3">
-        <div className="font-semibold text-foreground leading-snug">{company.name}</div>
+    <tr className="hover:bg-surface-3/45 transition-colors border-b border-border-subtle/50 h-[52px] max-h-[52px]">
+      <td className="px-4 py-2.5 truncate max-w-0" title={company.name}>
+        <div className="font-semibold text-foreground truncate">{company.name}</div>
         {company.rating != null && (
-          <span className="text-[9px] text-warning font-mono">★ {company.rating}</span>
+          <span className="text-[9px] text-warning font-mono block">★ {company.rating}</span>
         )}
       </td>
-      <td className="px-4 py-3 max-w-[160px]">
+      <td className="px-4 py-2.5 truncate max-w-0">
         {company.website ? (
           <a
             href={company.website}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-primary hover:underline truncate block text-[10px]"
+            title={company.domain || company.website}
           >
             {company.domain || company.website}
           </a>
@@ -54,48 +55,49 @@ export const DiscoveryResultRow = memo(function DiscoveryResultRow({
           <span className="opacity-40">—</span>
         )}
       </td>
-      <td className="px-4 py-3 text-muted-foreground font-mono whitespace-nowrap">
+      <td className="px-4 py-2.5 text-muted-foreground font-mono whitespace-nowrap truncate max-w-0" title={company.phone || undefined}>
         {company.phone || <span className="opacity-40">—</span>}
       </td>
-      <td className="px-4 py-3 text-muted-foreground max-w-[180px]">
+      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-0" title={company.location || undefined}>
         <span className="truncate block">{company.location || <span className="opacity-40">—</span>}</span>
       </td>
-      <td className="px-4 py-3">
-        <div className="flex flex-col gap-1 items-start">
+      <td className="px-4 py-2.5 whitespace-nowrap">
+        <div className="flex items-center gap-1.5 min-w-0 flex-nowrap overflow-hidden">
           {emailContacts.length > 0 && (
             <Badge
               variant="outline"
-              className="bg-info-muted text-info border border-info/20 font-bold text-[9px] rounded-none"
+              className="bg-info-muted text-info border border-info/20 font-bold text-[9px] rounded-none shrink-0"
+              title={`${emailContacts.length} email${emailContacts.length > 1 ? 's' : ''} · ${primaryEmail}`}
             >
               <Mail className="w-2.5 h-2.5 mr-1" />
-              {emailContacts.length} email{emailContacts.length > 1 ? 's' : ''} · {primaryEmail}
+              {emailContacts.length} email{emailContacts.length > 1 ? 's' : ''}
             </Badge>
           )}
           {execContacts.length > 0 && (
             <Badge
               variant="outline"
-              className="bg-primary/10 text-primary border border-primary/20 font-bold text-[9px] rounded-none"
+              className="bg-primary/10 text-primary border border-primary/20 font-bold text-[9px] rounded-none shrink-0"
+              title={`${execContacts.length} Exec${execContacts.length > 1 ? 's' : ''}`}
             >
               <UserCheck className="w-2.5 h-2.5 mr-1" />
-              {execContacts.length} Exec{execContacts.length > 1 ? 's' : ''} (
-              {execContacts[0].firstName} {execContacts[0].lastName || ''})
+              {execContacts.length} Exec{execContacts.length > 1 ? 's' : ''}
             </Badge>
           )}
           {emailContacts.length === 0 && execContacts.length === 0 && companyContacts.length > 0 && (
             <Badge
               variant="outline"
-              className="bg-success-muted text-success border border-success/20 font-bold text-[9px] rounded-none"
+              className="bg-success-muted text-success border border-success/20 font-bold text-[9px] rounded-none shrink-0"
             >
               <Phone className="w-2.5 h-2.5 mr-1" />
               Phone saved
             </Badge>
           )}
           {companyContacts.length === 0 && (
-            <span className="opacity-40 text-[10px]">No contacts found</span>
+            <span className="opacity-40 text-[10px]">No contacts</span>
           )}
         </div>
       </td>
-      <td className="px-4 py-3 text-right">
+      <td className="px-4 py-2.5 text-right whitespace-nowrap">
         <div className="flex justify-end gap-1.5">
           {company.website && (
             <Button

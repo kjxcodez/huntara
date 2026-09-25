@@ -410,7 +410,7 @@ export default function ContactsScreen() {
     bottomSpacerHeight
   } = useVirtualTable({
     count: paginatedContacts.length,
-    estimateRowHeight: 49,
+    estimateRowHeight: 52,
     overscan: 6
   });
 
@@ -733,10 +733,10 @@ export default function ContactsScreen() {
               ref={containerRef}
               className="bg-card border border-border-subtle overflow-y-auto max-h-[calc(100vh-320px)] min-h-[300px] shadow-sm rounded-none"
             >
-              <table className="w-full border-collapse text-left">
+              <table className="table-fixed w-full border-collapse text-left">
                 <thead className="sticky top-0 z-10 bg-surface-3 shadow-sm">
-                  <tr className="bg-surface-3 border-b border-border-subtle text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
-                    <th className="px-4 py-3 w-10">
+                  <tr className="bg-surface-3 border-b border-border-subtle text-[10px] font-semibold text-muted-foreground uppercase tracking-wider select-none h-10">
+                    <th className="px-4 py-2.5 w-10 text-center">
                       <input
                         ref={headerCheckboxRef}
                         type="checkbox"
@@ -745,19 +745,27 @@ export default function ContactsScreen() {
                         className="rounded-none border-border-subtle text-primary focus:ring-ring"
                       />
                     </th>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Company</th>
-                    <th className="px-4 py-3">Email</th>
-                    <th className="px-4 py-3">Phone</th>
-                    <th className="px-4 py-3">Job Title</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-2.5 w-[16%]">Name</th>
+                    <th className="px-4 py-2.5 w-[18%]">Company</th>
+                    <th className="px-4 py-2.5 w-[22%]">Email</th>
+                    <th className="px-4 py-2.5 w-[13%]">Phone</th>
+                    <th className="px-4 py-2.5 w-[15%]">Job Title</th>
+                    <th className="px-4 py-2.5 w-[80px]">Status</th>
+                    <th className="px-4 py-2.5 w-[90px] text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border-subtle/50">
+                <tbody>
                   {topSpacerHeight > 0 && (
-                    <tr style={{ height: topSpacerHeight }} aria-hidden="true">
-                      <td colSpan={8} className="p-0 border-0" />
+                    <tr
+                      style={{ height: `${topSpacerHeight}px`, maxHeight: `${topSpacerHeight}px` }}
+                      aria-hidden="true"
+                      className="p-0 m-0 border-0 pointer-events-none"
+                    >
+                      <td
+                        colSpan={8}
+                        style={{ height: `${topSpacerHeight}px`, maxHeight: `${topSpacerHeight}px`, padding: 0, border: 'none', lineHeight: 0, fontSize: 0 }}
+                        className="p-0 m-0 border-0 pointer-events-none"
+                      />
                     </tr>
                   )}
                   {virtualIndices.map((idx) => {
@@ -782,8 +790,16 @@ export default function ContactsScreen() {
                     );
                   })}
                   {bottomSpacerHeight > 0 && (
-                    <tr style={{ height: bottomSpacerHeight }} aria-hidden="true">
-                      <td colSpan={8} className="p-0 border-0" />
+                    <tr
+                      style={{ height: `${bottomSpacerHeight}px`, maxHeight: `${bottomSpacerHeight}px` }}
+                      aria-hidden="true"
+                      className="p-0 m-0 border-0 pointer-events-none"
+                    >
+                      <td
+                        colSpan={8}
+                        style={{ height: `${bottomSpacerHeight}px`, maxHeight: `${bottomSpacerHeight}px`, padding: 0, border: 'none', lineHeight: 0, fontSize: 0 }}
+                        className="p-0 m-0 border-0 pointer-events-none"
+                      />
                     </tr>
                   )}
                 </tbody>

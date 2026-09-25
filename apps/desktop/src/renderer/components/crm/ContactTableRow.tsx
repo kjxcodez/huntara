@@ -36,14 +36,16 @@ export const ContactTableRow = memo(function ContactTableRow({
   const emailQualityStatus =
     contact.emailQuality?.status || (contact.status === 'BOUNCED' ? 'INVALID' : contact.emailStatus);
 
+  const fullName = `${contact.firstName || ''} ${contact.lastName || ''}`.trim() || '—';
+
   return (
     <tr
       onClick={() => onSelectRow(contact)}
-      className={`hover:bg-surface-3/45 cursor-pointer transition-colors ${
+      className={`h-[52px] max-h-[52px] border-b border-border-subtle/50 hover:bg-surface-3/45 cursor-pointer transition-colors ${
         isPanelSelected ? 'bg-primary/12' : ''
       }`}
     >
-      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+      <td className="px-4 py-2.5 w-10 text-center" onClick={(e) => e.stopPropagation()}>
         <input
           type="checkbox"
           checked={rowSelected}
@@ -51,42 +53,48 @@ export const ContactTableRow = memo(function ContactTableRow({
           className="rounded-none border-border-subtle text-primary focus:ring-ring"
         />
       </td>
-      <td className="px-4 py-3 font-semibold text-foreground">
-        {contact.firstName} {contact.lastName || ''}
+      <td className="px-4 py-2.5 font-semibold text-foreground truncate max-w-0" title={fullName}>
+        <span className="truncate block">{fullName}</span>
       </td>
-      <td className="px-4 py-3 text-muted-foreground">
-        {companyName || <span className="opacity-40">—</span>}
+      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-0" title={companyName || undefined}>
+        <span className="truncate block">{companyName || <span className="opacity-40">—</span>}</span>
       </td>
-      <td className="px-4 py-3 font-mono text-primary">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span>{contact.email || '—'}</span>
-          {contact.email && <EmailQualityBadge status={emailQualityStatus} size="sm" />}
+      <td className="px-4 py-2.5 font-mono text-primary truncate max-w-0" title={contact.email || undefined}>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="truncate">{contact.email || '—'}</span>
+          {contact.email && <EmailQualityBadge status={emailQualityStatus} size="sm" className="shrink-0" />}
         </div>
       </td>
-      <td className="px-4 py-3 text-muted-foreground font-mono">{contact.phone || '—'}</td>
-      <td className="px-4 py-3 text-muted-foreground">{contact.title || '—'}</td>
-      <td className="px-4 py-3">
-        <Badge variant="outline" className={`text-[9px] font-bold rounded-none ${statusBadgeClass}`}>
+      <td className="px-4 py-2.5 text-muted-foreground font-mono truncate max-w-0" title={contact.phone || undefined}>
+        <span className="truncate block">{contact.phone || '—'}</span>
+      </td>
+      <td className="px-4 py-2.5 text-muted-foreground truncate max-w-0" title={contact.title || undefined}>
+        <span className="truncate block">{contact.title || '—'}</span>
+      </td>
+      <td className="px-4 py-2.5 whitespace-nowrap">
+        <Badge variant="outline" className={`text-[9px] font-bold rounded-none shrink-0 ${statusBadgeClass}`}>
           {contact.status}
         </Badge>
       </td>
-      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onEdit(contact)}
-          className="h-7 text-[10px] rounded-none hover:bg-surface-3"
-        >
-          Edit
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDelete(contact.id)}
-          className="h-7 text-[10px] text-danger hover:bg-danger-muted hover:text-danger rounded-none"
-        >
-          Delete
-        </Button>
+      <td className="px-4 py-2.5 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(contact)}
+            className="h-7 text-[10px] rounded-none hover:bg-surface-3 px-2"
+          >
+            Edit
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onDelete(contact.id)}
+            className="h-7 text-[10px] text-danger hover:bg-danger-muted hover:text-danger rounded-none px-2"
+          >
+            Delete
+          </Button>
+        </div>
       </td>
     </tr>
   );
