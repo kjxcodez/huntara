@@ -8,6 +8,21 @@ import { getDatabase } from '../database/connection';
 import { randomUUID } from 'crypto';
 import { encryptSecret, decryptSecret } from '../lib/crypto';
 
+export function isSecretSettingKey(key: string): boolean {
+  if (!key || typeof key !== 'string') return false;
+  const lower = key.toLowerCase();
+  return (
+    lower.includes('secret') ||
+    lower.includes('password') ||
+    lower.includes('token') ||
+    lower.includes('api_key') ||
+    lower.includes('apikey') ||
+    lower.includes('li_at') ||
+    lower.endsWith('_key') ||
+    lower.includes('credential')
+  );
+}
+
 export function registerOnboardingIpc() {
   // ── Onboarding Diagnostics IPC ──────────────────────────────────────────
   safeRegister('onboarding:get-diagnostics', async () => {
@@ -76,8 +91,7 @@ export function registerOnboardingIpc() {
     if (!key) throw new Error('key is required.');
 
     const db = getDatabase(workspaceId);
-    const encryptedValue =
-      key === 'openrouter_key' || key.includes('password') || key.includes('li_at') ? encryptSecret(value) : value;
+    const encryptedValue = isSecretSettingKey(key) ? encryptSecret(value) : value;
 
     db.prepare(
       `
@@ -99,7 +113,8 @@ export function registerOnboardingIpc() {
 
     for (const row of rows) {
       try {
-        const isSecret = row.key === 'openrouter_key' || row.key.includes('password') || row.key.includes('li_at');
+        const isEncrypted = typeof row.value === 'string' && row.value.startsWith('_enc_base64:');
+        const isSecret = isSecretSettingKey(row.key) || isEncrypted;
         if (isSecret) {
           const raw = decryptSecret(row.value);
           if (!raw) {
