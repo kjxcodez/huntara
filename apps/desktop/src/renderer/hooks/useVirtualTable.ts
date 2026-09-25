@@ -8,8 +8,13 @@ export interface UseVirtualTableOptions {
   enabled?: boolean;
 }
 
+export type VirtualContainerRef = {
+  (node: HTMLDivElement | null): void;
+  current: HTMLDivElement | null;
+};
+
 export interface UseVirtualTableReturn extends VirtualWindowResult {
-  containerRef: React.RefObject<HTMLDivElement | null>;
+  containerRef: VirtualContainerRef;
   isVirtualized: boolean;
   scrollToIndex: (index: number) => void;
 }
@@ -23,62 +28,113 @@ export interface UseVirtualTableReturn extends VirtualWindowResult {
  */
 export function useVirtualTable({
   count,
-  estimateRowHeight = 49,
-  overscan = 5,
+  estimateRowHeight = 52,
+  overscan = 6,
   enabled = true
 }: UseVirtualTableOptions): UseVirtualTableReturn {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const internalRef = useRef<HTMLDivElement | null>(null);
+  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(null);
+
+  const containerRefCallback = useCallback((node: HTMLDivElement | null) => {
+    internalRef.current = node;
+    setContainerNode(node);
+  }, []);
+
+  const containerRef = useMemo(() => {
+    const fn = (node: HTMLDivElement | null) => {
+      containerRefCallback(node);
+    };
+    Object.defineProperty(fn, 'current', {
+      get: () => internalRef.current,
+      set: (val: HTMLDivElement | null) => {
+        internalRef.current = val;
+        setContainerNode(val);
+      }
+    });
+    return fn as VirtualContainerRef;
+  }, [containerRefCallback]);
+
   const [scrollState, setScrollState] = useState<{ scrollTop: number; clientHeight: number }>({
     scrollTop: 0,
     clientHeight: 0
   });
 
-  const updateScrollState = useCallback(() => {
-    const el = containerRef.current;
-    if (!el) return;
+  useEffect(() => {
+    if (!containerNode || !enabled) return;
+
+    let rafId: number | null = null;
+    let lastScrollTop = containerNode.scrollTop;
+    let lastClientHeight = containerNode.clientHeight;
+
+    // Immediately record initial layout on mount
     setScrollState((prev) => {
-      if (prev.scrollTop === el.scrollTop && prev.clientHeight === el.clientHeight) {
+      if (prev.scrollTop === lastScrollTop && prev.clientHeight === lastClientHeight) {
         return prev;
       }
       return {
-        scrollTop: el.scrollTop,
-        clientHeight: el.clientHeight
+        scrollTop: lastScrollTop,
+        clientHeight: lastClientHeight
       };
     });
-  }, []);
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || !enabled) return;
-
-    // Measure initial layout
-    updateScrollState();
-
+    // Coalesce high-frequency scroll events using requestAnimationFrame to prevent render frame thrashing
     const handleScroll = () => {
-      updateScrollState();
+      const currentScrollTop = containerNode.scrollTop;
+      const currentClientHeight = containerNode.clientHeight;
+
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          if (
+            lastScrollTop !== currentScrollTop ||
+            lastClientHeight !== currentClientHeight
+          ) {
+            lastScrollTop = currentScrollTop;
+            lastClientHeight = currentClientHeight;
+            setScrollState({
+              scrollTop: currentScrollTop,
+              clientHeight: currentClientHeight
+            });
+          }
+        });
+      }
     };
 
-    el.addEventListener('scroll', handleScroll, { passive: true });
+    containerNode.addEventListener('scroll', handleScroll, { passive: true });
 
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => {
-        updateScrollState();
+      resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const newHeight = Math.round(
+          entry.contentBoxSize?.[0]?.blockSize ?? entry.contentRect.height
+        );
+        if (newHeight > 0 && Math.abs(newHeight - lastClientHeight) >= 2) {
+          lastClientHeight = newHeight;
+          setScrollState((prev) => ({
+            ...prev,
+            clientHeight: newHeight
+          }));
+        }
       });
-      resizeObserver.observe(el);
+      resizeObserver.observe(containerNode);
     }
 
     return () => {
-      el.removeEventListener('scroll', handleScroll);
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+      }
+      containerNode.removeEventListener('scroll', handleScroll);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
     };
-  }, [enabled, updateScrollState]);
+  }, [containerNode, enabled]);
 
   const scrollToIndex = useCallback(
     (index: number) => {
-      const el = containerRef.current;
+      const el = internalRef.current;
       if (!el) return;
       const targetScroll = Math.max(0, index * estimateRowHeight);
       el.scrollTo({ top: targetScroll, behavior: 'smooth' });

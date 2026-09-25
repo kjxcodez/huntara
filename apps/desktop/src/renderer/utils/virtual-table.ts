@@ -41,12 +41,13 @@ export function computeVirtualWindow(params: VirtualWindowParams): VirtualWindow
   }
 
   const totalHeight = count * estimateRowHeight;
-  const safeScrollTop = Math.max(0, scrollTop);
+  const maxScrollTop = Math.max(0, totalHeight - clientHeight);
+  const safeScrollTop = Math.min(Math.max(0, scrollTop), maxScrollTop);
   const rawStart = Math.floor(safeScrollTop / estimateRowHeight);
   const visibleCount = Math.ceil(clientHeight / estimateRowHeight);
 
-  const startIndex = Math.max(0, rawStart - overscan);
-  const endIndex = Math.min(count, rawStart + visibleCount + overscan);
+  const startIndex = Math.max(0, Math.min(count, rawStart - overscan));
+  const endIndex = Math.max(startIndex, Math.min(count, rawStart + visibleCount + overscan));
 
   const topSpacerHeight = startIndex * estimateRowHeight;
   const bottomSpacerHeight = Math.max(0, (count - endIndex) * estimateRowHeight);
