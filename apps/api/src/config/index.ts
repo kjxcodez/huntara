@@ -5,13 +5,50 @@ import { auth } from './auth.js';
 export { env, logger, auth };
 
 /**
+ * Resolves allowed CORS origin dynamically based on environment and allowlists.
+ * Strictly prevents wildcard '*' reflection when credentials: true.
+ */
+export function resolveCorsOrigin(origin: string | undefined): string | null {
+  if (!origin) return null;
+
+  // Local development / desktop client origins
+  const isLocalOrigin =
+    /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin) ||
+    origin === 'null' ||
+    origin.startsWith('leadforge://') ||
+    origin.startsWith('huntara://') ||
+    origin.startsWith('app://');
+
+  if (env.NODE_ENV !== 'production') {
+    if (isLocalOrigin) return origin;
+    if (env.CORS_ORIGIN && env.CORS_ORIGIN !== '*') {
+      const allowed = env.CORS_ORIGIN.split(',').map((o) => o.trim());
+      if (allowed.includes(origin)) return origin;
+    }
+    return isLocalOrigin ? origin : null;
+  }
+
+  // Production: strictly match explicitly configured origins or desktop app scheme
+  if (env.CORS_ORIGIN && env.CORS_ORIGIN !== '*') {
+    const allowed = env.CORS_ORIGIN.split(',').map((o) => o.trim());
+    if (allowed.includes(origin)) return origin;
+  }
+
+  if (origin.startsWith('huntara://') || origin.startsWith('leadforge://') || origin.startsWith('app://')) {
+    return origin;
+  }
+
+  return null;
+}
+
+/**
  * CORS configurations central module.
  */
 export const corsConfig = {
-  origin: env.CORS_ORIGIN,
+  origin: (origin: string) => resolveCorsOrigin(origin) || '',
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-request-id'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-request-id', 'x-workspace-id'],
   exposeHeaders: ['Content-Length', 'X-Koa-Response-Time', 'x-request-id'],
   maxAge: 600
 };
