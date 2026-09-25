@@ -37,6 +37,8 @@ import {
   normalizeStateName
 } from '../lib/locations';
 import { GeographySelector } from '../components/discovery/GeographySelector';
+import { useVirtualTable } from '../hooks/useVirtualTable';
+import { DiscoveryResultRow } from '../components/discovery/DiscoveryResultRow';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -89,7 +91,7 @@ export default function DiscoveryScreen() {
 
   // Pagination states
   const [resultsPage, setResultsPage] = useState(1);
-  const [resultsPerPage] = useState(10);
+  const [resultsPerPage, setResultsPerPage] = useState(25);
 
   const [jobsPage, setJobsPage] = useState(1);
   const [jobsPerPage] = useState(10);
@@ -357,12 +359,51 @@ export default function DiscoveryScreen() {
     return 'bg-muted-muted text-muted-foreground border-border-subtle';
   };
 
+  // Memoized contacts grouping by companyId for O(1) row resolution
+  const contactsByCompanyId = React.useMemo(() => {
+    const map = new Map<string, any[]>();
+    for (const ct of existingContacts) {
+      if (ct.companyId) {
+        let arr = map.get(ct.companyId);
+        if (!arr) {
+          arr = [];
+          map.set(ct.companyId, arr);
+        }
+        arr.push(ct);
+      }
+    }
+    return map;
+  }, [existingContacts]);
+
+  // Stable row action callbacks
+  const handleCrawl = useCallback((companyId: string, website: string) => {
+    enrichCompanyMutation.mutate({ companyId, website });
+  }, [enrichCompanyMutation]);
+
+  const handleExecs = useCallback((companyId: string, companyName: string, domain?: string | undefined) => {
+    enrichLinkedInMutation.mutate(
+      domain ? { companyId, companyName, domain } : { companyId, companyName }
+    );
+  }, [enrichLinkedInMutation]);
+
   // Pagination calculation: Scraper results
   const totalResults = results.length;
-  const totalResultsPages = Math.ceil(totalResults / resultsPerPage);
-  const adjustedResultsPage = Math.min(Math.max(1, resultsPage), totalResultsPages || 1);
-  const resultsStartIndex = (adjustedResultsPage - 1) * resultsPerPage;
-  const paginatedResults = results.slice(resultsStartIndex, resultsStartIndex + resultsPerPage);
+  const isAllResultsPages = resultsPerPage === -1;
+  const totalResultsPages = isAllResultsPages ? 1 : Math.ceil(totalResults / resultsPerPage);
+  const adjustedResultsPage = isAllResultsPages ? 1 : Math.min(Math.max(1, resultsPage), totalResultsPages || 1);
+  const resultsStartIndex = isAllResultsPages ? 0 : (adjustedResultsPage - 1) * resultsPerPage;
+  const paginatedResults = isAllResultsPages ? results : results.slice(resultsStartIndex, resultsStartIndex + resultsPerPage);
+
+  const {
+    containerRef: resultsContainerRef,
+    virtualIndices: resultsVirtualIndices,
+    topSpacerHeight: resultsTopSpacerHeight,
+    bottomSpacerHeight: resultsBottomSpacerHeight
+  } = useVirtualTable({
+    count: paginatedResults.length,
+    estimateRowHeight: 49,
+    overscan: 6
+  });
 
   // Pagination calculation: Discovery Runs list
   const totalParentJobs = discoveryRunsList.length;
@@ -483,10 +524,13 @@ export default function DiscoveryScreen() {
                   </div>
                 ) : (
                   <div className="flex flex-col justify-between h-full pt-4 space-y-4">
-                    <div className="border border-border-subtle rounded-none overflow-hidden">
+                    <div
+                      ref={resultsContainerRef}
+                      className="border border-border-subtle rounded-none overflow-y-auto max-h-[calc(100vh-340px)] min-h-[300px]"
+                    >
                       <table className="w-full text-left border-collapse min-w-[640px]">
-                        <thead>
-                          <tr className="bg-surface-3 border-b border-border-subtle text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <thead className="sticky top-0 z-10 bg-surface-3 shadow-sm">
+                          <tr className="bg-surface-3 border-b border-border-subtle text-[9px] font-bold text-muted-foreground uppercase tracking-wider select-none">
                             <th className="px-4 py-2.5">Company</th>
                             <th className="px-4 py-2.5">Website</th>
                             <th className="px-4 py-2.5">Phone</th>
@@ -495,195 +539,120 @@ export default function DiscoveryScreen() {
                             <th className="px-4 py-2.5 text-right">Actions</th>
                           </tr>
                         </thead>
-                        <motion.tbody
-                          className="divide-y divide-border-subtle/50"
-                          initial="hidden"
-                          animate="visible"
-                          variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-                        >
-                          <AnimatePresence initial={false}>
-                            {paginatedResults.map((res) => {
-                              const companyContacts = existingContacts.filter(
-                                (ct) => ct.companyId === res.id
-                              );
-                              const emailContacts = companyContacts.filter((ct) => ct.email);
-                              const primaryEmail = emailContacts[0]?.email;
+                        <tbody className="divide-y divide-border-subtle/50">
+                          {resultsTopSpacerHeight > 0 && (
+                            <tr style={{ height: resultsTopSpacerHeight }} aria-hidden="true">
+                              <td colSpan={6} className="p-0 border-0" />
+                            </tr>
+                          )}
+                          {resultsVirtualIndices.map((idx) => {
+                            const res = paginatedResults[idx];
+                            if (!res) return null;
+                            const companyContacts = contactsByCompanyId.get(res.id) || [];
 
-                              return (
-                                <motion.tr
-                                  key={res.id}
-                                  initial={{ opacity: 0, y: 4 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0 }}
-                                  className="hover:bg-surface-3/45 transition-colors"
-                                >
-                                  <td className="px-4 py-3">
-                                    <div className="font-semibold text-foreground leading-snug">
-                                      {res.name}
-                                    </div>
-                                    {res.rating != null && (
-                                      <span className="text-[9px] text-warning font-mono">★ {res.rating}</span>
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-3 max-w-[160px]">
-                                    {res.website ? (
-                                      <a
-                                        href={res.website}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-mono text-primary hover:underline truncate block text-[10px]"
-                                      >
-                                        {res.domain || res.website}
-                                      </a>
-                                    ) : (
-                                      <span className="opacity-40">—</span>
-                                    )}
-                                  </td>
-                                  <td className="px-4 py-3 text-muted-foreground font-mono whitespace-nowrap">
-                                    {res.phone || <span className="opacity-40">—</span>}
-                                  </td>
-                                  <td className="px-4 py-3 text-muted-foreground max-w-[180px]">
-                                    <span className="truncate block">
-                                      {res.location || <span className="opacity-40">—</span>}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    {(() => {
-                                      const execContacts = companyContacts.filter(
-                                        (ct) => ct.type === 'executive' || ct.source === 'linkedin' || !!ct.linkedinUrl
-                                      );
-                                      return (
-                                        <div className="flex flex-col gap-1 items-start">
-                                          {emailContacts.length > 0 && (
-                                            <Badge
-                                              variant="outline"
-                                              className="bg-info-muted text-info border border-info/20 font-bold text-[9px] rounded-none"
-                                            >
-                                              <Mail className="w-2.5 h-2.5 mr-1" />
-                                              {emailContacts.length} email
-                                              {emailContacts.length > 1 ? 's' : ''} · {primaryEmail}
-                                            </Badge>
-                                          )}
-                                          {execContacts.length > 0 && (
-                                            <Badge
-                                              variant="outline"
-                                              className="bg-primary/10 text-primary border border-primary/20 font-bold text-[9px] rounded-none"
-                                            >
-                                              <UserCheck className="w-2.5 h-2.5 mr-1" />
-                                              {execContacts.length} Exec{execContacts.length > 1 ? 's' : ''} (
-                                              {execContacts[0].firstName} {execContacts[0].lastName || ''})
-                                            </Badge>
-                                          )}
-                                          {emailContacts.length === 0 &&
-                                            execContacts.length === 0 &&
-                                            companyContacts.length > 0 && (
-                                              <Badge
-                                                variant="outline"
-                                                className="bg-success-muted text-success border border-success/20 font-bold text-[9px] rounded-none"
-                                              >
-                                                <Phone className="w-2.5 h-2.5 mr-1" />
-                                                Phone saved
-                                              </Badge>
-                                            )}
-                                          {companyContacts.length === 0 && (
-                                            <span className="opacity-40 text-[10px]">No contacts found</span>
-                                          )}
-                                        </div>
-                                      );
-                                    })()}
-                                  </td>
-                                  <td className="px-4 py-3 text-right">
-                                    <div className="flex justify-end gap-1.5">
-                                      {res.website && (
-                                        <Button
-                                          type="button"
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() =>
-                                            enrichCompanyMutation.mutate({
-                                              companyId: res.id,
-                                              website: res.website
-                                            })
-                                          }
-                                          disabled={enrichCompanyMutation.isPending}
-                                          title="Crawl website for email addresses"
-                                          className="h-6 text-[10px] gap-1 font-semibold border-primary/20 text-primary hover:bg-primary/10 rounded-none"
-                                        >
-                                          <Sparkles className="w-3 h-3" />
-                                          Crawl
-                                        </Button>
-                                      )}
-                                      <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() =>
-                                          enrichLinkedInMutation.mutate({
-                                            companyId: res.id,
-                                            companyName: res.name,
-                                            domain: res.domain
-                                          })
-                                        }
-                                        disabled={enrichLinkedInMutation.isPending}
-                                        title="Scrape executive decision makers"
-                                        className="h-6 text-[10px] gap-1 font-semibold border-info/20 text-info hover:bg-info/10 rounded-none"
-                                      >
-                                        <Linkedin className="w-3 h-3" />
-                                        Execs
-                                      </Button>
-                                    </div>
-                                  </td>
-                                </motion.tr>
-                              );
-                            })}
-                          </AnimatePresence>
-                        </motion.tbody>
+                            return (
+                              <DiscoveryResultRow
+                                key={res.id}
+                                company={res}
+                                companyContacts={companyContacts}
+                                onCrawl={handleCrawl}
+                                onExecs={handleExecs}
+                                isCrawlPending={enrichCompanyMutation.isPending}
+                                isExecsPending={enrichLinkedInMutation.isPending}
+                              />
+                            );
+                          })}
+                          {resultsBottomSpacerHeight > 0 && (
+                            <tr style={{ height: resultsBottomSpacerHeight }} aria-hidden="true">
+                              <td colSpan={6} className="p-0 border-0" />
+                            </tr>
+                          )}
+                        </tbody>
                       </table>
                     </div>
 
                     {/* Results table pagination controls */}
-                    {totalResultsPages > 1 && (
+                    {(totalResultsPages > 1 || totalResults > 10) && (
                       <div className="flex items-center justify-between border-t border-border-subtle pt-4 mt-2 select-none px-1">
-                        <span className="text-[11px] text-muted-foreground">
-                          Showing{' '}
-                          <strong className="text-foreground font-mono">{resultsStartIndex + 1}</strong>{' '}
-                          to{' '}
-                          <strong className="text-foreground font-mono">
-                            {Math.min(resultsStartIndex + resultsPerPage, totalResults)}
-                          </strong>{' '}
-                          of <strong className="text-foreground font-mono">{totalResults}</strong> companies
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[11px] text-muted-foreground">
+                            Showing{' '}
+                            <strong className="text-foreground font-mono">{totalResults === 0 ? 0 : resultsStartIndex + 1}</strong>{' '}
+                            to{' '}
+                            <strong className="text-foreground font-mono">
+                              {isAllResultsPages ? totalResults : Math.min(resultsStartIndex + resultsPerPage, totalResults)}
+                            </strong>{' '}
+                            of <strong className="text-foreground font-mono">{totalResults}</strong> companies
+                          </span>
 
-                        <div className="flex items-center gap-1">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleResultsPageChange(Math.max(1, resultsPage - 1));
-                            }}
-                            disabled={adjustedResultsPage === 1}
-                            className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
-                          >
-                            Previous
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleResultsPageChange(Math.min(totalResultsPages, resultsPage + 1));
-                            }}
-                            disabled={adjustedResultsPage === totalResultsPages}
-                            className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
-                          >
-                            Next
-                          </Button>
+                          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                            <span>Show:</span>
+                            {[25, 50, 100, 250].map((size) => (
+                              <button
+                                key={size}
+                                type="button"
+                                onClick={() => {
+                                  setResultsPerPage(size);
+                                  handleResultsPageChange(1);
+                                }}
+                                className={`px-1.5 py-0.5 font-mono text-[10px] rounded-none border ${
+                                  resultsPerPage === size
+                                    ? 'bg-primary text-primary-foreground border-primary font-bold'
+                                    : 'border-border-subtle hover:bg-surface-3'
+                                }`}
+                              >
+                                {size}
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setResultsPerPage(-1);
+                                handleResultsPageChange(1);
+                              }}
+                              className={`px-1.5 py-0.5 font-mono text-[10px] rounded-none border ${
+                                resultsPerPage === -1
+                                  ? 'bg-primary text-primary-foreground border-primary font-bold'
+                                  : 'border-border-subtle hover:bg-surface-3'
+                              }`}
+                            >
+                              All
+                            </button>
+                          </div>
                         </div>
+
+                        {totalResultsPages > 1 && (
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleResultsPageChange(Math.max(1, resultsPage - 1));
+                              }}
+                              disabled={adjustedResultsPage === 1}
+                              className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
+                            >
+                              Previous
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleResultsPageChange(Math.min(totalResultsPages, resultsPage + 1));
+                              }}
+                              disabled={adjustedResultsPage === totalResultsPages}
+                              className="h-8 rounded-none px-3 text-[11px] font-semibold transition-colors cursor-pointer"
+                            >
+                              Next
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
