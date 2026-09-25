@@ -248,46 +248,94 @@ export default function ContactsScreen() {
   const distinctValues = distinctQuery.data || { titles: [], sources: [] };
   const discoveryRuns = discoveryRunsQuery.data || [];
 
-  // Filter & Search logic
-  const filtered = contacts.filter((c: any) => {
-    const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
-    const emailStr = (c.email || '').toLowerCase();
-    const titleStr = (c.title || '').toLowerCase();
-    const searchLower = search.toLowerCase();
+  // Memoized company map for O(1) resolution
+  const companyMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const comp of companies) {
+      if (comp.id) map.set(comp.id, comp.name);
+    }
+    return map;
+  }, [companies]);
 
-    const matchesSearch =
-      !search ||
-      fullName.includes(searchLower) ||
-      emailStr.includes(searchLower) ||
-      titleStr.includes(searchLower);
-    const matchesStatus = !statusFilter || (c.status && String(c.status).toUpperCase() === statusFilter.toUpperCase());
-    const matchesCompany = !companyFilter || c.companyId === companyFilter;
-    const matchesTitle = !titleFilter || (c.title && c.title.toLowerCase().includes(titleFilter.toLowerCase()));
-    const matchesSource = !sourceFilter || (c.source && c.source.toLowerCase() === sourceFilter.toLowerCase());
-    const matchesDiscoveryRun = !discoveryRunFilter || (c.companyId && discoveryRunCompanyIds.has(c.companyId));
+  // Memoized discovery run map for O(1) resolution
+  const discoveryRunMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of discoveryRuns) {
+      if (r.id) map.set(r.id, r.name);
+    }
+    return map;
+  }, [discoveryRuns]);
 
-    return matchesSearch && matchesStatus && matchesCompany && matchesTitle && matchesSource && matchesDiscoveryRun;
-  });
+  // Filter & Search logic — memoized with prepared lowercased search terms
+  const filtered = React.useMemo(() => {
+    if (!contacts || contacts.length === 0) return [];
+    const searchLower = search.trim().toLowerCase();
+    const statusUpper = statusFilter.toUpperCase();
+    const titleLower = titleFilter.toLowerCase();
+    const sourceLower = sourceFilter.toLowerCase();
 
-  // Build active filter chips
-  const activeFilterChips = [
-    statusFilter ? { label: 'Status', value: statusFilter, onRemove: () => setStatusFilter('') } : null,
-    companyFilter ? {
-      label: 'Company',
-      value: companies.find((comp: any) => comp.id === companyFilter)?.name || 'Company',
-      onRemove: () => setCompanyFilter('')
-    } : null,
-    titleFilter ? { label: 'Title', value: titleFilter, onRemove: () => setTitleFilter('') } : null,
-    sourceFilter ? { label: 'Source', value: sourceFilter, onRemove: () => setSourceFilter('') } : null,
-    discoveryRunFilter ? {
-      label: 'Discovery',
-      value: discoveryRuns.find((r: any) => r.id === discoveryRunFilter)?.name || 'Run',
-      onRemove: () => {
-        setDiscoveryRunFilter('');
-        setCurrentPage(1);
+    return contacts.filter((c: any) => {
+      if (searchLower) {
+        const fullName = `${c.firstName || ''} ${c.lastName || ''}`.toLowerCase();
+        const emailStr = (c.email || '').toLowerCase();
+        const titleStr = (c.title || '').toLowerCase();
+        const matchesSearch =
+          fullName.includes(searchLower) ||
+          emailStr.includes(searchLower) ||
+          titleStr.includes(searchLower);
+        if (!matchesSearch) return false;
       }
-    } : null
-  ].filter(Boolean) as Array<{ label: string; value: string; onRemove: () => void }>;
+
+      if (statusFilter && (!c.status || String(c.status).toUpperCase() !== statusUpper)) {
+        return false;
+      }
+      if (companyFilter && c.companyId !== companyFilter) {
+        return false;
+      }
+      if (titleFilter && (!c.title || !c.title.toLowerCase().includes(titleLower))) {
+        return false;
+      }
+      if (sourceFilter && (!c.source || c.source.toLowerCase() !== sourceLower)) {
+        return false;
+      }
+      if (discoveryRunFilter && (!c.companyId || !discoveryRunCompanyIds.has(c.companyId))) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [
+    contacts,
+    search,
+    statusFilter,
+    companyFilter,
+    titleFilter,
+    sourceFilter,
+    discoveryRunFilter,
+    discoveryRunCompanyIds
+  ]);
+
+  // Build active filter chips with O(1) map lookups and memoization
+  const activeFilterChips = React.useMemo(() => {
+    return [
+      statusFilter ? { label: 'Status', value: statusFilter, onRemove: () => setStatusFilter('') } : null,
+      companyFilter ? {
+        label: 'Company',
+        value: companyMap.get(companyFilter) || 'Company',
+        onRemove: () => setCompanyFilter('')
+      } : null,
+      titleFilter ? { label: 'Title', value: titleFilter, onRemove: () => setTitleFilter('') } : null,
+      sourceFilter ? { label: 'Source', value: sourceFilter, onRemove: () => setSourceFilter('') } : null,
+      discoveryRunFilter ? {
+        label: 'Discovery',
+        value: discoveryRunMap.get(discoveryRunFilter) || 'Run',
+        onRemove: () => {
+          setDiscoveryRunFilter('');
+          setCurrentPage(1);
+        }
+      } : null
+    ].filter(Boolean) as Array<{ label: string; value: string; onRemove: () => void }>;
+  }, [statusFilter, companyFilter, titleFilter, sourceFilter, discoveryRunFilter, companyMap, discoveryRunMap]);
 
   const handleClearAllFilters = () => {
     setSearch('');
@@ -312,7 +360,7 @@ export default function ContactsScreen() {
     return !areQueriesEqual(currentQuery, capturedQuery);
   }, [isAllMatching, capturedQuery, currentQuery]);
 
-  // Selected Contacts for Static Audience creation
+  // Selected Contacts for Static Audience creation — O(1) company lookup
   const selectedContactsForAudience: PreloadedContact[] = React.useMemo(() => {
     if (effectiveSelectedCount === 0) return [];
     if (isAllMatching) {
@@ -325,7 +373,7 @@ export default function ContactsScreen() {
           lastName: ct.lastName,
           email: ct.email,
           title: ct.title,
-          companyName: companies.find((comp: any) => comp.id === ct.companyId)?.name
+          companyName: ct.companyId ? companyMap.get(ct.companyId) : undefined
         }));
     }
     const idSet = new Set(selectedIds);
@@ -337,18 +385,9 @@ export default function ContactsScreen() {
         lastName: ct.lastName,
         email: ct.email,
         title: ct.title,
-        companyName: companies.find((comp: any) => comp.id === ct.companyId)?.name
+        companyName: ct.companyId ? companyMap.get(ct.companyId) : undefined
       }));
-  }, [effectiveSelectedCount, isAllMatching, excludedIds, selectedIds, filtered, contacts, companies]);
-
-  // Memoized company map for O(1) resolution
-  const companyMap = React.useMemo(() => {
-    const map = new Map<string, string>();
-    for (const comp of companies) {
-      if (comp.id) map.set(comp.id, comp.name);
-    }
-    return map;
-  }, [companies]);
+  }, [effectiveSelectedCount, isAllMatching, excludedIds, selectedIds, filtered, contacts, companyMap]);
 
   // Stable row edit handler
   const handleEditClick = useCallback((contact: any) => {
@@ -394,13 +433,15 @@ export default function ContactsScreen() {
   }, [headerState.indeterminate]);
 
   // Prune any selected IDs that no longer exist in contacts (e.g. after sync / deletion)
+  // Only runs when contacts array identity changes, avoiding 10,000 array maps on every click
   React.useEffect(() => {
-    if (contactsQuery.isSuccess && contacts.length > 0 && (selectedIds.length > 0 || excludedIds.length > 0)) {
+    if (!contactsQuery.isSuccess) return;
+    if (contacts.length > 0 && (selectedIds.length > 0 || excludedIds.length > 0)) {
       pruneStaleIds(contacts.map((c: any) => c.id));
-    } else if (contactsQuery.isSuccess && contacts.length === 0 && effectiveSelectedCount > 0) {
+    } else if (contacts.length === 0 && effectiveSelectedCount > 0) {
       clearSelection();
     }
-  }, [contactsQuery.isSuccess, contacts, pruneStaleIds, clearSelection, selectedIds.length, excludedIds.length, effectiveSelectedCount]);
+  }, [contacts, contactsQuery.isSuccess]);
 
   const handleCreate = async (data: any) => {
     await createMutation.mutateAsync(data);
