@@ -4,6 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useWorkspace } from '../hooks/useWorkspace';
+import { useAuthStore } from '../stores/auth-store';
+import { resolveApplicationEntryState, cleanupObsoleteOnboardingStorage } from '../utils/entry-resolver';
 import { Skeleton } from '../components/ui/skeleton';
 import { SidebarInset, SidebarProvider } from '../components/ui/sidebar';
 import AppHeader from './AppHeader';
@@ -29,18 +31,16 @@ import { ConnectivityBanner } from '../components/common/ConnectivityBanner';
  */
 export function AppLayout() {
   const { activeWorkspace, isInitialized, isLoading, workspaces, error } = useWorkspace();
+  const { state: authState } = useAuthStore();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  // Redirect to onboarding if not completed
+  // Safe one-time cleanup of obsolete client-only onboarding flag
   useEffect(() => {
-    const isCompleted = localStorage.getItem('onboarding_completed') === 'true';
-    if (!isCompleted) {
-      navigate('/onboarding');
-    }
-  }, [navigate]);
+    cleanupObsoleteOnboardingStorage();
+  }, []);
 
   // Show window frame only when workspace state has been deterministically resolved
   useEffect(() => {
@@ -99,12 +99,23 @@ export function AppLayout() {
     };
   }, [activeWorkspace?.id, queryClient]);
 
+  const entryState = resolveApplicationEntryState({
+    authStatus: authState.status,
+    emailVerified: authState.user?.emailVerified,
+    isInitialized,
+    isLoading,
+    workspaces,
+    activeWorkspace,
+    error,
+    currentPath: location.pathname
+  });
+
   // ── Error state: display actionable error with reload rather than failing through to Create Workspace ──
-  if (error && !activeWorkspace) {
+  if (entryState === 'WORKSPACE_RESOLUTION_ERROR') {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background px-4">
         <div className="flex flex-col items-center gap-4 text-center max-w-sm">
-          <p className="text-sm text-destructive font-medium">{error}</p>
+          <p className="text-sm text-destructive font-medium">{error || 'Failed to load workspace.'}</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 text-xs bg-primary text-primary-foreground hover:bg-primary/90 rounded"
@@ -117,7 +128,7 @@ export function AppLayout() {
   }
 
   // ── Initializing state: show clean progress gate if not resolved yet ─────
-  if (!isInitialized || (isLoading && !activeWorkspace)) {
+  if (entryState === 'WORKSPACE_RESOLVING') {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background px-4">
         <div className="flex flex-col items-center gap-3 text-center">
@@ -128,8 +139,21 @@ export function AppLayout() {
     );
   }
 
+  // ── Zero workspaces: allow invited users to view /invites screen ──────────
+  if (entryState === 'INVITATIONS_VIEW') {
+    return (
+      <div className="flex h-screen w-full bg-background text-foreground overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-6">
+          <Suspense fallback={<AppContentSkeleton />}>
+            <Outlet />
+          </Suspense>
+        </main>
+      </div>
+    );
+  }
+
   // ── No workspace: ONLY prompt to create one if resolution completed and 0 workspaces exist ──
-  if (!activeWorkspace && workspaces.length === 0) {
+  if (entryState === 'WORKSPACE_CREATION_REQUIRED') {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background px-4">
         <motion.div
@@ -147,6 +171,15 @@ export function AppLayout() {
             </p>
           </div>
           <CreateWorkspaceForm />
+          <div className="pt-2 border-t border-border-subtle/50 text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/invites')}
+              className="text-[11px] text-muted-foreground hover:text-primary transition-colors underline underline-offset-4"
+            >
+              Have a pending invitation? View invitations
+            </button>
+          </div>
         </motion.div>
       </div>
     );

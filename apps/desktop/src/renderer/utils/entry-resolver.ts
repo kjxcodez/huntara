@@ -9,18 +9,18 @@ export type ApplicationEntryState =
 
 export interface EntryResolutionInput {
   authStatus: 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
-  emailVerified?: boolean;
+  emailVerified?: boolean | undefined;
   isInitialized: boolean;
   isLoading: boolean;
   workspaces: Array<{ id: string; name: string }>;
   activeWorkspace: { id: string; name: string } | null;
   error: string | null;
-  currentPath?: string;
+  currentPath?: string | undefined;
   /**
    * Client-side storage flags for auditing purposes.
    * Under HUNTARA Phase 6 architecture, local flags MUST NOT gate application readiness.
    */
-  localStorageOnboardingCompleted?: string | null;
+  localStorageOnboardingCompleted?: string | null | undefined;
 }
 
 /**
