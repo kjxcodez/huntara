@@ -1,7 +1,9 @@
 import { join } from 'path';
 import fs from 'fs';
 
-export const DEFAULT_PRODUCTION_API_URL = 'https://api.leadforge.kapiljangid.pro/api/v1';
+export const CANONICAL_PRODUCTION_API_URL = 'https://api.huntara.online/api/v1';
+export const LEGACY_PRODUCTION_API_URL = 'https://api.leadforge.kapiljangid.pro/api/v1';
+export const DEFAULT_PRODUCTION_API_URL = CANONICAL_PRODUCTION_API_URL;
 export const DEFAULT_DEVELOPMENT_API_URL = 'http://localhost:3001/api/v1';
 
 /**
@@ -108,10 +110,22 @@ export function loadConfig(): AppConfig {
   }
 
   const isDevMode = isDevEnvironment();
-  const defaultFallback = isDevMode ? DEFAULT_DEVELOPMENT_API_URL : DEFAULT_PRODUCTION_API_URL;
+  const defaultFallback = isDevMode ? DEFAULT_DEVELOPMENT_API_URL : CANONICAL_PRODUCTION_API_URL;
 
-  // Precedence: process.env.API_URL > config.json's apiUrl > Environment Default
-  const rawApiUrl = process.env.API_URL || localData.apiUrl || defaultFallback;
+  // Precedence: process.env.HUNTARA_API_URL > process.env.LEADFORGE_API_URL > process.env.API_URL > config.json's apiUrl > Environment Default
+  let rawApiUrl =
+    process.env.HUNTARA_API_URL ||
+    process.env.LEADFORGE_API_URL ||
+    process.env.API_URL ||
+    localData.apiUrl ||
+    defaultFallback;
+
+  // Seamless configuration migration: If local config still contains the legacy production default URL
+  // and no explicit override was set, upgrade it to the canonical HUNTARA production URL.
+  if (rawApiUrl === LEGACY_PRODUCTION_API_URL && !process.env.LEADFORGE_API_URL && !process.env.HUNTARA_API_URL && !process.env.API_URL) {
+    rawApiUrl = CANONICAL_PRODUCTION_API_URL;
+  }
+
   const apiUrl = normalizeApiUrl(rawApiUrl);
 
   if (!apiUrl) {

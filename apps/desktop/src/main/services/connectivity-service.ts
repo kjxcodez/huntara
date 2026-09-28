@@ -7,7 +7,7 @@ import type {
 } from '@huntara/schema';
 import { AppLogger } from '../lib/logger';
 import { WorkspaceManager } from '../lib/workspace-manager';
-import { loadConfig } from '../lib/config';
+import { loadConfig, CANONICAL_PRODUCTION_API_URL, LEGACY_PRODUCTION_API_URL } from '../lib/config';
 
 /**
  * ConnectivityService manages the runtime connectivity health gate, state machine,
@@ -181,6 +181,50 @@ class ConnectivityServiceClass {
         ) {
           code = 'NETWORK_UNREACHABLE';
           message = `API server is unreachable at ${targetUrl}. Verify server process is running.`;
+        }
+
+        // Dual-endpoint compatibility: If canonical production endpoint fails due to network unreachability
+        // or DNS propagation delay, probe legacy production endpoint fallback during migration window
+        if (
+          targetUrl === CANONICAL_PRODUCTION_API_URL &&
+          (code === 'NETWORK_UNREACHABLE' || code === 'TIMEOUT')
+        ) {
+          AppLogger.warn(
+            'connectivity',
+            'Canonical API endpoint unreachable; probing legacy production endpoint fallback during transition window',
+            undefined,
+            { targetUrl, fallbackUrl: LEGACY_PRODUCTION_API_URL, reason: code }
+          );
+          try {
+            const fallbackHealthUrl = `${LEGACY_PRODUCTION_API_URL.replace(/\/+$/, '')}/health`;
+            const fbController = new AbortController();
+            const fbTimer = setTimeout(() => fbController.abort(), timeoutMs);
+            const fbRes = await fetch(fallbackHealthUrl, {
+              method: 'GET',
+              headers: { Accept: 'application/json' },
+              signal: fbController.signal
+            });
+            clearTimeout(fbTimer);
+            if (fbRes.ok) {
+              const fbBody: any = await fbRes.json().catch(() => ({}));
+              const fbData = fbBody?.data || fbBody;
+              if (fbData?.status === 'OK' || fbRes.status === 200) {
+                AppLogger.info(
+                  'connectivity',
+                  'Legacy production API endpoint reachable; operating on compatibility fallback',
+                  undefined,
+                  { apiUrl: LEGACY_PRODUCTION_API_URL }
+                );
+                return this.setState({
+                  status: 'ONLINE',
+                  apiUrl: LEGACY_PRODUCTION_API_URL,
+                  error: null
+                });
+              }
+            }
+          } catch {
+            // Fallback also failed, proceed with original error
+          }
         }
 
         AppLogger.warn('connectivity', 'api_connectivity_check_failed', undefined, {

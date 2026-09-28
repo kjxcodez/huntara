@@ -11,7 +11,11 @@ import type { JobContext } from '../../shared/types/job';
  * Throws a loud, descriptive error if the URL is missing or unresolvable.
  */
 export function resolveWorkerApiUrl(ctx: JobContext): string {
-  const rawUrl = ctx.payload?._config?.apiUrl || process.env.API_URL;
+  const rawUrl =
+    ctx.payload?._config?.apiUrl ||
+    process.env.HUNTARA_API_URL ||
+    process.env.LEADFORGE_API_URL ||
+    process.env.API_URL;
   if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) {
     throw new Error(
       'HUNTARA could not determine the API server URL for this environment. Please ensure the job was dispatched by the HUNTARA Scheduler.'
