@@ -32,11 +32,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "kjxcodez", url: "https://github.com/kjxcodez" }],
   creator: "kjxcodez",
-  metadataBase: new URL("https://github.com/kjxcodez/huntara"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://huntara.online"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://github.com/kjxcodez/huntara",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://huntara.online",
     title: "HUNTARA — Find the companies worth selling to.",
     description: "HUNTARA helps businesses find and understand their next customers.",
     siteName: "HUNTARA"

@@ -30,13 +30,12 @@ export default function BetaPage() {
     setLoading(true)
     setError(null)
     
-    let apiHost = "https://api.leadforge.kapiljangid.pro"
+    let apiHost = process.env.NEXT_PUBLIC_API_URL || "https://api.huntara.online"
     if (typeof window !== "undefined") {
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-        apiHost = "http://localhost:3001"
+        apiHost = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
       }
     }
-    apiHost = process.env.NEXT_PUBLIC_API_URL || apiHost
     const apiUrl = `${apiHost}/api/v1/beta-apply`
 
     try {

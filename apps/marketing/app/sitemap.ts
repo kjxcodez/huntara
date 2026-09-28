@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next"
 import { getAllReleases } from "../lib/generated-releases"
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://huntara.app"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://huntara.online"
   const releases = getAllReleases()
 
   // Base static routes
