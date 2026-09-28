@@ -5,11 +5,11 @@ import { createSuccessResponseSchema } from '../../openapi/index.js';
 
 const apiInfoSchema = z
   .object({
-    name: z.string().openapi({ example: 'LeadForge OS API' }),
+    name: z.string().openapi({ example: 'HUNTARA API' }),
     version: z.string().openapi({ example: '1.0.0' }),
     description: z
       .string()
-      .openapi({ example: 'LeadForge OS authenticated production CRUD API backend.' }),
+      .openapi({ example: 'HUNTARA authenticated production CRUD API backend.' }),
     status: z.string().openapi({ example: 'online' })
   })
   .openapi('ApiInfo');
@@ -39,7 +39,7 @@ const infoRoute = createRoute({
   method: 'get',
   path: '/',
   summary: 'Get API Information',
-  description: 'Returns general identification details about the running LeadForge OS service.',
+  description: 'Returns general identification details about the running HUNTARA service.',
   tags: ['System'],
   responses: {
     200: {
@@ -103,9 +103,9 @@ const router = new OpenAPIHono();
 router.openapi(infoRoute, (c) => {
   return c.json(
     successResponse({
-      name: 'LeadForge OS API',
+      name: 'HUNTARA API',
       version: '1.0.0',
-      description: 'LeadForge OS authenticated production CRUD API backend.',
+      description: 'HUNTARA authenticated production CRUD API backend.',
       status: 'online'
     })
   );

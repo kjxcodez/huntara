@@ -32,7 +32,7 @@ function registerTestRecipient(userId: string, rawEmail: string): { success: boo
     if (existing.length >= 3) {
       return {
         success: false,
-        error: 'You can use up to 3 different test recipients across your LeadForge account. Reuse one of your existing test addresses to continue.'
+        error: 'You can use up to 3 different test recipients across your HUNTARA account. Reuse one of your existing test addresses to continue.'
       };
     }
     existing.push({ email, firstUsedAt: new Date(), lastUsedAt: new Date() });

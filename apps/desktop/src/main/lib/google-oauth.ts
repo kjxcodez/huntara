@@ -233,7 +233,7 @@ export async function performGoogleOAuth(
     }
 
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(callbackPage('Signed in', 'You are signed in. Return to LeadForge OS.', true));
+    res.end(callbackPage('Signed in', 'You are signed in. Return to HUNTARA.', true));
 
     AppLogger.info('auth', 'Google sign-in callback received session token');
     settle({ ok: true, token });
@@ -250,7 +250,7 @@ function callbackPage(title: string, message: string, success: boolean): string 
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>${title} — LeadForge OS</title>
+  <title>${title} — HUNTARA</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {

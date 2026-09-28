@@ -33,6 +33,7 @@ export function createBetterAuth(options: BetterAuthConfigOptions) {
   const trustedOrigins = [
     'http://127.0.0.1:*',
     'http://localhost:*',
+    'huntara://*',
     'leadforge://*',
     ...(options.trustedOrigins || [])
   ];

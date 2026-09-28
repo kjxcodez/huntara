@@ -1259,7 +1259,7 @@ export class EmailService {
     if (!existingRecipient && userRecipients.length >= 3) {
       throw new EmailDomainError(
         'TEST_RECIPIENT_LIMIT_REACHED',
-        `Test email recipient limit reached (maximum 3 distinct recipients per LeadForge account). Currently used: ${userRecipients.map((r) => r.email).join(', ')}`
+        `Test email recipient limit reached (maximum 3 distinct recipients per HUNTARA account). Currently used: ${userRecipients.map((r) => r.email).join(', ')}`
       );
     }
 
@@ -1280,14 +1280,14 @@ export class EmailService {
     const res = await this.send({
       accountId,
       to: normalizedTo,
-      subject: 'LeadForge OS — Mailbox Verification Test',
+      subject: 'HUNTARA — Mailbox Verification Test',
       idempotencyKey: `test_${accountId}_${Date.now()}_${crypto.randomUUID()}`,
       html: `
         <div dir="ltr">
           <div dir="ltr">
             <p class="MsoNormal" style="margin:0in 0in 8pt;line-height:107%;font-size:13pt;font-family:Calibri,sans-serif;color:#4f46e5;"><strong>Mailbox Verification Successful</strong></p>
             <p class="MsoNormal" style="margin:0in 0in 8pt;line-height:107%;font-size:11pt;font-family:Calibri,sans-serif;color:#111827;">This is an automated test email confirming that your Gmail account <strong>${accountDoc.email}</strong> is properly connected via Google OAuth.</p>
-            <p class="MsoNormal" style="margin:0in 0in 8pt;line-height:107%;font-size:10pt;font-family:Calibri,sans-serif;color:#6b7280;">Sent securely from LeadForge OS</p>
+            <p class="MsoNormal" style="margin:0in 0in 8pt;line-height:107%;font-size:10pt;font-family:Calibri,sans-serif;color:#6b7280;">Sent securely from HUNTARA</p>
           </div>
         </div>
       `,

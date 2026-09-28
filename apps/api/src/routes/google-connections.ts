@@ -91,7 +91,7 @@ googleConnectionsRouter.get('/oauth/callback', async (c) => {
           <div class="icon">✓</div>
           <h1>Google Account Connected</h1>
           <p>Successfully authorized <strong>${account.email}</strong>.</p>
-          <p class="sub">You can close this tab and return to LeadForge OS.</p>
+          <p class="sub">You can close this tab and return to HUNTARA.</p>
         </div>`
       )
     );
@@ -227,7 +227,7 @@ function htmlShell(title: string, content: string): string {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>${title} — LeadForge OS</title>
+  <title>${title} — HUNTARA</title>
   <style>
     body { background: #09090b; color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
     .card { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 40px; text-align: center; max-width: 420px; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }

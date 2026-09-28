@@ -607,9 +607,9 @@ export class ReconciliationService {
   }
 
   /**
-   * Helper verifying whether an inbound candidate is relevant to LeadForge outreach.
+   * Helper verifying whether an inbound candidate is relevant to HUNTARA outreach.
    */
-  public async isLeadForgeRelevant(
+  public async isHuntaraRelevant(
     item: { id: string; threadId?: string | null | undefined },
     detail: {
       headers: Record<string, any>;
@@ -621,6 +621,22 @@ export class ReconciliationService {
   ): Promise<boolean> {
     const evaluation = await this.evaluateInboundRelevance(item, detail, accountEmail);
     return evaluation.isRelevant;
+  }
+
+  /**
+   * @deprecated Use isHuntaraRelevant instead. Retained for legacy LeadForge compatibility.
+   */
+  public async isLeadForgeRelevant(
+    item: { id: string; threadId?: string | null | undefined },
+    detail: {
+      headers: Record<string, any>;
+      bodyText?: string | null | undefined;
+      bodyHtml?: string | null | undefined;
+      internalDate?: Date | null | undefined;
+    },
+    accountEmail: string
+  ): Promise<boolean> {
+    return this.isHuntaraRelevant(item, detail, accountEmail);
   }
 
   /**

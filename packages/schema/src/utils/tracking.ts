@@ -95,6 +95,8 @@ export function rewriteLinksForClickTracking(
     const combinedAttrs = `${beforeHref} ${afterHref}`.toLowerCase();
     if (
       combinedAttrs.includes('data-no-track') ||
+      combinedAttrs.includes('huntara-no-track') ||
+      combinedAttrs.includes('huntara-unsubscribe') ||
       combinedAttrs.includes('leadforge-no-track') ||
       combinedAttrs.includes('leadforge-unsubscribe') ||
       trimmedHref.includes('unsubscribe')

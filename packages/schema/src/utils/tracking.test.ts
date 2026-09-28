@@ -51,6 +51,8 @@ describe('Email Tracking Utilities', () => {
           <a href="tel:+18005551234">Call Us</a>
           <a href="#section-2">Jump Down</a>
           <a href="https://acme.com/unsubscribe" class="leadforge-unsubscribe">Unsubscribe</a>
+          <a href="https://acme.com/opt-out" class="huntara-unsubscribe">Opt Out</a>
+          <a href="https://acme.com/terms" class="huntara-no-track">Terms</a>
           <a href="https://acme.com/privacy" data-no-track="true">Privacy Policy</a>
         </div>
       `;
@@ -71,6 +73,8 @@ describe('Email Tracking Utilities', () => {
       expect(result.rewrittenHtml).toContain('href="tel:+18005551234"');
       expect(result.rewrittenHtml).toContain('href="#section-2"');
       expect(result.rewrittenHtml).toContain('href="https://acme.com/unsubscribe"');
+      expect(result.rewrittenHtml).toContain('href="https://acme.com/opt-out"');
+      expect(result.rewrittenHtml).toContain('href="https://acme.com/terms"');
       expect(result.rewrittenHtml).toContain('href="https://acme.com/privacy"');
     });
   });

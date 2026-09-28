@@ -108,11 +108,11 @@ export class GoogleDriveProvider {
       );
     }
 
-    const boundary = `----=_LeadForge_Drive_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+    const boundary = `----=_Huntara_Drive_${Date.now()}_${Math.random().toString(36).substring(2)}`;
     const metadata = JSON.stringify({
       name: options.filename,
       mimeType: options.mimeType,
-      description: 'LeadForge OS Media Asset'
+      description: 'HUNTARA Media Asset'
     });
 
     const header = `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n\r\n--${boundary}\r\nContent-Type: ${options.mimeType}\r\n\r\n`;

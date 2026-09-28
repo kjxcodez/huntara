@@ -13,6 +13,8 @@ export class ProductionSafetyViolationError extends Error {
 }
 
 const FORBIDDEN_PRODUCTION_PATTERNS = [
+  /api\.huntara\.online/i,
+  /huntara-prod/i,
   /api\.leadforge\.kapiljangid\.pro/i,
   /leadforge-prod/i,
   /production/i,
@@ -52,7 +54,7 @@ export function assertSafeEmailRecipient(recipient: string): void {
   }
 
   const normalized = recipient.toLowerCase().trim();
-  const safeDomains = ['example.com', 'test.com', 'localhost', 'leadforge.local', 'company.com'];
+  const safeDomains = ['example.com', 'test.com', 'localhost', 'huntara.local', 'leadforge.local', 'company.com'];
   const domain = normalized.split('@')[1];
 
   if (!domain || (!safeDomains.includes(domain) && !domain.endsWith('.test'))) {

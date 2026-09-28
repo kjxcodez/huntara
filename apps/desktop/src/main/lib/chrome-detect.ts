@@ -5,7 +5,7 @@
  * (fallback). Returns an actionable diagnostic instead of a cryptic error when
  * Chrome is absent.
  *
- * Intentionally Windows-only — LeadForge OS only ships on Windows for now.
+ * Intentionally Windows-only — HUNTARA only ships on Windows for now.
  * No Electron import; this module runs safely in both the main process and
  * worker processes.
  */
@@ -92,7 +92,7 @@ export function detectChrome(): ChromeDetectionResult {
     found: false,
     error:
       'Google Chrome was not found on this computer.\n\n' +
-      'LeadForge OS opens Google sign-in in your Chrome browser so you can use ' +
+      'HUNTARA opens Google sign-in in your Chrome browser so you can use ' +
       'your existing Google account without re-entering credentials.\n\n' +
       'Please install Google Chrome from https://www.google.com/chrome and try again.'
   };

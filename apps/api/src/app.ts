@@ -68,9 +68,9 @@ app.get('/', (c) => {
 app.doc('/openapi.json', {
   openapi: '3.0.0',
   info: {
-    title: 'LeadForge OS API Reference',
+    title: 'HUNTARA API Reference',
     version: '1.0.0',
-    description: 'Production API reference catalog details for LeadForge OS tenant modules.'
+    description: 'Production API reference catalog details for HUNTARA tenant modules.'
   }
 });
 

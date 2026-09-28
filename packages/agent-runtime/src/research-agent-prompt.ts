@@ -12,7 +12,7 @@ export type ResearchSummaryInput = z.infer<typeof ResearchSummaryInputSchema>;
 export const ResearchSummaryPrompt: PromptDefinition<ResearchSummaryInput, string> = {
   id: 'research_summary',
   version: '1.0.0',
-  render: (input) => `You are the LeadForge Research Agent.
+  render: (input) => `You are the HUNTARA Research Agent.
 We searched Google Maps for: "${input.query}". Results:
 ${JSON.stringify(input.scraperResults, null, 2)}
 

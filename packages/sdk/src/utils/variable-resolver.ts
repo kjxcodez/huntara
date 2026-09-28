@@ -525,7 +525,7 @@ export function composeOutboundMessage(input: ComposeMessageInput): ComposeMessa
       lastName: input.recipient.lastName ?? input.context?.contact?.lastName
     },
     sender: {
-      name: input.sender.name || 'LeadForge',
+      name: input.sender.name || 'HUNTARA',
       email: input.sender.email
     },
     workspace: {
