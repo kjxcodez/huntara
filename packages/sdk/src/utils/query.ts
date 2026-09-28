@@ -1,5 +1,5 @@
 /**
- * Centralized query parameter serialization utility for LeadForge SDK.
+ * Centralized query parameter serialization utility for HUNTARA SDK.
  *
  * Invariant (Phase 2C / F-06):
  * 1. undefined and null values are completely omitted (never emitted as literal "undefined" or "null").

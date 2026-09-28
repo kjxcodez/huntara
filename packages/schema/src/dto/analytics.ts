@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { EmailQualityStatus } from '../enums/index.js';
 
 /**
- * LeadForge OS — Phase 11: Authoritative Metric and Analytics Dictionary
+ * HUNTARA — Authoritative Metric and Analytics Dictionary
  *
  * Guaranteed Invariants:
  * 1. Every rate metric exposes its explicit numerator, denominator, formula, and caveats.

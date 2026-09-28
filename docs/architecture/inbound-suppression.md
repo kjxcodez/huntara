@@ -4,7 +4,7 @@
 The central operational question answered by Phase 17 is:
 > *After an inbound event or suppression-state change, does every relevant subsystem converge on one authoritative answer to "may this address/contact receive another outbound message?"*
 
-In LeadForge OS, suppression authority is maintained hierarchically:
+In HUNTARA, suppression authority is maintained hierarchically:
 - **Suppression Authority Unit**: The normalized email address (`{ workspaceId, email }`) in MongoDB `SuppressionModel` and mirrored in SQLite `suppressions`.
 - **Contact Lifecycle State**: Maintained in `ContactModel` and cached in SQLite `contacts`.
 - **Precedence Rule**: Administrative unsuppression removes the address suppression record and safely restores contact eligibility:

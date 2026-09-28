@@ -1,5 +1,5 @@
 /**
- * Generates a canonical cryptographically secure string entity ID for LeadForge OS.
+ * Generates a canonical cryptographically secure string entity ID for HUNTARA.
  * Invariant: MongoDB _id === API entity id === SQLite cache id === foreign-key references.
  * Standard: UUID v4 string (lowercase, hyphenated).
  * Compatible universally across Node.js, Electron main/renderer (Vite), and browsers.
@@ -16,7 +16,7 @@ export function generateEntityId(): string {
 }
 
 /**
- * Validates that an identifier is a non-empty string compliant with LeadForge identity standard.
+ * Validates that an identifier is a non-empty string compliant with HUNTARA identity standard.
  */
 export function isValidEntityId(id: unknown): id is string {
   return typeof id === 'string' && id.trim().length > 0 && id.length <= 128;

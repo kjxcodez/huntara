@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Phase 10: Email Verification Provider Abstraction & Native Resolver
+ * HUNTARA — Email Verification Provider Abstraction & Native Resolver
  *
  * Implements an extensible provider interface for email verification.
  * Native implementation performs DNS A/AAAA and MX resolution, disposable domain checking,

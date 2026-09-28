@@ -20,7 +20,7 @@ export const entityIdFieldNullable = z.preprocess(
 );
 
 /**
- * @deprecated Use entityIdField instead. BSON ObjectIds are prohibited; all LeadForge IDs are canonical strings.
+ * @deprecated Use entityIdField instead. BSON ObjectIds are prohibited; all HUNTARA IDs are canonical strings.
  */
 export const objectIdField = entityIdField;
 

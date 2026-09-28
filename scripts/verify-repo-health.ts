@@ -297,7 +297,7 @@ async function main() {
     const targetPkg = packagesMap.get(name)!;
     const relativeDir = path.relative(rootDir, targetPkg.dir).replace(/\\/g, '/');
     const isApp = relativeDir.startsWith('apps/');
-    if (count === 0 && !isApp && name !== 'leadforge') {
+    if (count === 0 && !isApp && name !== 'huntara' && name !== 'leadforge') {
       issues.push({
         category: 'orphaned_package',
         message: `Workspace package "${name}" is not imported anywhere in the monorepo.`,
@@ -486,7 +486,7 @@ async function main() {
   fs.writeFileSync(path.join(reportDir, 'health-report.json'), JSON.stringify(report, null, 2));
 
   // Write Markdown output
-  let md = `# LeadForge OS Repository Health Report\n\n`;
+  let md = `# HUNTARA Repository Health Report\n\n`;
   md += `**Timestamp**: ${report.timestamp}\n\n`;
   md += `## Summary\n\n`;
   md += `- **Total Workspace Packages**: ${report.summary.totalPackages}\n`;

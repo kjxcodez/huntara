@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Campaign Lifecycle & Outreach Eligibility Policy
+ * HUNTARA — Campaign Lifecycle & Outreach Eligibility Policy
  *
  * Authoritative, server-grade decision engine for:
  * 1. Campaign state transitions (DRAFT -> ACTIVE -> PAUSED -> STOPPED -> COMPLETED / FAILED)

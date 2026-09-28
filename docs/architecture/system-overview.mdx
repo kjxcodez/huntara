@@ -1,11 +1,11 @@
 ---
 title: "System Architecture"
-description: "Process boundaries, monorepo packages, and local-first topologies in LeadForge OS."
+description: "Process boundaries, monorepo packages, and local-first topologies in HUNTARA."
 category: "Architecture"
 order: 1
 ---
 
-LeadForge OS is built on a local-first architecture. The client machine's desktop hardware serves as the primary engine for heavy operations—running headless browser scrapes, website crawling, database queries, and AI qualifications—while external networks act as synchronization layers.
+HUNTARA is built on a local-first architecture. The client machine's desktop hardware serves as the primary engine for heavy operations—running headless browser scrapes, website crawling, database queries, and AI qualifications—while external networks act as synchronization layers.
 
 ## Overall Architecture
 
@@ -182,7 +182,7 @@ sequenceDiagram
 
 ### Daily-Rotating Logging
 
-- System logs are written to rotating files using `@leadforge/logger`.
+- System logs are written to rotating files using `@huntara/logger`.
 - When exporting a **Support Bundle**, log files and the current configuration are packed into a ZIP file. All sensitive parameters (passwords, SMTP credentials, OpenRouter API keys) are replaced with `[MASKED]`.
 
 ### Telemetry & Diagnostics

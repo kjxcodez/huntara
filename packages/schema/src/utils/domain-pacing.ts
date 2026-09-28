@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Domain Pacing & Company Contact Cardinality Engine
+ * HUNTARA — Domain Pacing & Company Contact Cardinality Engine
  *
  * Deterministically controls outbound activity to prevent excessive concentration
  * of sends to the same recipient domain or company.

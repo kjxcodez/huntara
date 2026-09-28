@@ -1,6 +1,6 @@
 ---
 name: "🚀 Feature Request"
-about: Suggest an idea, enhancement, or new workflow screen for LeadForge OS.
+about: Suggest an idea, enhancement, or new workflow screen for HUNTARA.
 title: "feat: [Short description of the proposed feature]"
 labels: enhancement, discussion
 assignees: ""

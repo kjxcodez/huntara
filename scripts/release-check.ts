@@ -229,7 +229,7 @@ async function main() {
 
   // Compile final report
   let allSuccess = true;
-  let md = `# LeadForge OS Release Verification Report\n\n`;
+  let md = `# HUNTARA Release Verification Report\n\n`;
   md += `**Timestamp**: ${new Date().toISOString()}\n\n`;
   md += `## Release Gates Checklist\n\n`;
 
@@ -252,7 +252,7 @@ async function main() {
   fs.writeFileSync(path.join(reportDir, 'release-check-report.md'), md);
 
   console.log('\n==================================================');
-  console.log('LEADFORGE OS RELEASE VERIFICATION REPORT SUMMARY');
+  console.log('HUNTARA RELEASE VERIFICATION REPORT SUMMARY');
   console.log('==================================================');
   for (const res of results) {
     const statusStr = res.success ? 'PASS' : 'FAIL';

@@ -29,7 +29,7 @@ const PLAYWRIGHT_BROWSER_VERSION = '151.0.7922.34';
 const PLAYWRIGHT_FFMPEG_REVISION = '1011';
 
 /**
- * Returns the path where LeadForge OS stores its Playwright browser binaries.
+ * Returns the path where HUNTARA stores its Playwright browser binaries.
  */
 export function getPlaywrightBrowsersPath(): string {
   if (app && typeof app.getPath === 'function') {
@@ -40,7 +40,9 @@ export function getPlaywrightBrowsersPath(): string {
     (process.platform === 'darwin'
       ? join(process.env.HOME || '', 'Library', 'Application Support')
       : join(process.env.HOME || '', '.config'));
-  return join(appData, '@leadforge', 'desktop', 'playwright-browsers');
+  const canonicalPath = join(appData, 'HUNTARA', 'playwright-browsers');
+  const legacyPath = join(appData, '@leadforge', 'desktop', 'playwright-browsers');
+  return existsSync(canonicalPath) ? canonicalPath : (existsSync(legacyPath) ? legacyPath : canonicalPath);
 }
 
 /**

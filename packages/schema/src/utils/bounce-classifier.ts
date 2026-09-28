@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Phase 10: Canonical Bounce & Rejection Classification Engine
+ * HUNTARA — Canonical Bounce & Rejection Classification Engine
  *
  * Deterministically categorizes recipient failures, SMTP status codes (RFC 3463 / RFC 5321),
  * provider diagnostics, and inbound Delivery Status Notifications (DSNs).

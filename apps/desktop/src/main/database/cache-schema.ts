@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 
 /**
- * LeadForge OS — Clean Disposable SQLite Cache Schema Initializer (Phase 6)
+ * HUNTARA — Clean Disposable SQLite Cache Schema Initializer
  * 
  * Defines the minimal, read-optimized local SQLite schema.
  * SQLite is strictly a disposable read projection of authoritative MongoDB state.
@@ -10,7 +10,7 @@ import Database from 'better-sqlite3';
  *  1. Zero sync infrastructure tables (no sync_queue, sync_metadata, sync_dead_letter).
  *  2. Zero sync status columns (no syncStatus, version, pending flags).
  *  3. All IDs are exact canonical strings matching MongoDB document _id.
- *  4. Database can be dropped (rm leadforge_<wsId>.db) and fully recreated without data loss.
+ *  4. Database can be dropped (rm huntara_<wsId>.db) and fully recreated without data loss.
  */
 
 export const CACHE_SCHEMA_VERSION = 4;

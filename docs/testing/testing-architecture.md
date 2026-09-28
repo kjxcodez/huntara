@@ -1,9 +1,9 @@
-# LeadForge OS — Testing Architecture Specification
+# HUNTARA — Testing Architecture Specification
 
 ## 1. Testing Philosophy & Quality Principles
-LeadForge OS is a desktop and cloud lead discovery, CRM, intelligence, and outbound campaign delivery platform. Its operations handle sensitive email communications, outbound sending quotas, third-party authentication tokens (Gmail OAuth2), and prospect relationships. Flaky, slow, or deceptively passing tests are unacceptable because delivery bugs or state corruption can lead to domain reputation damage, rate limit bans, or accidental spam.
+HUNTARA is a desktop and cloud lead discovery, CRM, intelligence, and outbound campaign delivery platform. Its operations handle sensitive email communications, outbound sending quotas, third-party authentication tokens (Gmail OAuth2), and prospect relationships. Flaky, slow, or deceptively passing tests are unacceptable because delivery bugs or state corruption can lead to domain reputation damage, rate limit bans, or accidental spam.
 
-The LeadForge OS testing architecture is governed by five non-negotiable quality principles:
+The HUNTARA testing architecture is governed by five non-negotiable quality principles:
 1. **Deterministic Execution**: Tests must produce identical results regardless of execution order, host OS, machine load, or time of day. Time-dependent logic relies on frozen clocks or explicit timestamps.
 2. **Zero External Production Side-Effects**: Tests must never connect to live external APIs (Gmail, Google Maps, hunter.io), write to production databases, or transmit live network payloads.
 3. **Behavioral Invariant Protection**: Every architectural invariant established in Phases 1–6 (email sanitization, crawler DOM extraction, campaign safety, delivery reservations, idempotency, engagement tracking, reply reconciliation) must be asserted at test boundaries.
@@ -27,9 +27,9 @@ The testing suite is partitioned into four distinct layers:
 
 ## 3. Framework Selection & Justification (Vitest)
 
-Vitest was chosen as the authoritative test runner for LeadForge OS replacing ad-hoc tsx scripts and custom assertion loops for the following technical reasons:
+Vitest was chosen as the authoritative test runner for HUNTARA replacing ad-hoc tsx scripts and custom assertion loops for the following technical reasons:
 - **ESM and TypeScript Native Execution**: Out-of-the-box support for TypeScript and ESM without complex transpilation layers (`ts-node`, `babel-jest`).
-- **Workspace & Monorepo First**: Fast path alias resolution (`@leadforge/core`, `@leadforge/schema`, `@leadforge/sdk`, `@leadforge/logger`, `@leadforge/auth`) identical to Vite and Turbo build pipelines.
+- **Workspace & Monorepo First**: Fast path alias resolution (`@huntara/core`, `@huntara/schema`, `@huntara/sdk`, `@huntara/logger`, `@huntara/auth`) identical to Vite and Turbo build pipelines.
 - **High Concurrency & Worker Isolation**: Vitest leverages worker threads for parallel file execution, achieving complete test suite execution across 27 suites in under 5 seconds.
 - **Rich Assertion & Mocking API**: Built-in `describe`, `it`, `expect`, `vi.fn()`, `vi.mock()`, and `vi.useFakeTimers()` eliminating disjoint assertion libraries (`assert`, `chai`).
 - **Snapshot & Coverage Integration**: Native V8 coverage engine and snapshot testing capabilities.
@@ -48,7 +48,7 @@ All test suites conform to standard colocated naming conventions:
 
 ## 5. Test Doubles Strategy (Fakes vs Mocks vs Stubs)
 
-To prevent brittle tests, LeadForge OS prioritizes **State-Based Verification** with authoritative test doubles over extensive call-spying:
+To prevent brittle tests, HUNTARA prioritizes **State-Based Verification** with authoritative test doubles over extensive call-spying:
 - **Fake Gmail Provider (`FakeGmailProvider`)**: An authoritative, in-memory implementation of the Gmail provider interface. It maintains sent messages, message threads, search indices, and simulates error codes (`RATE_LIMITED`, `AUTH_ERROR`, `TIMEOUT`, `PERMANENT_REJECTION`) deterministically.
 - **In-Memory SQLite / Execution Stores**: Used in unit suites (`campaign-lifecycle-safety.test.ts`, `email-delivery-engagement.test.ts`, `scheduler-recovery.test.ts`) to verify CAS compare-and-swap, reservations, and idempotency without requiring binary native compilation.
 - **Stubs (`vi.fn()`, `vi.mock()`)**: Used strictly at hard external system boundaries (e.g., Electron `ipcMain`, `app.getPath()`, `fetch`).
@@ -118,15 +118,15 @@ Vitest runs test files concurrently across separate worker threads. To prevent s
 
 | Package | Test Suites | Test Count | Focus Areas |
 | :--- | :--- | :--- | :--- |
-| **`@leadforge/schema`** | `email-sanitizer.test.ts`, `outreach-eligibility.test.ts`, `tracking.test.ts` | 62 | RFC email syntax, role account detection, contact eligibility, open/click tokens. |
-| **`@leadforge/sdk`** | `variable-resolver.test.ts` | 8 | Template variable resolution (`{{contact.firstName}}`), legacy token fallback, escaping. |
-| **`@leadforge/core`** | `safety-guard.ts`, `fake-gmail-provider.ts`, `factories.ts` | Utilities | Test doubles, safety guards, typed builders. |
-| **`@leadforge/agent-core`** | `registry.test.ts` | 3 | Tool registration, duplicate tool rejection, catalog discovery. |
-| **`@leadforge/agent-runtime`**| `runtime.test.ts` | 1 | Agent state machine transitions, tool result dispatching. |
-| **`@leadforge/workflow-engine`**| `tool-prompt-builder.test.ts`, `tool-dispatcher.test.ts`, `workflow-runner.test.ts` | 13 | Step sequencing, context accumulation, bounded fan-out, failure stopping. |
+| **`@huntara/schema`** | `email-sanitizer.test.ts`, `outreach-eligibility.test.ts`, `tracking.test.ts` | 62 | RFC email syntax, role account detection, contact eligibility, open/click tokens. |
+| **`@huntara/sdk`** | `variable-resolver.test.ts` | 8 | Template variable resolution (`{{contact.firstName}}`), legacy token fallback, escaping. |
+| **`@huntara/core`** | `safety-guard.ts`, `fake-gmail-provider.ts`, `factories.ts` | Utilities | Test doubles, safety guards, typed builders. |
+| **`@huntara/agent-core`** | `registry.test.ts` | 3 | Tool registration, duplicate tool rejection, catalog discovery. |
+| **`@huntara/agent-runtime`**| `runtime.test.ts` | 1 | Agent state machine transitions, tool result dispatching. |
+| **`@huntara/workflow-engine`**| `tool-prompt-builder.test.ts`, `tool-dispatcher.test.ts`, `workflow-runner.test.ts` | 13 | Step sequencing, context accumulation, bounded fan-out, failure stopping. |
 | **`api` (`apps/api`)** | `gmail-oauth-refresh.test.ts`, `gmail-phase9r.test.ts`, `error-contracts.test.ts` | 17 | Token refresh mechanics, retry policies, API error contracts & HTTP status codes. |
-| **`@leadforge/desktop` (Unit)**| `crawler-extractor.test.ts`, `campaign-lifecycle-safety.test.ts`, `email-delivery-engagement.test.ts`, `email-reply-reconciliation.test.ts`, `desktop-runtime-config.test.ts`, `locations.test.ts`, `worker-auth.test.ts`, `send-test-attachment.test.ts`, `intelligence.test.ts`, `playwright-setup.test.ts`, `adapter.test.ts`, `updater.test.ts`, `email-test-recipients.test.ts`, `scheduler-recovery.test.ts`, `onboarding.test.ts` | 98 | DOM crawler extraction, send reservations, reply reconciliation, update manager. |
-| **`@leadforge/desktop` (Native)**| `audiences.test.ts`, `campaign.test.ts`, `fresh-database.test.ts`, `fresh-database-all-queries.test.ts`, `post-release-stabilization.test.ts`, `release-qualification.test.ts` | 6 suites | SQLite cache schema versioning, 15 production queries, cross-workspace isolation. |
+| **`@huntara/desktop` (Unit)**| `crawler-extractor.test.ts`, `campaign-lifecycle-safety.test.ts`, `email-delivery-engagement.test.ts`, `email-reply-reconciliation.test.ts`, `desktop-runtime-config.test.ts`, `locations.test.ts`, `worker-auth.test.ts`, `send-test-attachment.test.ts`, `intelligence.test.ts`, `playwright-setup.test.ts`, `adapter.test.ts`, `updater.test.ts`, `email-test-recipients.test.ts`, `scheduler-recovery.test.ts`, `onboarding.test.ts` | 98 | DOM crawler extraction, send reservations, reply reconciliation, update manager. |
+| **`@huntara/desktop` (Native)**| `audiences.test.ts`, `campaign.test.ts`, `fresh-database.test.ts`, `fresh-database-all-queries.test.ts`, `post-release-stabilization.test.ts`, `release-qualification.test.ts` | 6 suites | SQLite cache schema versioning, 15 production queries, cross-workspace isolation. |
 | **Total Monorepo** | **27 Vitest Suites + 6 Native Suites** | **202 Unit + Native** | **100% Passing** |
 
 ---
@@ -178,7 +178,7 @@ Developers have dedicated commands for various testing workflows:
 
 1. **Email Logs UI (Phase 8)**: The user interface components for viewing email delivery ledgers and conversation threads are currently scheduled for Phase 8. Component testing with React Testing Library or Vitest Browser Mode will be integrated during that phase.
 2. **End-to-End (E2E) Desktop Flow**: Full Electron application launch and UI automation via Playwright for Electron is planned as an overnight scheduled job rather than a PR blocking gate to preserve sub-minute CI turnaround times.
-3. **AI Sentiment Ingestion Double**: A programmable mock for future LLM-based reply classification will be added to `@leadforge/core/test-utils` in upcoming intelligence phases.
+3. **AI Sentiment Ingestion Double**: A programmable mock for future LLM-based reply classification will be added to `@huntara/core/test-utils` in upcoming intelligence phases.
 
 ---
 

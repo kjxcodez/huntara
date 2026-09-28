@@ -1,6 +1,6 @@
 ---
 name: "🐛 Bug Report"
-about: Report a bug or rendering defect in LeadForge OS to help us improve.
+about: Report a bug or rendering defect in HUNTARA to help us improve.
 title: "bug: [Short description of the bug]"
 labels: bug, triage
 assignees: ""

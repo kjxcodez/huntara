@@ -5,7 +5,7 @@ category: "Development"
 order: 2
 ---
 
-LeadForge OS employs automated unit, integration, and headless smoke tests, supplemented by runtime diagnostics and pre-release gates to guarantee codebase health.
+HUNTARA employs automated unit, integration, and headless smoke tests, supplemented by runtime diagnostics and pre-release gates to guarantee codebase health.
 
 ## Testing Philosophy
 
@@ -73,7 +73,7 @@ The checklist consists of:
 In unit tests, use the `'mock'` provider to bypass OpenRouter connections and return deterministic mock data instantly:
 
 ```typescript
-import { PromptRunner } from '@leadforge/ai';
+import { PromptRunner } from '@huntara/ai';
 
 const runner = new PromptRunner({
   provider: 'mock',

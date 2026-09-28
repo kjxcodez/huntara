@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Email Verification Provider
+ * HUNTARA — Email Verification Provider
  * Re-exported from @huntara/core
  */
 

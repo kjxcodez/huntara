@@ -22,7 +22,7 @@
 HUNTARA helps businesses find and understand their next customers. Instead of relying on expensive seat-based cloud platforms that charge high infrastructure markups and upload your database to third parties, HUNTARA executes scrapers, headless browsers, data-mining operations, and local LLMs **directly on your local hardware**.
 
 <div align="center">
-  <img src="docs/assets/dashboard_mockup.png" alt="LeadForge OS Dashboard Cockpit" width="700" />
+  <img src="docs/assets/dashboard_mockup.png" alt="HUNTARA Dashboard Cockpit" width="700" />
 </div>
 
 ---

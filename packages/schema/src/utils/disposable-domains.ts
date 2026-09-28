@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Phase 10: Disposable & Temporary Email Provider Intelligence
+ * HUNTARA — Disposable & Temporary Email Provider Intelligence
  *
  * High-confidence curated dictionary of temporary, burner, and disposable mail domains.
  * Emails hosted on these domains must never be claimed deliverable or contacted in outreach.

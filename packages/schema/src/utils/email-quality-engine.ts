@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Phase 10: Authoritative Email Quality Decision Engine
+ * HUNTARA — Authoritative Email Quality Decision Engine
  *
  * Enforces the central product invariants:
  * 1. Never represent an email as "verified" merely because it passes syntax validation or has MX records.

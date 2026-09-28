@@ -29,7 +29,7 @@ async function fetchContributors() {
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'LeadForge-OS-Builder',
+        'User-Agent': 'HUNTARA-Builder',
         'Accept': 'application/vnd.github.v3+json'
       },
       signal: AbortSignal.timeout(6000)

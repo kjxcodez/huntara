@@ -2,7 +2,7 @@
 
 ## 1. System-Wide Invariant Matrix
 
-This matrix maps every major architectural invariant in LeadForge OS across its authoritative source, runtime enforcement layer, observable evidence, test suite, potential failure modes, and recovery mechanisms.
+This matrix maps every major architectural invariant in HUNTARA across its authoritative source, runtime enforcement layer, observable evidence, test suite, potential failure modes, and recovery mechanisms.
 
 | Major Invariant | Authoritative Source | Enforcement Layer | Observable Evidence | Test Suite | Failure Mode | Recovery Mechanism |
 |---|---|---|---|---|---|---|
@@ -196,7 +196,7 @@ EVALUATION: ALL 14 GATES (A THROUGH N) PASSED WITH ZERO OUTSTANDING DEFECTS
 ```
 
 ### Architectural Foundation Summary
-LeadForge OS has achieved complete deterministic stability across its core distributed engine:
+HUNTARA has achieved complete deterministic stability across its core distributed engine:
 1. **Zero State Corruption**: Crash resilience verified across 17 distinct process failure boundaries (A–Q).
 2. **Authoritative Ledger & Lineage**: Multi-step cold outreach retains immutable template version snapshots, canonical message fingerprints, and deterministic idempotency keys.
 3. **Strict Inbound & Suppression Safety**: Cross-race hazards between inbound replies and outbound sends are neutralized with sub-millisecond precision; suppression lists cannot be bypassed under heavy queue concurrency.

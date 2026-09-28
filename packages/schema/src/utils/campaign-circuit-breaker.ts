@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — Campaign Outbound Rejection Circuit Breaker Engine
+ * HUNTARA — Campaign Outbound Rejection Circuit Breaker Engine
  *
  * Deterministically tracks provider and recipient rejection signals,
  * evaluates rolling failure windows, and provides authoritative circuit-breaker rules.

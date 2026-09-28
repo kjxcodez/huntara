@@ -1,7 +1,7 @@
 # Operational Reliability, Mailbox Health & Architecture Hardening
 
 ## 1. Executive Summary & Design Invariants
-Phase 18 introduces hardened operational reliability across outbound dispatch, mailbox health tracking, worker execution lifecycles, and projection consistency in LeadForge OS.
+Phase 18 introduces hardened operational reliability across outbound dispatch, mailbox health tracking, worker execution lifecycles, and projection consistency in HUNTARA.
 
 ### Core Invariants:
 1. **Deterministic Mailbox Health**: Mailbox dispatch eligibility is strictly governed by a bounded state machine (`HEALTHY`, `COOLDOWN`, `AUTH_REQUIRED`, `DISCONNECTED`, `DEGRADED`, `BLOCKED`) evaluated synchronously prior to every send attempt.
@@ -48,7 +48,7 @@ Phase 18 introduces hardened operational reliability across outbound dispatch, m
 - **`BLOCKED`**: Permanent provider policy block or administrative suspension.
 
 ### Pure Eligibility Evaluation
-The helper `isMailboxEligibleForDispatch(account)` in `@leadforge/schema` evaluates dispatch eligibility deterministically:
+The helper `isMailboxEligibleForDispatch(account)` in `@huntara/schema` evaluates dispatch eligibility deterministically:
 ```typescript
 export function isMailboxEligibleForDispatch(account: {
   status?: string | null;

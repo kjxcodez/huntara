@@ -1,5 +1,5 @@
 /**
- * LeadForge OS — SQLite to MongoDB Migration Manifest
+ * HUNTARA — SQLite to MongoDB Migration Manifest
  * Defines table-to-collection mapping, dependency ordering, foreign key relations,
  * JSON transformations, and field normalization rules.
  */

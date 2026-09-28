@@ -1,4 +1,4 @@
-# LeadForge OS — Current Architecture Specification
+# HUNTARA — Current Architecture Specification
 
 **Document:** `current-architecture.md`  
 **Status:** Certified Production Architecture ✅  
@@ -8,7 +8,7 @@
 
 ## 1. High-Level Architecture Overview
 
-LeadForge OS is built on a **MongoDB-First, Disposable Local Cache** architecture designed for multi-tenant scalability, zero cross-device synchronization ambiguity, and deterministic offline resilience.
+HUNTARA is built on a **MongoDB-First, Disposable Local Cache** architecture designed for multi-tenant scalability, zero cross-device synchronization ambiguity, and deterministic offline resilience.
 
 ```text
                                ┌────────────────────────────────┐
@@ -41,7 +41,7 @@ LeadForge OS is built on a **MongoDB-First, Disposable Local Cache** architectur
 ## 2. Core Architectural Subsystems
 
 ### 2.1 Canonical Identity & Schemas
-- **UUID Identifiers:** All domain entities generate canonical string UUIDs via `@leadforge/schema` (`generateEntityId()`).
+- **UUID Identifiers:** All domain entities generate canonical string UUIDs via `@huntara/schema` (`generateEntityId()`).
 - **Zero BSON ObjectIds:** MongoDB collections and domain documents strictly utilize string `_id` values and string foreign keys.
 - **Shared Contracts:** Zod and TypeScript schemas in `packages/schema` serve as the single source of type definitions across API, desktop, SDK, and worker layers.
 

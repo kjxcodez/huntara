@@ -21,7 +21,7 @@ Configure the API server (`apps/api`) using the following environment variables:
 | :--- | :--- | :--- |
 | `NODE_ENV` | Target execution environment | `production` |
 | `PORT` | Local runtime port | `3000` |
-| `MONGODB_URI` | MongoDB connection connection string | `mongodb+srv://user:pass@cluster.mongodb.net/leadforge` |
+| `MONGODB_URI` | MongoDB connection connection string | `mongodb+srv://user:pass@cluster.mongodb.net/huntara` |
 | `BETTER_AUTH_SECRET` | 32+ character auth security secret | `random_secret_string_here` |
 | `BETTER_AUTH_URL` | Callback URL matching the API domain | `https://api.leadforge.dev/api/v1/auth` |
 
@@ -45,7 +45,7 @@ To run persistent server daemons on virtual servers (e.g. AWS, DigitalOcean):
 
 ```bash
 pnpm -F api build
-pm2 start dist/index.js --name "leadforge-api" --update-env
+pm2 start dist/index.js --name "huntara-api" --update-env
 ```
 
 ### Docker Container
@@ -77,7 +77,7 @@ To build the setup installer executable:
 pnpm package
 ```
 
-This compiles main and renderer processes using `electron-builder`, outputting `LeadForge OS-Setup-<version>.exe` in the `apps/desktop/dist/` directory.
+This compiles main and renderer processes using `electron-builder`, outputting `HUNTARA-<version>-<os>-<arch>.exe` in the `apps/desktop/dist/` directory.
 
 ## Verification
 

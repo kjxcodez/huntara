@@ -166,7 +166,7 @@ async function main() {
 
   // Compile final unified report
   let allSuccess = true;
-  let md = `# LeadForge OS Doctor Diagnostics Report\n\n`;
+  let md = `# HUNTARA Doctor Diagnostics Report\n\n`;
   md += `**Timestamp**: ${new Date().toISOString()}\n\n`;
   md += `## Diagnostics Summary\n\n`;
 
@@ -200,7 +200,7 @@ async function main() {
   fs.writeFileSync(path.join(reportDir, 'doctor-report.md'), md);
 
   console.log('\n======================================');
-  console.log('LEADFORGE OS DOCTOR DIAGNOSTICS REPORT SUMMARY');
+  console.log('HUNTARA DOCTOR DIAGNOSTICS REPORT SUMMARY');
   console.log('======================================');
   for (const res of results) {
     const statusStr = res.success ? 'PASS' : 'FAIL';
