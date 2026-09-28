@@ -1190,6 +1190,18 @@ export interface IpcChannelMap {
     input: void;
     output: string;
   };
+  'app:deep-link': {
+    input: void;
+    output: {
+      valid: boolean;
+      scheme: 'huntara' | 'leadforge' | 'unknown';
+      action: string;
+      path: string;
+      params: Record<string, string>;
+      error?: string;
+      rawUrl?: string;
+    };
+  };
 }
 
 export interface IpcRequest<T> {

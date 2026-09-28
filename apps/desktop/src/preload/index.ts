@@ -246,7 +246,8 @@ contextBridge.exposeInMainWorld('ipc', {
       'agent:workflow:progress',
       'email-accounts:changed',
       'google-connections:changed',
-      'browser:install-progress'
+      'browser:install-progress',
+      'app:deep-link'
     ];
     if (validChannels.includes(channel as string)) {
       const listener = (_event: Electron.IpcRendererEvent, ...args: unknown[]) =>

@@ -2,6 +2,12 @@ appId: com.huntara.app
 
 productName: "HUNTARA"
 
+protocols:
+  - name: "HUNTARA Desktop Protocol"
+    schemes:
+      - huntara
+      - leadforge
+
 npmRebuild: true
 
 directories:

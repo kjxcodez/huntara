@@ -23,6 +23,7 @@ import { ensurePlaywrightBrowsers } from './lib/playwright-setup';
 import { WorkspaceManager } from './lib/workspace-manager';
 import { ConnectivityService } from './services/connectivity-service';
 import { setupTray, destroyTray } from './lib/tray';
+import { registerProtocolHandlers, setupDeepLinkHandler } from './lib/deep-link';
 
 // Load .env for main process (electron-vite only loads it for renderer)
 try {
@@ -181,6 +182,17 @@ app.whenReady().then(async () => {
 
   // Set as app user model ID (Windows)
   app.setAppUserModelId('com.huntara.desktop');
+
+  // Register OS protocol schemes (huntara:// canonical, leadforge:// compatibility)
+  registerProtocolHandlers();
+  setupDeepLinkHandler((link) => {
+    AppLogger.info('app', `Dispatching validated deep link: [${link.scheme}://${link.action}${link.path}]`);
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+      mainWindow.webContents.send('app:deep-link', link);
+    }
+  });
 
   // Restore session from disk
   const sessionStart = Date.now();
