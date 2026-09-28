@@ -29,7 +29,7 @@ function getLegacyCandidatePaths(appDataDir: string): string[] {
  * Initializes canonical HUNTARA storage paths and runs a one-time
  * zero-loss migration from existing LeadForge installations if detected.
  */
-export function initializeStorageAndMigrate(): StorageMigrationResult {
+export function initializeStorageAndMigrate(customAppDataDir?: string): StorageMigrationResult {
   // Always set the canonical application name first if Electron app is available
   if (typeof app !== 'undefined' && app?.setName) {
     try {
@@ -38,16 +38,20 @@ export function initializeStorageAndMigrate(): StorageMigrationResult {
   }
 
   let appDataDir: string;
-  try {
-    appDataDir = app.getPath('appData');
-  } catch {
-    // Fallback if accessed before app ready or in testing runtime
-    if (process.platform === 'win32') {
-      appDataDir = process.env.APPDATA || path.join(process.env.USERPROFILE || '', 'AppData', 'Roaming');
-    } else if (process.platform === 'darwin') {
-      appDataDir = path.join(process.env.HOME || '', 'Library', 'Application Support');
-    } else {
-      appDataDir = process.env.XDG_CONFIG_HOME || path.join(process.env.HOME || '', '.config');
+  if (customAppDataDir) {
+    appDataDir = customAppDataDir;
+  } else {
+    try {
+      appDataDir = app.getPath('appData');
+    } catch {
+      // Fallback if accessed before app ready or in testing runtime
+      if (process.platform === 'win32') {
+        appDataDir = process.env.APPDATA || path.join(process.env.USERPROFILE || '', 'AppData', 'Roaming');
+      } else if (process.platform === 'darwin') {
+        appDataDir = path.join(process.env.HOME || '', 'Library', 'Application Support');
+      } else {
+        appDataDir = process.env.XDG_CONFIG_HOME || path.join(process.env.HOME || '', '.config');
+      }
     }
   }
 
