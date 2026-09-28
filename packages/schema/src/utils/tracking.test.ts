@@ -153,6 +153,14 @@ describe('Email Tracking Utilities', () => {
 
   describe('validateTrackingBaseUrl Runtime Safety', () => {
     it('accepts valid absolute HTTPS URLs with public hostnames', () => {
+      const resCanonical1 = validateTrackingBaseUrl('https://api.huntara.online');
+      expect(resCanonical1.isValid).toBe(true);
+      expect(resCanonical1.normalizedUrl).toBe('https://api.huntara.online');
+
+      const resCanonical2 = validateTrackingBaseUrl('https://huntara.online/');
+      expect(resCanonical2.isValid).toBe(true);
+      expect(resCanonical2.normalizedUrl).toBe('https://huntara.online');
+
       const res1 = validateTrackingBaseUrl('https://api.leadforge.kapiljangid.pro');
       expect(res1.isValid).toBe(true);
       expect(res1.normalizedUrl).toBe('https://api.leadforge.kapiljangid.pro');
