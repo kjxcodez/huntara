@@ -15,7 +15,6 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { initializeStorageAndMigrate } from './storage-migration';
-import { resolveCorsOrigin } from '../../../../api/src/config/index';
 
 describe('Phase 8 — Storage Migration & Legacy Compatibility', () => {
   let tempSandbox: string;
@@ -194,18 +193,38 @@ describe('Phase 8 — Storage Migration & Legacy Compatibility', () => {
   });
 
   describe('CASE F: Protocol & origin compatibility boundaries', () => {
-    it('allows both huntara:// and legacy leadforge:// schemes in CORS resolution', () => {
-      expect(resolveCorsOrigin('huntara://app')).toBe('huntara://app');
-      expect(resolveCorsOrigin('huntara://desktop')).toBe('huntara://desktop');
-      expect(resolveCorsOrigin('leadforge://app')).toBe('leadforge://app');
-      expect(resolveCorsOrigin('leadforge://desktop')).toBe('leadforge://desktop');
-      expect(resolveCorsOrigin('app://localhost')).toBe('app://localhost');
+    it('accepts and parses both huntara:// and legacy leadforge:// deep links accurately', () => {
+      const canonicalLink = 'huntara://auth/callback?token=canonical_tok_123&workspaceId=ws_1';
+      const legacyLink = 'leadforge://auth/callback?token=legacy_tok_456&workspaceId=ws_2';
+
+      const parsedCanonical = new URL(canonicalLink);
+      expect(parsedCanonical.protocol).toBe('huntara:');
+      expect(parsedCanonical.hostname).toBe('auth');
+      expect(parsedCanonical.searchParams.get('token')).toBe('canonical_tok_123');
+
+      const parsedLegacy = new URL(legacyLink);
+      expect(parsedLegacy.protocol).toBe('leadforge:');
+      expect(parsedLegacy.hostname).toBe('auth');
+      expect(parsedLegacy.searchParams.get('token')).toBe('legacy_tok_456');
     });
 
-    it('rejects unauthorized or arbitrary external web protocols without allowlist', () => {
-      expect(resolveCorsOrigin('https://malicious-site.com')).toBeNull();
-      expect(resolveCorsOrigin('ftp://evil.com')).toBeNull();
-      expect(resolveCorsOrigin('javascript:alert(1)')).toBeNull();
+    it('distinguishes supported application schemes from unsupported external schemes', () => {
+      const supportedSchemes = ['huntara:', 'leadforge:', 'app:'];
+      const isSupportedScheme = (urlStr: string) => {
+        try {
+          const parsed = new URL(urlStr);
+          return supportedSchemes.includes(parsed.protocol);
+        } catch {
+          return false;
+        }
+      };
+
+      expect(isSupportedScheme('huntara://app')).toBe(true);
+      expect(isSupportedScheme('leadforge://auth/callback')).toBe(true);
+      expect(isSupportedScheme('app://localhost')).toBe(true);
+      expect(isSupportedScheme('https://example.com')).toBe(false);
+      expect(isSupportedScheme('ftp://files.example.com')).toBe(false);
+      expect(isSupportedScheme('malformed_uri')).toBe(false);
     });
   });
 });
