@@ -23,7 +23,7 @@ Configure the API server (`apps/api`) using the following environment variables:
 | `PORT` | Local runtime port | `3000` |
 | `MONGODB_URI` | MongoDB connection connection string | `mongodb+srv://user:pass@cluster.mongodb.net/huntara` |
 | `BETTER_AUTH_SECRET` | 32+ character auth security secret | `random_secret_string_here` |
-| `BETTER_AUTH_URL` | Callback URL matching the API domain | `https://api.leadforge.dev/api/v1/auth` |
+| `BETTER_AUTH_URL` | Callback URL matching the API domain | `https://api.huntara.online/api/v1/auth` |
 
 ## Deployment Options
 
@@ -67,7 +67,7 @@ CMD ["pnpm", "-F", "api", "start"]
 The desktop application resolves configuration variables using this precedence:
 1. **Environment Variables**: Reads `API_URL` or `OPENROUTER_API_KEY` from the shell.
 2. **Local JSON**: Reads `apiUrl` or `openRouterKey` from `config.json` inside the `userData` directory.
-3. **Build Defaults**: Falls back to `https://api.leadforge.kapiljangid.pro/api/v1`.
+3. **Build Defaults**: Falls back to `https://api.huntara.online/api/v1` (with transitional fallback to `https://api.leadforge.kapiljangid.pro/api/v1`).
 
 ### Build Windows Installer
 

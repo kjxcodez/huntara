@@ -162,7 +162,7 @@ function divider(): string {
 // ─────────────────────────────────────────────────────────────────────────────
 export class MailerService {
   private static instance: MailerService;
-  private fromAddress: string = 'HUNTARA <noreply@huntara.com>';
+  private fromAddress: string = process.env.SMTP_FROM || 'HUNTARA <noreply@huntara.online>';
 
   private constructor() {
     logger.info('Mailer: Initialized transactional system mailer.');
@@ -171,6 +171,10 @@ export class MailerService {
   public static getInstance(): MailerService {
     if (!MailerService.instance) MailerService.instance = new MailerService();
     return MailerService.instance;
+  }
+
+  public getFromAddress(): string {
+    return this.fromAddress;
   }
 
   public async sendMail(to: string, subject: string, html: string, text: string): Promise<void> {
