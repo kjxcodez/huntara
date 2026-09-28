@@ -4,6 +4,14 @@ import { auth } from './auth.js';
 
 export { env, logger, auth };
 
+export const CANONICAL_AND_LEGACY_ORIGINS = [
+  'https://huntara.online',
+  'https://www.huntara.online',
+  'https://api.huntara.online',
+  'https://leadforge.kapiljangid.pro',
+  'https://api.leadforge.kapiljangid.pro'
+];
+
 /**
  * Resolves allowed CORS origin dynamically based on environment and allowlists.
  * Strictly prevents wildcard '*' reflection when credentials: true.
@@ -25,13 +33,18 @@ export function resolveCorsOrigin(origin: string | undefined): string | null {
       const allowed = env.CORS_ORIGIN.split(',').map((o) => o.trim());
       if (allowed.includes(origin)) return origin;
     }
+    if (CANONICAL_AND_LEGACY_ORIGINS.includes(origin)) return origin;
     return isLocalOrigin ? origin : null;
   }
 
-  // Production: strictly match explicitly configured origins or desktop app scheme
+  // Production: strictly match explicitly configured origins, canonical/legacy origins, or desktop app schemes
   if (env.CORS_ORIGIN && env.CORS_ORIGIN !== '*') {
     const allowed = env.CORS_ORIGIN.split(',').map((o) => o.trim());
     if (allowed.includes(origin)) return origin;
+  }
+
+  if (CANONICAL_AND_LEGACY_ORIGINS.includes(origin)) {
+    return origin;
   }
 
   if (origin.startsWith('huntara://') || origin.startsWith('leadforge://') || origin.startsWith('app://')) {

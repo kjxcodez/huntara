@@ -71,7 +71,21 @@ app.doc('/openapi.json', {
     title: 'HUNTARA API Reference',
     version: '1.0.0',
     description: 'Production API reference catalog details for HUNTARA tenant modules.'
-  }
+  },
+  servers: [
+    {
+      url: 'https://api.huntara.online/api/v1',
+      description: 'Canonical Production API Server'
+    },
+    {
+      url: 'https://api.leadforge.kapiljangid.pro/api/v1',
+      description: 'Legacy Production API Server (Compatibility Transition)'
+    },
+    {
+      url: 'http://localhost:3001/api/v1',
+      description: 'Local Development Server'
+    }
+  ]
 });
 
 // Serve Scalar API reference document UI

@@ -35,6 +35,10 @@ export function createBetterAuth(options: BetterAuthConfigOptions) {
     'http://localhost:*',
     'huntara://*',
     'leadforge://*',
+    'https://huntara.online',
+    'https://*.huntara.online',
+    'https://leadforge.kapiljangid.pro',
+    'https://*.leadforge.kapiljangid.pro',
     ...(options.trustedOrigins || [])
   ];
 
